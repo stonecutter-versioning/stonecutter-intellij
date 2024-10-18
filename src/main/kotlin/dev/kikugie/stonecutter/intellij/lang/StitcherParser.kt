@@ -18,7 +18,7 @@ import dev.kikugie.stitcher.eval.isNotEmpty
 import dev.kikugie.stonecutter.intellij.util.also
 import dev.kikugie.stonecutter.intellij.util.whenIt
 import dev.kikugie.stonecutter.intellij.util.whenNot
-import kotlin.math.E
+import java.util.concurrent.ConcurrentHashMap
 
 class StitcherParser : PsiParser, LightPsiParser {
     companion object {
@@ -65,7 +65,7 @@ private class Mark(private val init: () -> Marker) {
 }
 
 private class StitcherPsiParser(builder: PsiBuilder) : PsiBuilder by builder {
-    val markers: MutableMap<String, Mark> = mutableMapOf()
+    val markers: MutableMap<String, Mark> = ConcurrentHashMap()
 
     fun parse(): Definition? {
         val type = currentType as? MarkerType ?: return null.also { error("Invalid marker type") }
@@ -101,11 +101,10 @@ private class StitcherPsiParser(builder: PsiBuilder) : PsiBuilder by builder {
             SCOPE_OPEN, EXPECT_WORD, null -> break
             IDENTIFIER -> consuming {
                 if (identifier.isEmpty()) identifier = token()
-                else mark("identifiers") { error("Unexpected identifier") }
+                else mark("unrecognized") { error("Unexpected expression") }
             }
 
             else -> consuming {
-                releaseExcept("unrecognized")
                 mark("unrecognized") { error("Unexpected expression") }
             }
         }
