@@ -1,0 +1,31 @@
+[versions]
+# Plugins
+kotlin = "2.0.20"
+intellij = "1.17.3"
+# Dependencies
+serialization = "1.7.3"
+coroutines = "1.9.0"
+kaml = "0.60.0"
+# Testing
+junit = "5.9.2"
+mordant = "2.7.2"
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+intellij = { id = "org.jetbrains.intellij", version.ref = "intellij" }
+
+[libraries]
+kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "serialization" }
+kotlin-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "coroutines" }
+kaml = { group = "com.charleskorn.kaml", name = "kaml", version.ref = "kaml" }
+junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
+junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
+mordant = { group = "com.github.ajalt.mordant", name = "mordant", version.ref = "mordant" }
+
+[bundles]
+test = [
+    "junit-api",
+    "junit-engine",
+    "mordant"
+]
