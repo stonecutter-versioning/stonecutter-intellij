@@ -30,5 +30,5 @@ class StitcherReferenceImpl(val type: StitcherReferenceType, node: ASTNode) : AS
 object StitcherReferenceFactory {
     fun property(project: Project, name: String): StitcherReference = file(project, name).firstChild as StitcherReference
     fun file(project: Project, text: String): StitcherFile = PsiFileFactory.getInstance(project)
-        .createFileFromText("dummy.stitcher", StitcherFile.Type, text) as StitcherFile
+        .createFileFromText("dummy.stitcher", StitcherFile.StitcherFileType, text) as StitcherFile
 }

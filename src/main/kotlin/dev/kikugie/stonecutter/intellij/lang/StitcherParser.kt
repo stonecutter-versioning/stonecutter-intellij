@@ -5,228 +5,248 @@ import com.intellij.lang.LightPsiParser
 import com.intellij.lang.PsiBuilder
 import com.intellij.lang.PsiBuilder.Marker
 import com.intellij.lang.PsiParser
-import com.intellij.openapi.util.Key
+import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
-import dev.kikugie.stitcher.data.component.*
-import dev.kikugie.stitcher.data.scope.ScopeType
-import dev.kikugie.stitcher.data.token.MarkerType
-import dev.kikugie.stitcher.data.token.StitcherTokenType.*
-import dev.kikugie.stitcher.data.token.Token
-import dev.kikugie.stitcher.data.token.TokenType
-import dev.kikugie.stitcher.eval.isEmpty
-import dev.kikugie.stitcher.eval.isNotEmpty
-import dev.kikugie.stonecutter.intellij.util.also
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.ASSIGNMENT_ENTRY
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.BOOLEAN_ENTRY
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.CONDITION
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.CONDITION_EXPRESSION
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.CONDITION_SUGAR
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.DEFINITION
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.DEPENDENCY_ID
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.GROUP_ENTRY
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.PREDICATE_ENTRY
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.SWAP
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.SWAP_ID
+import dev.kikugie.stonecutter.intellij.lang.StitcherComponentType.Companion.UNARY_ENTRY
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.AND
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.ASSIGNMENT
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.CONDITION_MARKER
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.CONSTANT_ID
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.EXPECT_WORD
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.IDENTIFIER
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.IF
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.ELSE
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.ELIF
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.GROUP_CLOSE
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.GROUP_OPEN
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.NEGATE
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.OR
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.PREDICATE
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.SCOPE_CLOSE
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.SCOPE_OPEN
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.SWAP_MARKER
 import dev.kikugie.stonecutter.intellij.util.whenIt
 import dev.kikugie.stonecutter.intellij.util.whenNot
 import java.util.concurrent.ConcurrentHashMap
 
 class StitcherParser : PsiParser, LightPsiParser {
-    companion object {
-        val DEFINITION: Key<Definition> = Key("STITCHER_DEFINITION")
-    }
-
     override fun parse(root: IElementType, builder: PsiBuilder): ASTNode {
-        val definition = parseInternal(builder)
-        return builder.treeBuilt.also {
-            it.putCopyableUserData(DEFINITION, definition)
-        }
+        parseLight(root, builder)
+        return builder.treeBuilt
     }
 
-    override fun parseLight(root: IElementType, builder: PsiBuilder) {
-        parseInternal(builder)
-    }
-
-    private fun parseInternal(builder: PsiBuilder): Definition? {
-        val mark = builder.mark()
-        val definition = StitcherPsiParser(builder).parse()
-        if (!builder.eof()) {
-            val marker = builder.mark()
-            while (!builder.eof()) builder.advanceLexer()
-            marker.error("Expected comment to end")
+    override fun parseLight(root: IElementType, builder: PsiBuilder) = with(builder) {
+        withMarker(root) {
+            StitcherPsiParser(builder).parse()
+            if (tokenType != null) withMarker(TokenType.ERROR_ELEMENT) {
+                while (!eof()) advanceLexer()
+                throw MarkerException("Expected comment to end")
+            }
         }
-        mark.done(StitcherType.STITCHER_EXPRESSION)
-        return definition
     }
 }
 
-private class Mark(private val init: () -> Marker) {
+private class Handler(private val init: () -> Marker, private val type: StitcherType?) {
     private var marker: Marker? = null
-    private lateinit var resetter: Marker.() -> Unit
-    fun mark(resetter: Marker.() -> Unit) {
-        if (marker == null) {
-            marker = init()
-            this.resetter = resetter
-        }
+    private lateinit var msg: String
+    fun mark(message: String) {
+        if (marker != null) return
+        marker = init()
+        msg = message
     }
-    fun release() {
-        marker?.resetter()
+
+    fun release() = marker?.run {
+        if (type == null) error(msg)
+        else done(type)
         marker = null
     }
 }
 
+private class MarkerException(val error: String) : Throwable()
+
 private class StitcherPsiParser(builder: PsiBuilder) : PsiBuilder by builder {
-    val markers: MutableMap<String, Mark> = ConcurrentHashMap()
+    val handlers: MutableMap<String, Handler> = ConcurrentHashMap()
 
-    fun parse(): Definition? {
-        val type = currentType as? MarkerType ?: return null.also { error("Invalid marker type") }
-        advanceLexer()
+    fun parse() = withMarker(DEFINITION) {
+        val marker = consuming {
+            if (it != CONDITION_MARKER && it != SWAP_MARKER)
+                throw err("Invalid marker type '$it'")
+            it
+        }
+        val extension = if (tokenType != null) consuming { it == SCOPE_CLOSE }
+        else throw err("Empty comment body")
 
-        val extension = when (currentType) {
-            SCOPE_CLOSE -> consuming { true }
-            null -> return null.also { error("Empty comment body") }
-            else -> false
+        when (marker) {
+            CONDITION_MARKER -> parseCondition(extension)
+            SWAP_MARKER -> parseSwap(extension)
         }
 
-        val component = when (type) {
-            MarkerType.CONDITION -> parseCondition(extension)
-            MarkerType.SWAP -> parseSwap(extension)
-        }
-
-        val closer = when(currentType) {
-            SCOPE_OPEN -> consuming { ScopeType.CLOSED }
-            EXPECT_WORD -> consuming { ScopeType.WORD }
-            null -> ScopeType.LINE
-            else -> consuming { error("Unexpected token"); ScopeType.LINE }
-        }
-        return Definition(component, extension, closer)
+        if (tokenType == SCOPE_OPEN || tokenType == EXPECT_WORD) advanceLexer()
     }
 
-    private fun parseSwap(extension: Boolean): Swap {
-        if (extension && tokenType != null) return Swap(Token.EMPTY).also {
-            error("Swap closers must be empty")
+    fun parseSwap(extension: Boolean) = withMarker(SWAP) {
+        if (extension && tokenType != null) {
+            while (!eof()) advanceLexer()
+            throw err("Swap closers must be empty")
         }
-        val marker = mark()
-        var identifier = Token.EMPTY
-        while (true) when (currentType) {
+        var identifier: StitcherType? = null
+        while (true) when (tokenType) {
             SCOPE_OPEN, EXPECT_WORD, null -> break
             IDENTIFIER -> consuming {
-                if (identifier.isEmpty()) identifier = token()
-                else mark("unrecognized") { error("Unexpected expression") }
+                if (identifier == null && "unrecognized" !in handlers) identifier =
+                    SWAP_ID.also { remapCurrentToken(it) }
+                else handle("unrecognized", "Unexpected expression")
             }
 
-            else -> consuming {
-                mark("unrecognized") { error("Unexpected expression") }
-            }
+            else -> handle("unrecognized", "Unexpected expression")
         }
-        releaseAll()
-        if (identifier.isEmpty()) error("Missing swap identifier")
-        marker.done(StitcherType.SWAP)
-        return Swap(identifier)
+        release()
+        if (identifier == null) throw err("Missing identifier")
     }
 
-    private fun parseCondition(extension: Boolean): Condition {
+    fun parseCondition(extension: Boolean) = withMarker(CONDITION) {
         var needsCondition = false
-        var expression: Component = Empty
-        val sugar = mutableListOf<Token>()
-        val marker = mark()
+        var hasCondition = false
+        val sugar = mutableListOf<StitcherType>()
 
-        while (true) when (currentType) {
+        while (true) when (tokenType) {
             SCOPE_OPEN, EXPECT_WORD, null -> break
-            IF, ELSE, ELIF -> consuming { token ->
-                releaseExcept("sugar")
-                if (expression.isNotEmpty()) mark("sugar") { error("Unexpected condition sugar") }
+            IF, ELSE, ELIF -> consuming {
+                release("cond_err")
+                if ("unrecognized" in handlers) return@consuming
+                if (hasCondition) handle("sugar_err", "Unexpected condition sugar")
                 else {
-                    validateCondition(extension, sugar).whenIt { needsCondition = it }
-                    sugar += token
+                    handle("sugar", CONDITION_SUGAR)
+                    validateSugar(extension, sugar).whenIt { bl -> needsCondition = bl }
+                    sugar += it
                 }
             }
 
             IDENTIFIER, PREDICATE, NEGATE, GROUP_OPEN -> {
-                releaseExcept("condition")
-                if (!expression.isEmpty()) consuming { mark("condition") { error("Unexpected condition expression") } }
-                else expression = parseExpression()
+                release("sugar", "sugar_err")
+                if ("unrecognized" in handlers) {
+                    advanceLexer(); continue
+                }
+                if (hasCondition) consuming { handle("cond_err", "Unexpected condition expression") }
+                else withMarker(CONDITION_EXPRESSION) { matchExpression(); hasCondition = true }
             }
 
-            else -> consuming {
-                releaseExcept("unrecognized")
-                mark("unrecognized") { error("Unknown expression") }
+            else -> {
+                release("sugar", "sugar_err", "cond_err")
+                handle("unrecognized", "Unexpected expression")
             }
         }
-
-        releaseAll()
-        if ((needsCondition || currentType == SCOPE_CLOSE || currentType == EXPECT_WORD) && expression.isEmpty())
-            error("Missing condition expression")
-        marker.done(StitcherType.CONDITION)
-        return Condition(sugar, expression)
+        release()
+        if ((needsCondition || tokenType == SCOPE_OPEN || tokenType == EXPECT_WORD) && !hasCondition)
+            throw err("Missing condition expression")
     }
 
-    private fun validateCondition(extension: Boolean, sugar: List<Token>): Boolean =
-        when (sugar.firstOrNull()?.type) { // True when must have a condition
-            null -> when (currentType) { // The current token is the first sugar
-                IF -> true.also { if (extension) error("Expected 'else' or 'elif' to follow the extension") }
-                ELSE, ELIF -> (currentType == ASSIGN).also { if (!extension) error("Expected to follow '}' to extend the condition") }
-                else -> false.also { error("Unexpected token") }
-            }
-
-            IF, ELIF -> true.also { error("No more condition sugar allowed") }
-            ELSE -> (currentType == ASSIGN).whenNot { error("Unexpected token") }
+    fun validateSugar(extension: Boolean, sugar: List<StitcherType>) = when (sugar.firstOrNull()) {
+        null -> when (tokenType) { // The current token is the first sugar
+            IF -> true.also { if (extension) error("Expected 'else' or 'elif' to follow the extension") }
+            ELSE, ELIF -> (tokenType != ELSE).also { if (!extension) error("Expected to follow '}' to extend the condition") }
             else -> false.also { error("Unexpected token") }
         }
 
-    private fun parseExpression(): Component = when (currentType) {
-        NEGATE -> advancing { parseMaybeBoolean(Unary(it, parseExpression())) }
-        PREDICATE -> parseMaybeBoolean(Assignment(Token.EMPTY, parsePredicate()))
-        IDENTIFIER -> advancing { token ->
-            fun IElementType?.isCandidate() = this?.convert()?.let { it == IDENTIFIER || it == PREDICATE } == true
-            val component = if (currentType == ASSIGN)
-                (if (lookAhead(1)?.isCandidate() == true) advancing { parsePredicate() }
-                else consuming { error("No predicate assigned"); emptyList() }).let {
-                    Assignment(token, it)
-                }
-            else if (tokenType?.isCandidate() == true)
-                Assignment(Token.EMPTY, listOf(token) + parsePredicate())
-            else Literal(token)
-            parseMaybeBoolean(component)
-        }
-        GROUP_OPEN -> advancing {
-            val group = Group(parseExpression())
-            if (currentType == GROUP_CLOSE) advanceLexer()
-            else error("Missing closing bracket")
-            parseMaybeBoolean(group)
-        }
-        SCOPE_OPEN, EXPECT_WORD, null -> Empty.also { error("Incomplete expression") }
-        else -> consuming { error("Unexpected token"); Empty }
+        IF, ELIF -> true.also { error("No more condition sugar allowed") }
+        ELSE -> (tokenType == IF).whenNot { error("Unexpected token") }
+        else -> false.also { error("Unexpected token") }
     }
 
-    private fun parsePredicate(): List<Token> = buildList {
-        while (true) when (currentType) { // TODO: Validate if identifier is allowed in the check
-            PREDICATE -> consuming { add(it) }
-            IDENTIFIER -> consuming { remapCurrentToken(PREDICATE.convert()); add(it) }
+    fun matchExpression(): Unit = when (tokenType) {
+        NEGATE -> maybeMatchBoolean(UNARY_ENTRY) {
+            advanceLexer()
+            matchExpression()
+
+        }
+
+        PREDICATE -> maybeMatchBoolean(PREDICATE_ENTRY) {
+            collectPredicates()
+        }
+
+        IDENTIFIER -> maybeMatchBoolean {
+            if (lookAhead(1) as? StitcherType != ASSIGNMENT) consuming { remapCurrentToken(CONSTANT_ID) }
+            else withMarker(ASSIGNMENT_ENTRY) {
+                consuming { remapCurrentToken(DEPENDENCY_ID) }
+                if (tokenType == PREDICATE) withMarker(PREDICATE_ENTRY) { collectPredicates() }
+                else throw err("No predicate after assignment")
+            }
+        }
+
+        GROUP_OPEN -> maybeMatchBoolean(GROUP_ENTRY) {
+            advanceLexer()
+            matchExpression()
+            if (tokenType == GROUP_CLOSE) advanceLexer()
+            else throw err("Missing group closer")
+        }
+
+        SCOPE_OPEN, EXPECT_WORD, null -> {
+            error("Incomplete expression")
+        }
+
+        else -> {
+            error("Unexpected token")
+        }
+    }
+
+    fun collectPredicates() {
+        while (true) when (tokenType) {
+            PREDICATE -> advanceLexer()
             else -> break
         }
     }
 
-    private fun parseMaybeBoolean(left: Component): Component = when (currentType) {
-        OR, AND -> {
-            val operator = token()
-            val right = if (lookAhead(1) != null) advancing { parseExpression() }
-            else advancing { error("Incomplete expression"); Empty }
-            Binary(left, operator, right)
+    inline fun maybeMatchBoolean(type: StitcherType? = null, action: () -> Unit) {
+        val bool = mark()
+        if (type == null) action()
+        else withMarker(type, action)
+        when (tokenType) {
+            AND, OR -> advancing {
+                when (tokenType) {
+                    SCOPE_OPEN, EXPECT_WORD, null -> bool.error("Incomplete expression")
+                    else -> matchExpression().also { bool.done(BOOLEAN_ENTRY) }
+                }
+            }
+
+            else -> bool.drop()
         }
-
-        else -> left
     }
 
-    private val currentType: TokenType? get() = tokenType?.convert()
+    private fun handle(name: String, message: String): Unit =
+        handlers.getOrPut(name) { Handler(::mark, null) }.mark(message)
 
-    private fun mark(name: String, resetter: Marker.() -> Unit) {
-        markers.getOrPut(name) { Mark(::mark) }.mark(resetter)
-    }
-    private fun release(name: String) {
-        markers.remove(name)?.release()
-    }
-    private fun releaseExcept(vararg names: String) {
-        markers.keys.forEach { if (it !in names) release(it) }
-    }
-    private fun releaseAll() {
-        markers.keys.forEach { release(it) }
-    }
+    @Suppress("SameParameterValue")
+    private fun handle(name: String, type: StitcherType): Unit =
+        handlers.getOrPut(name) { Handler(::mark, type) }.mark("")
 
-    private fun token() = Token(tokenText!!, tokenType!!.convert())
+    private fun release(vararg names: String) = names.forEach { handlers.remove(it)?.release() }
+    private fun release() = handlers.keys.forEach { release(it) }
 
-    /**Creates a [Token] for the current position, performs the [action] on it and advances the lexer.*/
-    private inline fun <T> consuming(action: (Token) -> T): T = action(token()).also { advanceLexer() }
+    private fun err(error: String) = MarkerException(error)
 
-    /**Creates a [Token] for the current position, advances the lexer and performs the [action] on it.*/
-    private inline fun <T> advancing(action: (Token) -> T): T = token().let { advanceLexer(); action(it) }
+    private inline fun <T> consuming(action: (StitcherType) -> T): T =
+        action(tokenType as StitcherType).also { advanceLexer() }
+
+    private inline fun <T> advancing(action: (StitcherType) -> T): T =
+        (tokenType as StitcherType).let { advanceLexer(); action(it) }
+}
+
+private inline fun PsiBuilder.withMarker(type: IElementType, action: () -> Unit) = with(mark()) {
+    try {
+        action()
+        done(type)
+    } catch (e: MarkerException) {
+        error(e.error)
+    }
 }

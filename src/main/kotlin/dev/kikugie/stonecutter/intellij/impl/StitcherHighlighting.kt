@@ -21,20 +21,32 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.IElementType
-import dev.kikugie.stonecutter.intellij.lang.*
+import dev.kikugie.stonecutter.intellij.lang.StitcherLexer
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.CONDITION_MARKER
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.ELIF
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.ELSE
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.EXPECT_WORD
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.GROUP_CLOSE
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.GROUP_OPEN
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.IDENTIFIER
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.IF
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.PREDICATE
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.SCOPE_CLOSE
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.SCOPE_OPEN
+import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType.Companion.SWAP_MARKER
 import javax.swing.Icon
 
 class StitcherHighlighter : SyntaxHighlighterBase(), DumbAware {
     override fun getHighlightingLexer(): Lexer = StitcherLexer()
 
     override fun getTokenHighlights(type: IElementType?): Array<TextAttributesKey> = when (type) {
-        StitcherType.IF, StitcherType.ELSE, StitcherType.ELIF -> Constants.SUGAR_KEY
-        StitcherType.IDENTIFIER -> Constants.IDENTIFIER_KEY
-        StitcherType.PREDICATE -> Constants.PREDICATE_KEY
-        StitcherType.CONDITION_MARKER, StitcherType.SWAP_MARKER -> Constants.MARKER_KEY
-        StitcherType.GROUP_OPEN, StitcherType.GROUP_CLOSE -> DefaultLanguageHighlighterColors.BRACES
-        StitcherType.SCOPE_OPEN, StitcherType.SCOPE_CLOSE -> DefaultLanguageHighlighterColors.BRACKETS
-        StitcherType.EXPECT_WORD -> DefaultLanguageHighlighterColors.LABEL
+        IF, ELSE, ELIF -> Constants.SUGAR_KEY
+        IDENTIFIER -> Constants.IDENTIFIER_KEY
+        PREDICATE -> Constants.PREDICATE_KEY
+        CONDITION_MARKER, SWAP_MARKER -> Constants.MARKER_KEY
+        GROUP_OPEN, GROUP_CLOSE -> DefaultLanguageHighlighterColors.BRACES
+        SCOPE_OPEN, SCOPE_CLOSE -> DefaultLanguageHighlighterColors.BRACKETS
+        EXPECT_WORD -> DefaultLanguageHighlighterColors.LABEL
         else -> null
     }.let(SyntaxHighlighterBase::pack)
 

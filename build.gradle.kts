@@ -26,6 +26,7 @@ dependencies {
     runtimeOnly("org.slf4j:slf4j-simple:1.7.10")
     implementation(plugin("dev.kikugie.stonecutter", "0.5-beta.3"))
     intellijPlatform {
+        instrumentationTools()
         intellijIdeaCommunity("2024.2.3")
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.plugins.gradle")

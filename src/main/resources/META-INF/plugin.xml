@@ -13,7 +13,7 @@
         <colorSettingsPage implementation="dev.kikugie.stonecutter.intellij.impl.StitcherColorSettingsPage"/>
         <editorHighlighterProvider filetype="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherEditorHighlighter"/>
         <fileTypeOverrider implementation="dev.kikugie.stonecutter.intellij.impl.StitcherFileTypeOverrider"/>
-        <lang.parserDefinition language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherDef"/>
+        <lang.parserDefinition language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherParserDef"/>
         <lang.syntaxHighlighter language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherHighlighter"/>
         <annotator language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherAnnotator"/>
         <lang.importOptimizer language="JAVA" order="first" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherImportManager"/>
