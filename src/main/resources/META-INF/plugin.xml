@@ -9,16 +9,16 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <languageInjector implementation="dev.kikugie.stonecutter.intellij.impl.StitcherInjector"/>
-        <colorSettingsPage implementation="dev.kikugie.stonecutter.intellij.impl.StitcherColorSettingsPage"/>
-        <editorHighlighterProvider filetype="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherEditorHighlighter"/>
-        <fileTypeOverrider implementation="dev.kikugie.stonecutter.intellij.impl.StitcherFileTypeOverrider"/>
+        <colorSettingsPage implementation="dev.kikugie.stonecutter.intellij.impl.StitcherHighlighting$Settings"/>
+        <editorHighlighterProvider filetype="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherHighlighting$Provider"/>
         <lang.parserDefinition language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherParserDef"/>
-        <lang.syntaxHighlighter language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherHighlighter"/>
+        <lang.syntaxHighlighter language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherHighlighting$Highlighter"/>
         <annotator language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherAnnotator"/>
         <lang.importOptimizer language="JAVA" order="first" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherImportManager"/>
-        <codeInsight.lineMarkerProvider language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherLineMarkerProvider"/>
-        <completion.contributor language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherCompletion"/>
+        <completion.contributor language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherCompletionContributor"/>
+        <codeInsight.lineMarkerProvider language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherLineMarker"/>
+        <lang.fileViewProviderFactory language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.lang.file.StitcherFileViewProvider$Factory"/>
+        <lang.substitutor language="JAVA" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherLanguageSubstitutor"/>
     </extensions>
     <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
         <projectResolve implementation="dev.kikugie.stonecutter.intellij.impl.ReloadListener"/>

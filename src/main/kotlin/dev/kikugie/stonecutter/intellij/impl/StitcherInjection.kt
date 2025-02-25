@@ -8,7 +8,7 @@ import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.injected.InjectionBackgroundSuppressor
 import com.intellij.psi.util.elementType
 import com.intellij.testFramework.LightVirtualFile
-import dev.kikugie.stonecutter.intellij.lang.StitcherFile
+import dev.kikugie.stonecutter.intellij.lang.file.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import dev.kikugie.stonecutter.intellij.util.isStitcherComment
 

@@ -1,10 +1,11 @@
-package dev.kikugie.stonecutter.intellij.lang
+package dev.kikugie.stonecutter.intellij.lang.file
 
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.fileTypes.TemplateLanguageFileType
 import com.intellij.psi.FileViewProvider
+import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import javax.swing.Icon
 
 class StitcherFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, StitcherLang) {

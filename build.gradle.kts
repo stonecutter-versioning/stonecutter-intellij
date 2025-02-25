@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    idea
     java
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
@@ -10,7 +11,15 @@ plugins {
 group = "dev.kikugie"
 version = "0.1.0-beta.3"
 
+idea {
+    module {
+        isDownloadJavadoc = true
+        isDownloadSources = true
+    }
+}
+
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://repo.gradle.org/gradle/libs-releases")
     maven("https://maven.kikugie.dev/snapshots")
@@ -24,7 +33,7 @@ dependencies {
     fun plugin(id: String, version: String) = "${id}:${id}.gradle.plugin:${version}"
 
     runtimeOnly("org.slf4j:slf4j-simple:1.7.10")
-    implementation(plugin("dev.kikugie.stonecutter", "0.5-beta.3"))
+    implementation(plugin("dev.kikugie.stonecutter", "0.6-alpha.8"))
     intellijPlatform {
         instrumentationTools()
         intellijIdeaCommunity("2024.2.3")
