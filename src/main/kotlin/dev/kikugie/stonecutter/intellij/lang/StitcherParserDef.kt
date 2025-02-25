@@ -23,16 +23,7 @@ import dev.kikugie.stonecutter.intellij.lang.parsing.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.token.StitcherType
 
 class StitcherParserDef : ParserDefinition {
-    override fun createLexer(project: Project?): Lexer {
-        val walker = StackWalker.getInstance()
-        val lines = buildString {
-            walker.forEach {
-                appendLine(it.toStackTraceElement())
-            }
-        }
-
-        return StitcherLexer()
-    }
+    override fun createLexer(project: Project?): Lexer =StitcherLexer()
     override fun createParser(project: Project?): PsiParser = StitcherPsiParser()
     override fun getFileNodeType(): IFileElementType = IFileElementType(StitcherLang)
     override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
