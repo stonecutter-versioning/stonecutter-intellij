@@ -1,179 +1,154 @@
 package dev.kikugie.stonecutter.intellij.lang.parsing
 
+import com.intellij.lang.ASTNode
+import com.intellij.lang.LightPsiParser
+import com.intellij.lang.PsiBuilder
+import com.intellij.lang.PsiParser
 import com.intellij.psi.tree.IElementType
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherConditionSugarType
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherMarkerType
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherPrimitiveType
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherScopeType
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherType
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherTypes
-import dev.kikugie.stonecutter.intellij.util.whenIt
-import dev.kikugie.stonecutter.intellij.util.whenNot
+import dev.kikugie.stonecutter.intellij.lang.token.StitcherType.Reference
+import dev.kikugie.stonecutter.intellij.lang.token.StitcherType.Component
+import dev.kikugie.stonecutter.intellij.lang.token.StitcherType.Marker
+import dev.kikugie.stonecutter.intellij.lang.token.StitcherType.Operator
+import dev.kikugie.stonecutter.intellij.lang.token.StitcherType.Primitive
+import dev.kikugie.stonecutter.intellij.lang.token.StitcherType.Scope
+import dev.kikugie.stonecutter.intellij.lang.token.StitcherType.Sugar
+import dev.kikugie.stonecutter.intellij.util.then
 
-class StitcherParser(val builder: AstBuilder, val errors: ErrorHandlers) {
-    private object Errors {
-        const val UNRECOGNIZED = "UNRECOGNIZED"
-        const val EXPRESSION = "CONDITION_EXPRESSSION"
-        const val SUGAR = "CONDITION_SUGAR"
-    }
-
-    private object Scopes {
-        const val SUGAR = "SUGAR_SCOPE"
-    }
-
-    fun parse() = builder.wrap(StitcherTypes.Component.DEFINITION) {
-        val marker = consuming {
-            check(it is StitcherMarkerType) { "Invalid marker '${builder.text}'" }; it
+class StitcherParser(builder: PsiBuilder) : ParserBase(builder) {
+    class Factory : PsiParser, LightPsiParser {
+        override fun parse(root: IElementType, builder: PsiBuilder): ASTNode {
+            builder.setDebugMode(true)
+            parseLight(root, builder)
+            return builder.treeBuilt
         }
 
-        val extension = when (builder.current) {
-            StitcherTypes.Scope.CLOSE -> consuming { true }
-            null -> error("Empty comment body")
-            else -> false
-        }
-
-        when (marker) {
-            StitcherTypes.Marker.SWAP -> parseSwap(extension)
-            StitcherTypes.Marker.CONDITION -> parseCondition(extension)
-        }
-
-        if (builder.current.isCloser) builder.advance()
-    }
-
-
-    fun parseSwap(extension: Boolean) = builder.wrap(StitcherTypes.Component.SWAP) {
-        if (extension && builder.current != null) builder.wrap(StitcherTypes.Invalid) {
-            while (builder.current != null) builder.advance()
-            error("Swap closers must be empty")
-        }
-
-        var identifier = false
-        while (!builder.current.isCloser) when (builder.current) {
-            StitcherTypes.Primitive.IDENTIFIER -> consuming {
-                if (!identifier && Errors.UNRECOGNIZED !in errors) identifier =
-                    true.also { builder.reassign(StitcherTypes.Primitive.SWAP) }
-                else errors.handle(Errors.UNRECOGNIZED, msg = "Unexpected expression")
-            }
-
-            else -> errors.handle(Errors.UNRECOGNIZED, msg = "Unexpected expression")
-        }
-        errors.releaseAll()
-        check(identifier) { "Missing identifier" }
-    }
-
-    fun parseCondition(extension: Boolean) = builder.wrap(StitcherTypes.Component.CONDITION) {
-        var needsCondition = false
-        var hasCondition = false
-        val sugar = mutableListOf<StitcherType>()
-
-        while (!builder.current.isCloser) when (builder.current) {
-            is StitcherConditionSugarType -> consuming {
-                errors.release(Errors.EXPRESSION)
-                if (Errors.UNRECOGNIZED in errors) return@consuming
-                if (hasCondition) errors.handle(Errors.SUGAR, msg = "Unexpected condition sugar")
-                else {
-                    errors.handle(Scopes.SUGAR, type = StitcherTypes.Component.SUGAR)
-                    validateSugar(extension, sugar).whenIt { needsCondition = true }
-                    sugar += it
-                }
-            }
-
-            is StitcherPrimitiveType,
-            StitcherTypes.Operator.NOT,
-            StitcherTypes.Operator.LPAREN -> {
-                errors.release(Errors.SUGAR, Scopes.SUGAR)
-                if (Errors.UNRECOGNIZED in errors) {
-                    builder.advance(); continue
-                }
-                if (hasCondition) consuming { errors.handle(Errors.EXPRESSION, msg = "Unexpected condition expression") }
-                else builder.wrap(StitcherTypes.Component.EXPRESSION) { matchExpression(); hasCondition = true }
-            }
-
-            else -> consuming {
-                errors.release(Errors.SUGAR, Errors.EXPRESSION, Scopes.SUGAR)
-                errors.handle(Errors.UNRECOGNIZED, msg = "Unexprected expression")
-            }
-
-        }
-        errors.releaseAll()
-        check(!needsCondition || hasCondition) { "Missing condition expression" }
-    }
-
-    fun validateSugar(extension: Boolean, sugar: List<StitcherType>) = when (sugar.firstOrNull()) {
-        null -> when (builder.current) {
-            StitcherTypes.Sugar.IF -> true.also { if (extension) error("Expected 'else' or 'elif' to follow the extension") }
-            StitcherTypes.Sugar.ELSE,
-            StitcherTypes.Sugar.ELIF -> (builder.current != StitcherTypes.Sugar.ELSE).also { if (!extension) error("Expected to follow '}' to extend the condition") }
-
-            else -> false.also { error("Unexpected token") }
-        }
-
-        StitcherTypes.Sugar.IF,
-        StitcherTypes.Sugar.ELIF -> true.also { error("No more condition sugar allowed") }
-
-        StitcherTypes.Sugar.ELSE -> (builder.current == StitcherTypes.Sugar.IF).whenNot { error("Unexpected token") }
-        else -> false.also { error("Unexpected token") }
-    }
-
-    fun matchExpression(): Unit = when (builder.current) {
-        StitcherTypes.Operator.NOT -> maybeMatchBoolean(StitcherTypes.Component.UNARY) {
-            advancing { matchExpression() }
-        }
-
-        StitcherTypes.Operator.LPAREN -> maybeMatchBoolean(StitcherTypes.Component.GROUP) {
-            builder.advance()
-            matchExpression()
-            check(builder.current != StitcherTypes.Operator.RPAREN) { "Missing group closer" }
-            builder.advance()
-        }
-
-        StitcherTypes.Primitive.PREDICATE -> maybeMatchBoolean(StitcherTypes.Component.PREDICATE) {
-            collectPredicates()
-        }
-
-        StitcherTypes.Primitive.IDENTIFIER -> maybeMatchBoolean {
-            if (builder.peek(1) != StitcherTypes.Operator.ASSIGN)
-                consuming { builder.reassign(StitcherTypes.Primitive.CONSTANT) }
-            else builder.wrap(StitcherTypes.Component.ASSIGNMENT) {
-                consuming { builder.reassign(StitcherTypes.Primitive.DEPENDENCY) }
-                builder.advance()
-                if (builder.current == StitcherTypes.Primitive.PREDICATE) builder.wrap(StitcherTypes.Component.PREDICATE) {
-                    collectPredicates()
-                } else error("No predicate after assignment")
-            }
-        }
-
-        null, is StitcherScopeType -> builder.report("Incomplete expression")
-        else -> builder.report("Unexpected token")
-    }
-
-    fun collectPredicates() {
-        while (true) if (builder.current != StitcherTypes.Primitive.PREDICATE) break
-        else builder.advance()
-    }
-
-    private inline fun maybeMatchBoolean(type: StitcherType? = null, crossinline action: () -> Unit) = builder.wrap(StitcherTypes.Component.BOOLEAN) {
-        if (type == null) action()
-        else builder.wrap(type) { action() }
-        when (builder.current) {
-            StitcherTypes.Operator.AND,
-            StitcherTypes.Operator.OR -> advancing {
-                check(!builder.current.isCloser) { "Incomplete expression" }
-                matchExpression()
-            }
-
-            else -> it.cancel()
+        override fun parseLight(root: IElementType, builder: PsiBuilder) {
+            val mark = builder.mark()
+            StitcherParser(builder).parse()
+            mark.done(root)
         }
     }
 
     private val IElementType?.isCloser
-        get() = this == null
-                || this == StitcherTypes.Scope.OPEN
-                || this == StitcherTypes.Scope.WORD
+        get() = when (this) {
+            null, Scope.OPEN, Scope.WORD -> true
+            else -> false
+        }
 
-    private inline fun <T> consuming(block: (StitcherType) -> T): T =
-        block(builder.current as StitcherType).also { builder.advance() }
 
-    private inline fun <T> advancing(block: () -> T): T =
-        (builder.current as StitcherType).let { builder.advance(); block() }
+    fun parse() {
+        parseContent()
+        consumeIfAny("Unexpected token")
+    }
+
+    private fun parseContent() = wrap(Component.DEFINITION) {
+        val marker = consuming {
+            check(it is Marker) { report("Invalid marker type") }; it
+        }
+
+        val isExtension = when (current) {
+            Scope.CLOSE -> advance() then true
+            null -> throw MarkerQuitException.also { report("Empty contents", true) }
+            else -> false
+        }
+
+        when (marker) {
+            Marker.SWAP -> parseSwap(isExtension)
+            Marker.CONDITION -> parseCondition(isExtension)
+        }
+
+        if (current.isCloser)
+            advance()
+    }
+
+    private fun parseSwap(isExtension: Boolean) = wrap(Component.SWAP) {
+        if (isExtension && current != null) consumeWhile("Swap closers must be empty")
+        fun chewRemaining() = consumeIfAny("Unexpected expression") { !it.isCloser }
+
+        if (current == Primitive.IDENTIFIER) wrap(Reference.SWAP)
+        else report("Missing swap identifier", true) then chewRemaining()
+        if (!current.isCloser) chewRemaining()
+    }
+
+    private fun parseCondition(isExtension: Boolean) = wrap(Component.CONDITION) {
+        val needsExpression = parseSugar(isExtension)
+        if (!current.isCloser) wrap(Component.EXPRESSION) { parseExpression() }
+        else if (needsExpression) report("Missing condition expression", true)
+    }
+
+    private fun parseSugar(isExtension: Boolean): Boolean = wrap(Component.SUGAR) {
+        fun chewRemaining() = consumeIfAny("Unexpected condition sugar") { it is Sugar }
+
+        when (current) { // True if condition is needed
+            Sugar.IF -> {
+                if (isExtension) report("IF can only be used in the opening condition")
+                advance(); chewRemaining(); true
+            }
+
+            Sugar.ELIF -> {
+                if (!isExtension) report("ELIF can only be used in extension conditions")
+                advance(); chewRemaining(); true
+            }
+
+            Sugar.ELSE -> {
+                if (!isExtension) report("ELSE can only be used in extension conditions")
+                val state = if (peek() == Sugar.IF) advance() then true else false
+                advance(); chewRemaining(); state
+            }
+
+            else -> false
+        }
+    } ?: false
+
+    private fun parseExpression(): Unit? = when (current) {
+        Primitive.PREDICATE -> maybeMatchBoolean {
+            collectPredicates()
+        }
+
+        Primitive.IDENTIFIER -> maybeMatchBoolean {
+            when (peek()) {
+                Operator.ASSIGN -> wrap(Component.ASSIGNMENT) {
+                    wrap(Reference.DEPENDENCY); advance()
+                    if (current != Primitive.PREDICATE) error("No predicate after assignment")
+                    else collectPredicates()
+                }
+
+                Operator.OR, Operator.AND -> wrap(Reference.CONSTANT)
+                else -> wrap(Reference.AMBIGUOUS)
+            }
+        }
+
+        Operator.NOT -> maybeMatchBoolean {
+            wrap(Component.UNARY) {
+                advance(); parseExpression()
+            }
+        }
+
+        Operator.LPAREN -> maybeMatchBoolean {
+            wrap(Component.GROUP) {
+                advance(); parseExpression()
+                if (current == Operator.RPAREN) advance()
+                else report("Missing closing parenthesis", true)
+            }
+        }
+
+        null, Scope.OPEN, Scope.WORD -> report("Incomplete expression", true)
+        else -> consumeWhile("Unexpected expression") { !it.isCloser }
+    }
+
+    fun collectPredicates() = wrap(Component.PREDICATE) {
+        while (true) if (current != Primitive.PREDICATE) break
+        else advance()
+    }
+
+    private inline fun maybeMatchBoolean(crossinline action: () -> Unit) = wrap(Component.BINARY) {
+        action() then when (current) {
+            Operator.OR, Operator.AND -> advancing {
+                check(!current.isCloser) { "Incomplete expression" }
+                parseExpression()
+            }
+
+            else -> throw MarkerQuitException
+        }
+    }
 }

@@ -1,8 +1,14 @@
 package dev.kikugie.stonecutter.intellij.impl
 
-import com.intellij.openapi.util.IconLoader.getIcon
+import com.intellij.openapi.util.IconLoader
 import javax.swing.Icon
 
 object PluginAssets {
-    val SWITCH_TO_VERSION: Icon = getIcon("/assets/icons/switch.png", javaClass)
+    fun icon(path: String) = IconLoader.getIcon("/assets/icons/$path", javaClass)
+
+    val SWITCH_TO_VERSION: Icon = icon("switch.png")
+    val VERSION_SELECTOR: Icon = icon("versions.svg")
+    val VERSION_ENTRY: Icon = icon("version.svg")
+    val VERSION_VCS: Icon = icon("version_vcs.svg")
+    val STONECUTTER: Icon = icon("stonecutter.svg")
 }

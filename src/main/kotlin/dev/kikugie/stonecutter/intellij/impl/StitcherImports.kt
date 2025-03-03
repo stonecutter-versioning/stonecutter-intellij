@@ -18,6 +18,12 @@ import dev.kikugie.stonecutter.intellij.util.string
  * - Versioned comments are moved to the bottom and not optimized.
  */
 class StitcherImportManager : ImportOptimizer {
+    class Optimizer(val file: PsiFile, val imports: PsiImportList) : Runnable {
+        override fun run() {
+        }
+    }
+
+
     override fun supports(file: PsiFile): Boolean = file is PsiJavaFile
 
     override fun processFile(file: PsiFile): Runnable {

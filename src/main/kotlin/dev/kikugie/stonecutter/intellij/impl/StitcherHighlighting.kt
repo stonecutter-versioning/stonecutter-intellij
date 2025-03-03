@@ -19,10 +19,7 @@ import com.intellij.psi.templateLanguages.TemplateDataLanguageMappings
 import com.intellij.psi.tree.IElementType
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import dev.kikugie.stonecutter.intellij.lang.StitcherLexer
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherConditionSugarType
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherMarkerType
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherScopeType
-import dev.kikugie.stonecutter.intellij.lang.token.StitcherTypes
+import dev.kikugie.stonecutter.intellij.lang.token.StitcherType
 import javax.swing.Icon
 
 class StitcherHighlighting(project: Project?, file: VirtualFile?, scheme: EditorColorsScheme) : LayeredLexerEditorHighlighter(Highlighter(), scheme) {
@@ -32,7 +29,7 @@ class StitcherHighlighting(project: Project?, file: VirtualFile?, scheme: Editor
             ?.associatedFileType ?: StitcherLang.TEMPLATE_FILE
         val highlighter = requireNotNull(SyntaxHighlighterFactory.getSyntaxHighlighter(type, project, file))
             { "No syntax highlighter factory found for ${type.displayName} file ${file?.path}" }
-        registerLayer(StitcherTypes.Component.DEFINITION, LayerDescriptor(highlighter, ""))
+        registerLayer(StitcherType.Component.DEFINITION, LayerDescriptor(highlighter, ""))
     }
 
     object Constants {
@@ -48,18 +45,17 @@ class StitcherHighlighting(project: Project?, file: VirtualFile?, scheme: Editor
     }
 
     class Highlighter : SyntaxHighlighterBase(), DumbAware {
-        override fun getHighlightingLexer(): Lexer = StitcherLexer.LexerImpl()
+        override fun getHighlightingLexer(): Lexer = StitcherLexer()
 
         override fun getTokenHighlights(type: IElementType?): Array<out TextAttributesKey?> = when (type) {
-            is StitcherConditionSugarType -> Constants.SUGAR_KEY
-            is StitcherMarkerType -> Constants.MARKER_KEY
-            is StitcherScopeType -> DefaultLanguageHighlighterColors.BRACKETS
-            StitcherTypes.Primitive.IDENTIFIER,
-            StitcherTypes.Primitive.CONSTANT,
-            StitcherTypes.Primitive.DEPENDENCY,
-            StitcherTypes.Primitive.SWAP -> Constants.IDENTIFIER_KEY
-            StitcherTypes.Primitive.PREDICATE -> Constants.PREDICATE_KEY
-            StitcherTypes.Operator.LPAREN, StitcherTypes.Operator.RPAREN -> DefaultLanguageHighlighterColors.BRACES
+            is StitcherType.Sugar -> Constants.SUGAR_KEY
+            is StitcherType.Marker -> Constants.MARKER_KEY
+            is StitcherType.Scope -> DefaultLanguageHighlighterColors.BRACKETS
+            is StitcherType.Reference,
+            StitcherType.Primitive.IDENTIFIER -> Constants.IDENTIFIER_KEY
+            StitcherType.Primitive.PREDICATE -> Constants.PREDICATE_KEY
+            StitcherType.Operator.LPAREN,
+            StitcherType.Operator.RPAREN -> DefaultLanguageHighlighterColors.BRACES
             else -> null
         }.let(SyntaxHighlighterBase::pack)
     }
@@ -73,7 +69,7 @@ class StitcherHighlighting(project: Project?, file: VirtualFile?, scheme: Editor
 
         override fun getIcon(): Icon? = null
 
-        override fun getHighlighter(): SyntaxHighlighter = StitcherHighlighting.Highlighter()
+        override fun getHighlighter(): SyntaxHighlighter = Highlighter()
 
         override fun getDemoText(): String = """
         //? if condition {

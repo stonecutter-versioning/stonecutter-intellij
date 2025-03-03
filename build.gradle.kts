@@ -1,3 +1,5 @@
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.html.HtmlRenderer
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -6,10 +8,21 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.intellij)
+    alias(libs.plugins.dotenv)
 }
 
 group = "dev.kikugie"
-version = "0.1.0-beta.3"
+version = "0.1.1"
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.commonmark:commonmark:0.24.0")
+    }
+}
 
 idea {
     module {
@@ -30,15 +43,16 @@ repositories {
 }
 
 dependencies {
-    fun plugin(id: String, version: String) = "${id}:${id}.gradle.plugin:${version}"
+    fun gradle(id: String, version: String) = "${id}:${id}.gradle.plugin:${version}"
 
-    runtimeOnly("org.slf4j:slf4j-simple:1.7.10")
-    implementation(plugin("dev.kikugie.stonecutter", "0.6-alpha.8"))
+    implementation(gradle("dev.kikugie.stonecutter", "0.6-alpha.8"))
+    implementation("org.apache.commons:commons-text:1.13.0")
     intellijPlatform {
         instrumentationTools()
         intellijIdeaCommunity("2024.2.3")
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.plugins.gradle")
+        plugin("PsiViewer:243.7768")
     }
 }
 
@@ -54,26 +68,26 @@ tasks.compileKotlin {
 }
 
 intellijPlatform {
+    fun fileProperty(path: String) = provider { file(path) }
+
+    fun File.mdtoHtml(): String {
+        val parser = Parser.builder().build()
+        val document = reader().use { parser.parseReader(it) }
+        val renderer = HtmlRenderer.builder().build()
+        return renderer.render(document)
+    }
+
+    buildSearchableOptions = false
     pluginConfiguration {
-        id = "stonecutter-dev"
+        id = "dev.kikugie.stonecutter"
         name = "Stonecutter Dev"
         version = project.version.toString()
-        description = """
-            Multi-version management Gradle plugin.
-            
-            Stonecutter is a Gradle plugin that allows working on a project that targets multiple compatible release versions of a dependency.
-            It's mostly meant for Minecraft mods, but on itself the plugin is platform-independent.
-            This project is inspired by <a href="https://github.com/ReplayMod/preprocessor">Preprocessor</a>, <a href="https://github.com/raydac/java-comment-preprocessor">JCP</a> and <a href="https://github.com/SHsuperCM/Stonecutter">The original Stonecutter</a>,
-            expanding on their features and providing new ones.
-            
-            The intellij plugin provides addition functionality for the Gradle plugin.
-            For more information visit the <a href="https://stonecutter.kikugie.dev/">Stonecutter website</a>.
-        """.trimIndent()
-        changeNotes = file("CHANGELOG.md").readText()
+        description = fileProperty("README.md").map { it.mdtoHtml() }
+        changeNotes = fileProperty("CHANGELOG.md").map { it.mdtoHtml() }
 
         ideaVersion {
-            sinceBuild = "223"
-            untilBuild = "242.*"
+            sinceBuild = "241"
+            untilBuild = "251.*"
         }
 
         vendor {
@@ -81,5 +95,9 @@ intellijPlatform {
             email = "git.kikugie@protonmail.com"
             url = "https://stonecutter.kikugie.dev/"
         }
+    }
+
+    publishing {
+        token = env.fetch("PUBLISH", "")
     }
 }

@@ -1,26 +1,29 @@
 package dev.kikugie.stonecutter.intellij.impl
 
+import com.intellij.lang.injection.MultiHostInjector
+import com.intellij.lang.injection.MultiHostRegistrar
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.impl.FileTypeOverrider
-import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
+import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import com.intellij.psi.impl.source.tree.injected.InjectionBackgroundSuppressor
-import com.intellij.psi.util.elementType
 import com.intellij.testFramework.LightVirtualFile
-import dev.kikugie.stonecutter.intellij.lang.file.StitcherFile
+import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import dev.kikugie.stonecutter.intellij.util.isStitcherComment
 
-class StitcherInjector : LanguageInjector, DumbAware, InjectionBackgroundSuppressor {
-    override fun getLanguagesToInject(
-        host: PsiLanguageInjectionHost,
-        registrar: InjectedLanguagePlaces,
-    ) {
-        if (!host.isStitcherComment) return
-        val range = ElementManipulators.getValueTextRange(host)
-        registrar.addPlace(StitcherLang, range, null, null)
+class StitcherInjector : MultiHostInjector, InjectionBackgroundSuppressor {
+    private val comments: List<Class<out PsiElement>> = listOf(PsiCommentImpl::class.java)
+
+    override fun getLanguagesToInject(registrar: MultiHostRegistrar, context: PsiElement) {
+        if (context is PsiLanguageInjectionHost && context.isStitcherComment) registrar
+            .startInjecting(StitcherLang)
+            .addPlace(null, null, context, ElementManipulators.getValueTextRange(context))
+            .doneInjecting()
     }
+
+    override fun elementsToInjectIn(): List<Class<out PsiElement>> = comments
 }
 
 @Suppress("UnstableApiUsage")

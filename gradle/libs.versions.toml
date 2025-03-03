@@ -2,6 +2,7 @@
 # Plugins
 kotlin = "2.0.20"
 intellij = "2.1.0"
+dotenv = "4.0.0"
 # Dependencies
 serialization = "1.7.3"
 coroutines = "1.9.0"
@@ -14,6 +15,7 @@ mordant = "2.7.2"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 intellij = { id = "org.jetbrains.intellij.platform", version.ref = "intellij" }
+dotenv = { id = "co.uzzu.dotenv.gradle", version.ref = "dotenv" }
 
 [libraries]
 kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "serialization" }
