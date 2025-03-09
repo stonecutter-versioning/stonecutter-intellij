@@ -20,6 +20,7 @@
         <completion.contributor language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.impl.StitcherCompletion"/>
         <runAnything.executionProvider implementation="dev.kikugie.stonecutter.intellij.impl.actions.VersionSwitchingRunner"/>
         <postStartupActivity implementation="dev.kikugie.stonecutter.intellij.impl.service.IntellijProjectListener"/>
+        <notificationGroup displayType="BALLOON" id="Stonecutter Notification Group"/>
     </extensions>
     <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
         <projectResolve implementation="dev.kikugie.stonecutter.intellij.impl.service.GradleReloadListener"/>

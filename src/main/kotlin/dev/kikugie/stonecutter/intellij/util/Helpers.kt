@@ -36,7 +36,7 @@ fun Map<*, *>.keysToString() = keys.toStringList()
 
 fun VirtualFile.getStonecutterProjectPath(project: Project): Result<Path> {
     val index = ProjectFileIndex.getInstance(project)
-    var root: VirtualFile? = index.getSourceRootForFile(this) ?: this
+    var root: VirtualFile? = this
     while (root != null && root.isValid)
         if (root.children.none { it.nameSequence.startsWith("stonecutter.gradle") }) root = root.parent
         else return Result.success(Path(root.path))
