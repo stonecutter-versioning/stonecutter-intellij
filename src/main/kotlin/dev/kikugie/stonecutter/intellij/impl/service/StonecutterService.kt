@@ -1,5 +1,6 @@
 package dev.kikugie.stonecutter.intellij.impl.service
 
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -30,7 +31,6 @@ class StonecutterService(private val project: Project) {
         notifyVersionMismatch()
     }
 
-    @Suppress("UnstableApiUsage")
     private fun notifyVersionMismatch() {
         if (version == null || version == COMPILED_VERSION) return
         val title = "Stonecutter version mismatch"
@@ -41,7 +41,10 @@ class StonecutterService(private val project: Project) {
             .setIcon(PluginAssets.STONECUTTER)
         msg.configureDoNotAskOption("sc-mismatch", title)
         msg.addAction(NotificationAction.createSimple("Don't show again") {
-            msg.setDoNotAskFor(project)
+            PropertiesComponent.getInstance(project).apply {
+                setValue("Notification.DoNotAsk-sc-mismatch", true)
+                setValue("Notification.DisplayName-DoNotAsk-sc-mismatch", title)
+            }
             msg.expire()
         })
         msg.notify(project)

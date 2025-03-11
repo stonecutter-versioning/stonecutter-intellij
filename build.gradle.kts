@@ -32,7 +32,6 @@ idea {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven("https://repo.gradle.org/gradle/libs-releases")
     maven("https://maven.kikugie.dev/snapshots")
