@@ -1,2 +1,2 @@
 ### Additions
-- Added version mismatch notification. 
+- Added plugin crash reporter.
