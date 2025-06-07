@@ -1,0 +1,56 @@
+{
+    parserClass="dev.kikugie.stonecutter.intellij.lang.StitcherParser"
+    extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+    psiClassPrefix="Stitcher"
+    psiPackage="dev.kikugie.stonecutter.intellij.lang.psi"
+    psiImplPackage="dev.kikugie.stonecutter.intellij.lang.impl"
+
+    elementTypeHolderClass="dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes"
+    elementTypeClass="dev.kikugie.stonecutter.intellij.lang.StitcherTokenType"
+    tokenTypeClass="dev.kikugie.stonecutter.intellij.lang.StitcherTokenType"
+}
+
+definition ::= COND_MARKER condition
+    | SWAP_MARKER swap
+    | REPL_MARKER replacement
+
+replacement ::= LITERAL { elementType = "REPLACEMENT_ID" }
+swap ::= CLOSER | (swap_id OPENER?)
+condition ::= CLOSER? SUGAR* expression? OPENER?
+
+swap_id ::= LITERAL { elementType = "SWAP_ID" }
+
+expression ::= binary_expression
+    | simple_expression
+
+private simple_expression ::= unary_expression
+    | group_expression
+    | assignment
+    | constant
+
+private binary_expression ::= simple_expression BINARY expression
+private unary_expression ::= UNARY expression
+private group_expression ::= LEFT_BRACE expression RIGHT_BRACE
+
+assignment ::= dependency ASSIGN predicate
+    | combined_predicate
+
+predicate ::= any_predicate+
+private combined_predicate ::= explicit_predicate predicate* {
+    extends = predicate
+}
+
+private any_predicate ::= explicit_predicate | implicit_predicate
+private implicit_predicate ::= string_version | semantic_version
+private explicit_predicate ::= COMPARATOR (string_version | semantic_version) | semantic_version
+
+constant ::= LITERAL { elementType = "CONSTANT" }
+dependency ::= LITERAL { elementType = "DEPENDENCY" }
+
+string_version ::= LITERAL
+semantic_version ::= version_core (DASH pre_release)? (PLUS build_metadata)?
+
+version_core ::= NUMERIC (DOT NUMERIC)*
+pre_release ::= IDENTIFIER (DOT IDENTIFIER)*
+build_metadata ::= IDENTIFIER (DOT IDENTIFIER)*

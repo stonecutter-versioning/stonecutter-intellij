@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<idea-plugin>
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends>org.jetbrains.plugins.gradle</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <multiHostInjector implementation="dev.kikugie.stonecutter.intellij.editor.StitcherInjector"/>
+        <annotator language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherAnnotator"/>
+        <completion.contributor language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherCompletionContributor"/>
+        <lang.parserDefinition language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherParserDef"/>
+        <lang.syntaxHighlighter language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter"/>
+        <lang.braceMatcher language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherBraceMatcher"/>
+        <editorHighlighterProvider filetype="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
+        <notificationGroup displayType="BALLOON" id="stonecutter-notifications"/>
+        <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
+    </extensions>
+    <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
+        <syncContributor implementation="dev.kikugie.stonecutter.intellij.service.GradleReloadListener"/>
+    </extensions>
+    <actions>
+        <action id="dev.kikugie.stonecutter.intellij.select_version"
+                text="Switch Active Version"
+                icon="/assets/icons/versions.svg"
+                class="dev.kikugie.stonecutter.intellij.action.VersionSelectorAction">
+            <add-to-group group-id="MainToolbarLeft" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
