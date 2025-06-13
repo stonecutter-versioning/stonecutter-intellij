@@ -1,4 +1,4 @@
-package dev.kikugie.stonecutter.intellij.model
+package dev.kikugie.stonecutter.intellij.model.serialized
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -9,6 +9,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonPrimitive
 import java.nio.file.Path
+import kotlin.collections.iterator
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.reflect.KClass

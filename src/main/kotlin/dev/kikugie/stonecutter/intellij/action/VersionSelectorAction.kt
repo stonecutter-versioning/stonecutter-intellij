@@ -38,10 +38,6 @@ class VersionSelectorAction : ComboBoxAction() {
         event.presentation.isEnabled = isAvailable
     }
 
-    override fun actionPerformed(e: AnActionEvent) {
-        super.actionPerformed(e)
-    }
-
     override fun createActionPopup(context: DataContext, component: JComponent, callback: Runnable?): JBPopup {
         val project = context.getData(CommonDataKeys.PROJECT) ?: throw UnsupportedOperationException()
         val lookup = project.stonecutterService.lookup

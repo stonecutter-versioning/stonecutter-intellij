@@ -1,5 +1,6 @@
 @file:UseSerializers(PathSerializer::class, FlagContainerJsonSerializer::class)
-package dev.kikugie.stonecutter.intellij.model
+
+package dev.kikugie.stonecutter.intellij.model.serialized
 
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable

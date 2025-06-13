@@ -6,17 +6,27 @@ import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
 import com.intellij.platform.workspace.storage.MutableEntityStorage
 import com.intellij.psi.PsiElement
+import com.intellij.util.io.write
 import dev.kikugie.stonecutter.intellij.PluginAssets
 import dev.kikugie.stonecutter.intellij.action.VersionSelectorAction
 import dev.kikugie.stonecutter.intellij.model.*
+import dev.kikugie.stonecutter.intellij.model.serialized.BranchInfo
+import dev.kikugie.stonecutter.intellij.model.serialized.BranchModel
+import dev.kikugie.stonecutter.intellij.model.serialized.NodeInfo
+import dev.kikugie.stonecutter.intellij.model.serialized.NodeModel
+import dev.kikugie.stonecutter.intellij.model.serialized.TreeModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.DeserializationStrategy
@@ -29,10 +39,13 @@ import org.jetbrains.plugins.gradle.service.project.ProjectResolverContext
 import org.jetbrains.plugins.gradle.service.syncAction.GradleSyncContributor
 import java.io.FileNotFoundException
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
 import kotlin.io.path.inputStream
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.notExists
+import kotlin.io.path.writeText
 
 val PsiElement.stonecutterService: StonecutterService
     get() = project.stonecutterService
@@ -51,11 +64,14 @@ class StonecutterService(private val project: Project, private val scope: Corout
     }
 
     private val json = Json { ignoreUnknownKeys = true }
-    private val logger = Logger.getInstance(this::class.java)
+    private val output = Path(PathManager.getLogPath()).resolve("stonecutter-log/latest.log")
+    private val logger = SCLogger("StonecutterService", output)
     var lookup: StonecutterModelLookup = StonecutterModelLookupImpl()
         private set
 
     internal suspend fun reset(projects: Map<String, String>) = withBackgroundProgress(project, "Updating Stonecutter models") {
+        output.parent.createDirectories()
+        output.writeText("", Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)
         lookup = StonecutterModelLookupImpl().apply {
             if (projects.isEmpty()) return@apply
             val result = projects.entries.fold(false) { acc, (location, path) ->
@@ -89,6 +105,11 @@ class StonecutterService(private val project: Project, private val scope: Corout
                     setValue("Notification.DisplayName-DoNotAsk-sc-model-err", title)
                 }
                 expire()
+            })
+            addAction(NotificationAction.createSimple("Open log file") {
+                val vf = LocalFileSystem.getInstance().findFileByNioFile(output)?.takeIf(VirtualFile::exists)
+                    ?: return@createSimple
+                FileEditorManager.getInstance(project).openFile(vf, true, true)
             })
             notify(project)
         }

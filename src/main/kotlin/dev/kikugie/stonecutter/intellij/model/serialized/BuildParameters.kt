@@ -1,5 +1,6 @@
-package dev.kikugie.stonecutter.intellij.model
+package dev.kikugie.stonecutter.intellij.model.serialized
 
+import dev.kikugie.stonecutter.intellij.model.Version
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException

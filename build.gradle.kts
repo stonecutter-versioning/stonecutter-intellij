@@ -4,16 +4,15 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     idea
-//    antlr
     `java-library`
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.intellij)
-    alias(libs.plugins.dotenv)
+    alias(common.plugins.gradle.dotenv)
+    alias(common.plugins.kotlin.jvm)
+    alias(common.plugins.kotlin.serialization)
 }
 
 group = "dev.kikugie"
-version = "0.2"
+version = "0.2.1"
 
 buildscript {
     repositories {
@@ -21,7 +20,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("org.commonmark:commonmark:0.24.0")
+        classpath(libs.commonmark)
     }
 }
 
@@ -42,7 +41,6 @@ repositories {
     mavenCentral()
     maven("https://repo.gradle.org/gradle/libs-releases")
     maven("https://central.sonatype.com/repository/maven-snapshots/")
-    maven("https://maven.kikugie.dev/snapshots")
 
     intellijPlatform {
         defaultRepositories()
@@ -50,13 +48,13 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.commons)
-    implementation(libs.kotlin.serialization)
-    implementation(libs.kotlin.serialization.json)
+    implementation(common.misc.commons)
+    implementation(common.kotlin.serialization)
+    implementation(common.kotlin.serialization.json)
 
     intellijPlatform {
         instrumentationTools()
-        intellijIdeaCommunity("2024.3.6")
+        intellijIdeaCommunity(libs.versions.intellij.ce.get())
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.plugins.gradle")
     }
