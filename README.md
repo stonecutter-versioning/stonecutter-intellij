@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> Stonecutter has moved to [Codeberg](https://codeberg.org/stonecutter/intellij-plugin).
+> This repository will not be updated.
+
 # Stonecutter Dev
 Addon plugin for [Stonecutter](https://stonecutter.kikugie.dev/) that provides in-comment language support and utilities.
 
