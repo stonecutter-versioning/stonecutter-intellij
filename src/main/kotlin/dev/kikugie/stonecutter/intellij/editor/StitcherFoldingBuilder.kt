@@ -12,12 +12,10 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.descendantsOfType
-import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition
 import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition.DefinitionType
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherCondition
+import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
-import dev.kikugie.stonecutter.intellij.util.stitcherFile
 
 class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     object Constants {
@@ -37,7 +35,7 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     }
 
     private fun PsiComment.lastSiblings(): Sequence<PsiElement> = generateSequence(prevSibling) { it.prevSibling }
-    private fun PsiComment.type(previous: Pair<PsiComment, CommentType>?): CommentType = when (val injected = stitcherFile) {
+    private fun PsiComment.type(previous: Pair<PsiComment, CommentType>?): CommentType = when (val injected = commentDefinition) {
         null -> previous?.let { (comment, type) ->
             val last = lastSiblings().find { it !is PsiWhiteSpace }
             if (last == null || last !== comment) CommentType.INDEPENDENT
@@ -45,8 +43,8 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
             else CommentType.SCOPED
         } ?: CommentType.INDEPENDENT
 
-        else -> when (val def = injected.descendantsOfType<ScopeDefinition>().first()) {
-            is StitcherCondition -> when(def.type) {
+        else -> when (val def = injected.element) {
+            is StitcherCondition -> when (def.type) {
                 DefinitionType.OPENER -> CommentType.OPEN
                 DefinitionType.EXTENSION -> CommentType.EXTENSION
                 DefinitionType.CLOSER -> CommentType.CLOSED
@@ -86,8 +84,10 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
             }
 
             CommentType.CLOSED -> if (list.getOrNull(index - 1)?.second == CommentType.SCOPED) {
-                conditions += pair.first
-                range = range.expand(pair.first)
+                if (conditions.lastOrNull()?.commentDefinition?.element?.closer?.text == "{") {
+                    conditions += pair.first
+                    range = range.expand(pair.first)
+                }
                 submit()
             }
 
@@ -105,10 +105,7 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
         val primary = conditions.first()
         val last = conditions.last()
         val title = StringBuilder()
-        conditions.joinTo(title, " ... ") {
-            val condition = it.stitcherFile!!.descendantsOfType<StitcherCondition>().first()
-            condition.text.trim(' ', '\t', '?')
-        }
+        conditions.joinTo(title, " ... ") { it.commentDefinition!!.element!!.text.trim(' ', '\t', '?') }
         if (title.startsWith('}')) title.insert(0, "?") else title.insert(0, "? ")
         if (last.textRange.endOffset != range.endOffset) title.append(" ...")
         return FoldingDescriptor(primary.node, range, Constants.STITCHER_SCOPE).apply {

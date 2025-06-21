@@ -57,6 +57,7 @@ dependencies {
         intellijIdeaCommunity(libs.versions.intellij.ce.get())
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.plugins.gradle")
+        bundledPlugin("org.jetbrains.kotlin")
     }
 }
 
