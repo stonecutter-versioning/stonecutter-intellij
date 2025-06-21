@@ -31,6 +31,13 @@ object StonecutterCallbacks {
     internal fun invokeProjectReload(service: StonecutterService) {
         (ActionManager.getInstance().getAction("dev.kikugie.stonecutter.intellij.select_version") as VersionSelectorAction)
             .isAvailable = true
+
+        if (StonecutterSettings.foldDisabledScopes) runWheneverIntelliJWantsIt {
+            FileEditorManager.getInstance(service.project).focusedEditor?.file
+                ?.findDocument()
+                ?.let(EditorFactory.getInstance()::getEditors)
+                ?.forEach(::updateFolding)
+        }
     }
 
     //<editor-fold desc="Implementations">
@@ -41,11 +48,13 @@ object StonecutterCallbacks {
     private fun createFocusListener() = object : FocusChangeListener {
         override fun focusGained(editor: Editor, event: FocusEvent) {
             if (!StonecutterSettings.foldDisabledScopes) return
-            if (!event.isTemporary) editor.foldingModel.runBatchFoldingOperation {
-                for (it in editor.foldingModel.allFoldRegions) if (it.group == STITCHER_SCOPE)
-                    it.isExpanded = false
-            }
+            if (!event.isTemporary) runWheneverIntelliJWantsIt { updateFolding(editor) }
         }
+    }
+
+    private fun updateFolding(editor: Editor) = editor.foldingModel.runBatchFoldingOperation {
+        for (it in editor.foldingModel.allFoldRegions) if (it.group == STITCHER_SCOPE)
+            it.isExpanded = false
     }
 
     /**
@@ -73,6 +82,11 @@ object StonecutterCallbacks {
             val isCache = path.startsWith(root.location.resolve("build/stonecutter-cache"))
             if (isGenerated || isCache) file.findDocument()?.setReadOnly(true)
         }
+    }
+
+    private fun runWheneverIntelliJWantsIt(action: () -> Unit) {
+        val application = ApplicationManager.getApplication()
+        application.invokeLater { application.runWriteAction(action) }
     }
     //</editor-fold>
 }
