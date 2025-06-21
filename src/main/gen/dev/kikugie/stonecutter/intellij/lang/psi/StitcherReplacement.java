@@ -4,7 +4,8 @@ package dev.kikugie.stonecutter.intellij.lang.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition;
 
-public interface StitcherReplacement extends PsiElement {
+public interface StitcherReplacement extends ScopeDefinition {
 
 }

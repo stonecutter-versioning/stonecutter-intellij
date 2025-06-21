@@ -15,6 +15,9 @@
         <lang.parserDefinition language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherParserDef"/>
         <lang.syntaxHighlighter language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter"/>
         <lang.braceMatcher language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherBraceMatcher"/>
+        <lang.surroundDescriptor language="JAVA" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSurroundDescriptor"/>
+        <lang.foldingBuilder language="JAVA" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherFoldingBuilder" order="first"/>
+        <codeFoldingOptionsProvider instance="dev.kikugie.stonecutter.intellij.settings.FoldingSettings"/>
         <editorHighlighterProvider filetype="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <notificationGroup displayType="BALLOON" id="stonecutter-notifications"/>
         <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>

@@ -9,6 +9,12 @@
     elementTypeHolderClass="dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes"
     elementTypeClass="dev.kikugie.stonecutter.intellij.lang.StitcherTokenType"
     tokenTypeClass="dev.kikugie.stonecutter.intellij.lang.StitcherTokenType"
+
+    implements("replacement")="dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition"
+    implements("condition")="dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition"
+    implements("swap")="dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition"
+
+    implements("condition")="dev.kikugie.stonecutter.intellij.lang.access.ConditionDefinition"
 }
 
 definition ::= COND_MARKER condition

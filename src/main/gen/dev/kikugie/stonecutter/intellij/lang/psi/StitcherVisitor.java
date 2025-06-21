@@ -4,6 +4,8 @@ package dev.kikugie.stonecutter.intellij.lang.psi;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiElement;
+import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition;
+import dev.kikugie.stonecutter.intellij.lang.access.ConditionDefinition;
 
 public class StitcherVisitor extends PsiElementVisitor {
 
@@ -16,7 +18,8 @@ public class StitcherVisitor extends PsiElementVisitor {
   }
 
   public void visitCondition(@NotNull StitcherCondition o) {
-    visitPsiElement(o);
+    visitScopeDefinition(o);
+    // visitConditionDefinition(o);
   }
 
   public void visitConstant(@NotNull StitcherConstant o) {
@@ -40,7 +43,7 @@ public class StitcherVisitor extends PsiElementVisitor {
   }
 
   public void visitReplacement(@NotNull StitcherReplacement o) {
-    visitPsiElement(o);
+    visitScopeDefinition(o);
   }
 
   public void visitSemanticVersion(@NotNull StitcherSemanticVersion o) {
@@ -52,7 +55,7 @@ public class StitcherVisitor extends PsiElementVisitor {
   }
 
   public void visitSwap(@NotNull StitcherSwap o) {
-    visitPsiElement(o);
+    visitScopeDefinition(o);
   }
 
   public void visitSwapId(@NotNull StitcherSwapId o) {
@@ -61,6 +64,10 @@ public class StitcherVisitor extends PsiElementVisitor {
 
   public void visitVersionCore(@NotNull StitcherVersionCore o) {
     visitPsiElement(o);
+  }
+
+  public void visitScopeDefinition(@NotNull ScopeDefinition o) {
+    visitElement(o);
   }
 
   public void visitPsiElement(@NotNull PsiElement o) {

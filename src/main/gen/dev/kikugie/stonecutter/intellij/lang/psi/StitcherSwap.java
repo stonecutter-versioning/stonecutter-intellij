@@ -4,8 +4,9 @@ package dev.kikugie.stonecutter.intellij.lang.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition;
 
-public interface StitcherSwap extends PsiElement {
+public interface StitcherSwap extends ScopeDefinition {
 
   @Nullable
   StitcherSwapId getSwapId();

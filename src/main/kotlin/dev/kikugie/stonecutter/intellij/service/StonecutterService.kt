@@ -5,11 +5,10 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
@@ -18,15 +17,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
 import com.intellij.platform.workspace.storage.MutableEntityStorage
 import com.intellij.psi.PsiElement
-import com.intellij.util.io.write
 import dev.kikugie.stonecutter.intellij.PluginAssets
-import dev.kikugie.stonecutter.intellij.action.VersionSelectorAction
 import dev.kikugie.stonecutter.intellij.model.*
-import dev.kikugie.stonecutter.intellij.model.serialized.BranchInfo
-import dev.kikugie.stonecutter.intellij.model.serialized.BranchModel
-import dev.kikugie.stonecutter.intellij.model.serialized.NodeInfo
-import dev.kikugie.stonecutter.intellij.model.serialized.NodeModel
-import dev.kikugie.stonecutter.intellij.model.serialized.TreeModel
+import dev.kikugie.stonecutter.intellij.model.serialized.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.DeserializationStrategy
@@ -40,12 +33,7 @@ import org.jetbrains.plugins.gradle.service.syncAction.GradleSyncContributor
 import java.io.FileNotFoundException
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.io.path.Path
-import kotlin.io.path.createDirectories
-import kotlin.io.path.inputStream
-import kotlin.io.path.invariantSeparatorsPathString
-import kotlin.io.path.notExists
-import kotlin.io.path.writeText
+import kotlin.io.path.*
 
 val PsiElement.stonecutterService: StonecutterService
     get() = project.stonecutterService
@@ -54,13 +42,14 @@ val Project.stonecutterService: StonecutterService
     get() = getService(StonecutterService::class.java)
 
 @Service(Service.Level.PROJECT)
-class StonecutterService(private val project: Project, private val scope: CoroutineScope) {
+class StonecutterService(val project: Project, val scope: CoroutineScope) : Disposable.Default {
     init {
         val stored = PropertiesComponent.getInstance(project).getList("dev.kikugie.stonecutter.projects")
             ?: emptyList()
         if (stored.isNotEmpty()) scope.launch {
             reset(stored.associate { val (a, b) = it.split('#'); a to b })
         }
+        StonecutterCallbacks.invokeProjectLoad(this)
     }
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -80,9 +69,7 @@ class StonecutterService(private val project: Project, private val scope: Corout
 
             if (!result) return@apply notifyModuleReadError()
         }
-
-        val switch = ActionManager.getInstance().getAction("dev.kikugie.stonecutter.intellij.select_version") as VersionSelectorAction
-        switch.isAvailable = true
+        StonecutterCallbacks.invokeProjectReload(this@StonecutterService)
     }
 
     private fun notifyModuleReadError() {

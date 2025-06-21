@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "dev.kikugie"
-version = "0.2.1"
+version = "0.3.0"
 
 buildscript {
     repositories {
@@ -69,6 +69,7 @@ tasks {
     compileKotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
+            freeCompilerArgs.add("-Xjvm-default=all")
         }
     }
 }

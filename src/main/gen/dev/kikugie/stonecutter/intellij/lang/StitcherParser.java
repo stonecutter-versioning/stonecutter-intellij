@@ -16,8 +16,7 @@ public class StitcherParser implements PsiParser, LightPsiParser {
 
   public ASTNode parse(IElementType t, PsiBuilder b) {
     parseLight(t, b);
-    var tree = b.getTreeBuilt();
-    return tree;
+    return b.getTreeBuilt();
   }
 
   public void parseLight(IElementType t, PsiBuilder b) {
