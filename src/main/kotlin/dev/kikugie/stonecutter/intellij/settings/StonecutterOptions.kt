@@ -16,6 +16,7 @@ class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Sto
             checkbox("Lock generated files", STATE::lockGeneratedFiles)
 
             selector("Code folding mode", FoldingMode.entries.toTypedArray(), STATE::foldDisabledBlocks)
+            checkbox("Link folded regions", STATE::linkDisabledBlocks)
         }
     }
 

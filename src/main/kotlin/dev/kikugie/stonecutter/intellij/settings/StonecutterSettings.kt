@@ -29,6 +29,8 @@ class StonecutterSettings : SerializablePersistentStateComponent<StonecutterSett
          */
         var foldDisabledBlocks by enum(FoldingMode.DISABLED)
 
+        var linkDisabledBlocks by property(true)
+
         /**
          * Toggles the functionality of [StitcherImportOptimizer][dev.kikugie.stonecutter.intellij.editor.StitcherImportOptimizer].
          */

@@ -111,7 +111,9 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
         conditions.joinTo(title, " ... ") { it.commentDefinition!!.element!!.text.trim(' ', '\t', '?') }
         if (title.startsWith('}')) title.insert(0, "?") else title.insert(0, "? ")
         if (last.textRange.endOffset != range.endOffset) title.append(" ...")
-        return FoldingDescriptor(primary.node, range, Constants.STITCHER_SCOPE).apply {
+
+        val group = if (StonecutterSettings.STATE.linkDisabledBlocks) Constants.STITCHER_SCOPE else null
+        return FoldingDescriptor(primary.node, range, group).apply {
             placeholderText = ElementManipulators.getValueTextRange(primary).replace(primary.text, title.toString())
         }
     }
