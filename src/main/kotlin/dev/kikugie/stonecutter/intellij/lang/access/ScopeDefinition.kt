@@ -2,35 +2,33 @@ package dev.kikugie.stonecutter.intellij.lang.access
 
 import com.intellij.psi.PsiElement
 import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes
-import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition.DefinitionType
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherCondition
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwap
 import dev.kikugie.stonecutter.intellij.util.childrenSeqOfType
 
 interface ScopeDefinition : PsiElement {
-    enum class DefinitionType { OPENER, EXTENSION, CLOSER, INVALID }
     val closer: PsiElement? get() = childrenSeqOfType(StitcherTokenTypes.CLOSER).firstOrNull()
     val opener: PsiElement? get() = childrenSeqOfType(StitcherTokenTypes.OPENER).firstOrNull()
-    val type: DefinitionType get() = determineType()
+    val type: ScopeType get() = determineType()
 }
 
-private fun ScopeDefinition.determineType(): DefinitionType = when (this) {
+private fun ScopeDefinition.determineType(): ScopeType = when (this) {
     is StitcherCondition -> determineConditionType()
     is StitcherSwap -> determineSwapType()
-    else -> DefinitionType.INVALID
+    else -> ScopeType.INVALID
 }
 
-private fun StitcherSwap.determineSwapType(): DefinitionType =
+private fun StitcherSwap.determineSwapType(): ScopeType =
     match(closer != null, opener != null || swapId != null).let {
-        if (it != DefinitionType.OPENER && it != DefinitionType.CLOSER) DefinitionType.INVALID else it
+        if (it != ScopeType.OPENER && it != ScopeType.CLOSER) ScopeType.INVALID else it
     }
 
-private fun StitcherCondition.determineConditionType(): DefinitionType =
+private fun StitcherCondition.determineConditionType(): ScopeType =
     match(closer != null, opener != null || expression != null || sugar.firstOrNull() != null)
 
-private fun match(hasCloser: Boolean, expectsScope: Boolean): DefinitionType = when {
-    hasCloser && expectsScope -> DefinitionType.EXTENSION
-    !hasCloser && expectsScope -> DefinitionType.OPENER
-    hasCloser -> DefinitionType.CLOSER
-    else -> DefinitionType.INVALID
+private fun match(hasCloser: Boolean, expectsScope: Boolean): ScopeType = when {
+    hasCloser && expectsScope -> ScopeType.EXTENSION
+    !hasCloser && expectsScope -> ScopeType.OPENER
+    hasCloser -> ScopeType.CLOSER
+    else -> ScopeType.INVALID
 }

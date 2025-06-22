@@ -10,12 +10,16 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.ElementManipulators
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
-import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition.DefinitionType
+import dev.kikugie.stonecutter.intellij.lang.access.OpenerType
+import dev.kikugie.stonecutter.intellij.lang.access.ScopeType
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherCondition
 import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
+import dev.kikugie.stonecutter.intellij.lang.util.openerType
+import dev.kikugie.stonecutter.intellij.settings.FoldingOptions.FoldingMode.DISABLED
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
+import dev.kikugie.stonecutter.intellij.util.filterNotWhitespace
+import dev.kikugie.stonecutter.intellij.util.prevSiblings
 
 class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     object Constants {
@@ -27,17 +31,16 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     override fun isCollapsedByDefault(node: ASTNode): Boolean = true
     override fun getPlaceholderText(node: ASTNode): String = ""
     override fun buildFoldRegions(root: PsiElement, document: Document, quick: Boolean): Array<out FoldingDescriptor> {
-        if (!StonecutterSettings.foldDisabledScopes) return emptyArray()
+        if (StonecutterSettings.STATE.foldDisabledBlocks == DISABLED) return emptyArray()
 
         val comments: MutableList<Pair<PsiComment, CommentType>> = mutableListOf()
         PsiTreeUtil.findChildrenOfType(root, PsiComment::class.java).mapTo(comments) { it to it.type(comments.lastOrNull()) }
         return buildFoldingDescriptors(comments).toTypedArray()
     }
 
-    private fun PsiComment.lastSiblings(): Sequence<PsiElement> = generateSequence(prevSibling) { it.prevSibling }
     private fun PsiComment.type(previous: Pair<PsiComment, CommentType>?): CommentType = when (val injected = commentDefinition) {
         null -> previous?.let { (comment, type) ->
-            val last = lastSiblings().find { it !is PsiWhiteSpace }
+            val last = prevSiblings.filterNotWhitespace().firstOrNull()
             if (last == null || last !== comment) CommentType.INDEPENDENT
             else if (type == CommentType.INDEPENDENT || type == CommentType.CLOSED) CommentType.INDEPENDENT
             else CommentType.SCOPED
@@ -45,10 +48,10 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
 
         else -> when (val def = injected.element) {
             is StitcherCondition -> when (def.type) {
-                DefinitionType.OPENER -> CommentType.OPEN
-                DefinitionType.EXTENSION -> CommentType.EXTENSION
-                DefinitionType.CLOSER -> CommentType.CLOSED
-                DefinitionType.INVALID -> CommentType.INDEPENDENT
+                ScopeType.OPENER -> CommentType.OPEN
+                ScopeType.EXTENSION -> CommentType.EXTENSION
+                ScopeType.CLOSER -> CommentType.CLOSED
+                ScopeType.INVALID -> CommentType.INDEPENDENT
             }
 
             else -> CommentType.INDEPENDENT
@@ -84,7 +87,7 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
             }
 
             CommentType.CLOSED -> if (list.getOrNull(index - 1)?.second == CommentType.SCOPED) {
-                if (conditions.lastOrNull()?.commentDefinition?.element?.closer?.text == "{") {
+                if (conditions.lastOrNull()?.commentDefinition?.element?.opener?.openerType == OpenerType.OPEN) {
                     conditions += pair.first
                     range = range.expand(pair.first)
                 }

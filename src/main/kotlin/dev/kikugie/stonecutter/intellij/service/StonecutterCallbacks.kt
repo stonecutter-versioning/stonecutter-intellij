@@ -14,6 +14,7 @@ import com.intellij.openapi.vfs.findDocument
 import com.intellij.openapi.vfs.toNioPathOrNull
 import dev.kikugie.stonecutter.intellij.action.VersionSelectorAction
 import dev.kikugie.stonecutter.intellij.editor.StitcherFoldingBuilder.Constants.STITCHER_SCOPE
+import dev.kikugie.stonecutter.intellij.settings.FoldingOptions.FoldingMode.AGGRESSIVE
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
 import java.awt.event.FocusEvent
 
@@ -32,7 +33,7 @@ object StonecutterCallbacks {
         (ActionManager.getInstance().getAction("dev.kikugie.stonecutter.intellij.select_version") as VersionSelectorAction)
             .isAvailable = true
 
-        if (StonecutterSettings.foldDisabledScopes) runWheneverIntelliJWantsIt {
+        if (StonecutterSettings.STATE.foldDisabledBlocks == AGGRESSIVE) runWheneverIntelliJWantsIt {
             FileEditorManager.getInstance(service.project).focusedEditor?.file
                 ?.findDocument()
                 ?.let(EditorFactory.getInstance()::getEditors)
@@ -47,8 +48,8 @@ object StonecutterCallbacks {
      */
     private fun createFocusListener() = object : FocusChangeListener {
         override fun focusGained(editor: Editor, event: FocusEvent) {
-            if (!StonecutterSettings.foldDisabledScopes) return
-            if (!event.isTemporary) runWheneverIntelliJWantsIt { updateFolding(editor) }
+            if (StonecutterSettings.STATE.foldDisabledBlocks == AGGRESSIVE && !event.isTemporary)
+                runWheneverIntelliJWantsIt { updateFolding(editor) }
         }
     }
 

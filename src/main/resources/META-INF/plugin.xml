@@ -18,10 +18,14 @@
         <lang.surroundDescriptor language="JAVA" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSurroundDescriptor"/>
         <lang.foldingBuilder language="JAVA" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherFoldingBuilder" order="first"/>
         <lang.foldingBuilder language="kotlin" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherFoldingBuilder" order="first"/>
-        <codeFoldingOptionsProvider instance="dev.kikugie.stonecutter.intellij.settings.FoldingSettings"/>
+        <lang.importOptimizer language="JAVA" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherImportOptimizer" order="first"/>
+        <codeFoldingOptionsProvider instance="dev.kikugie.stonecutter.intellij.settings.FoldingOptions"/>
         <editorHighlighterProvider filetype="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <notificationGroup displayType="BALLOON" id="stonecutter-notifications"/>
         <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
+        <applicationConfigurable parentId="tools" instance="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions"
+                                 id="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions"
+                                 displayName="Stonecutter Dev"/>
     </extensions>
     <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
         <syncContributor implementation="dev.kikugie.stonecutter.intellij.service.GradleReloadListener"/>

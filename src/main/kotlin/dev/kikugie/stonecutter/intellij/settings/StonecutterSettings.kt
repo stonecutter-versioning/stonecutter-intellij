@@ -8,27 +8,31 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import dev.kikugie.stonecutter.intellij.service.StonecutterCallbacks
+import dev.kikugie.stonecutter.intellij.settings.FoldingOptions.FoldingMode
 
 @Service(Service.Level.APP) @State(
     name = "dev.kikugie.stonecutter.intellij.StonecutterSettings",
     storages = [Storage("StonecutterSettings.xml")]
 )
 class StonecutterSettings : SerializablePersistentStateComponent<StonecutterSettings.Settings>(Settings()), Disposable.Default {
-    companion object : Properties {
-        private val IT get() = ApplicationManager.getApplication().getService(StonecutterSettings::class.java)
-        override var foldDisabledScopes: Boolean
-            get() = IT.state.foldDisabledScopes
-            set(value) {
-                IT.state.foldDisabledScopes = value
-            }
+    companion object {
+        val IT by lazy { ApplicationManager.getApplication().getService(StonecutterSettings::class.java) }
+        val STATE get() = IT.state
     }
 
-    class Settings : BaseState(), Properties {
-        override var foldDisabledScopes by property(false)
-    }
+    class Settings : BaseState() {
+        /**
+         * Configures the behaviour of [StitcherFoldingBuilder][dev.kikugie.stonecutter.intellij.editor.StitcherFoldingBuilder].
+         * - [FoldingMode.DISABLED] - no folding regions are added.
+         * - [FoldingMode.LENIENT] - folding regions are added, but not automatically collapsed.
+         * - [FoldingMode.AGGRESSIVE] - added folding regions are collapsed whenever the file is selected.
+         */
+        var foldDisabledBlocks by enum(FoldingMode.DISABLED)
 
-    interface Properties {
-        var foldDisabledScopes: Boolean
+        /**
+         * Toggles the functionality of [StitcherImportOptimizer][dev.kikugie.stonecutter.intellij.editor.StitcherImportOptimizer].
+         */
+        var useImportOptimizer by property(true)
     }
 
     init {
