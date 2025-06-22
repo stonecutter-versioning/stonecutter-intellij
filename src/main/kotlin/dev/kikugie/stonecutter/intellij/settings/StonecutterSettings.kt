@@ -33,6 +33,11 @@ class StonecutterSettings : SerializablePersistentStateComponent<StonecutterSett
          * Toggles the functionality of [StitcherImportOptimizer][dev.kikugie.stonecutter.intellij.editor.StitcherImportOptimizer].
          */
         var useImportOptimizer by property(true)
+
+        /**
+         * Marks files in generated Stonecutter sources as read-only.
+         */
+        var lockGeneratedFiles by property(true)
     }
 
     init {

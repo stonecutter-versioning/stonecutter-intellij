@@ -13,6 +13,8 @@ class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Sto
     class EditorOptions : PropertyConfigurable("Editor") {
         init {
             checkbox("Use custom import optimiser", STATE::useImportOptimizer)
+            checkbox("Lock generated files", STATE::lockGeneratedFiles)
+
             selector("Code folding mode", FoldingMode.entries.toTypedArray(), STATE::foldDisabledBlocks)
         }
     }

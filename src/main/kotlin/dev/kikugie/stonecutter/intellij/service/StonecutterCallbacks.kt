@@ -63,19 +63,12 @@ object StonecutterCallbacks {
      */
     private fun createFileListener(service: StonecutterService) = object : FileEditorManagerListener {
         override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
-            val application = ApplicationManager.getApplication()
-            application.invokeLater {
-                application.runWriteAction {
-                    updateFile(service, source, file)
-                }
-            }
+            if (StonecutterSettings.STATE.lockGeneratedFiles)
+                runWheneverIntelliJWantsIt { updateFile(service, source, file) }
         }
 
-        // TODO: Make a setting for it
         private fun updateFile(service: StonecutterService, source: FileEditorManager, file: VirtualFile) {
             val path = file.toNioPathOrNull() ?: return
-            val module = ModuleUtilCore.findModuleForFile(file, source.project)
-            if (module != null) return
             val root = service.lookup.all
                 .find { path.startsWith(it.location.resolve("build")) }
                 ?: return
