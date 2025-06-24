@@ -9,7 +9,7 @@ import javax.swing.Icon
 
 class StitcherFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, StitcherLang) {
     override fun getFileType(): FileType = StitcherFileType
-    object StitcherFileType : LanguageFileType(StitcherLang){
+    object StitcherFileType : LanguageFileType(StitcherLang), TemplateLanguageFileType {
         override fun getName(): String = "Stitcher"
         override fun getDescription(): String = "Stitcher comments"
         override fun getDefaultExtension(): String = "stitcher"

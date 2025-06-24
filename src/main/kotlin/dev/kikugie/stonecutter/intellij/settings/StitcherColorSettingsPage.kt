@@ -5,18 +5,28 @@ import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
 import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter
-import dev.kikugie.stonecutter.intellij.editor.StitcherTextAttributesKeys
+import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.AttributeKeys
 
 class StitcherColorSettingsPage : ColorSettingsPage {
     private val descriptors = arrayOf(
-        AttributesDescriptor("Markers", StitcherTextAttributesKeys.STITCHER_MARKER),
-        AttributesDescriptor("Keywords", StitcherTextAttributesKeys.STITCHER_KEYWORD),
-        AttributesDescriptor("Operators", StitcherTextAttributesKeys.STITCHER_OPERATOR),
-        AttributesDescriptor("Numbers", StitcherTextAttributesKeys.STITCHER_NUMBER),
-        AttributesDescriptor("Identifiers", StitcherTextAttributesKeys.STITCHER_IDENTIFIER),
-        AttributesDescriptor("Braces", StitcherTextAttributesKeys.STITCHER_BRACES),
-        AttributesDescriptor("Constants", StitcherTextAttributesKeys.STITCHER_CONSTANT),
-        AttributesDescriptor("Dependencies", StitcherTextAttributesKeys.STITCHER_DEPENDENCY)
+        AttributesDescriptor("Markers//Conditional marker (//?)", AttributeKeys.MARKER),
+        AttributesDescriptor("Markers//Swap marker (//$)", AttributeKeys.MARKER),
+        AttributesDescriptor("Markers//Replacement marker (//~)", AttributeKeys.MARKER),
+
+        AttributesDescriptor("Control Flow//Keywords (if, else, elif)", AttributeKeys.KEYWORD),
+
+        AttributesDescriptor("Operators//Comparison (>=, <=, ==, ~, ^)", AttributeKeys.OPERATOR),
+        AttributesDescriptor("Operators//Logical (&&, ||, !)", AttributeKeys.OPERATOR),
+        AttributesDescriptor("Operators//Assignment (:)", AttributeKeys.OPERATOR),
+
+        AttributesDescriptor("Syntax//Numbers", AttributeKeys.NUMBER),
+        AttributesDescriptor("Syntax//Identifiers", AttributeKeys.IDENTIFIER),
+        AttributesDescriptor("Syntax//Braces ( )", AttributeKeys.BRACES),
+
+        AttributesDescriptor("Semantic//Constants", AttributeKeys.CONSTANT),
+        AttributesDescriptor("Semantic//Dependencies", AttributeKeys.DEPENDENCY),
+        AttributesDescriptor("Semantic//Replacements", AttributeKeys.REPLACEMENT),
+        AttributesDescriptor("Semantic//Swaps", AttributeKeys.SWAP),
     )
 
     override fun getDisplayName() = "Stonecutter"
@@ -56,14 +66,16 @@ class StitcherColorSettingsPage : ColorSettingsPage {
 
     override fun getAdditionalHighlightingTagToDescriptorMap(): Map<String, TextAttributesKey> {
         return mapOf(
-            "marker" to StitcherTextAttributesKeys.STITCHER_MARKER,
-            "keyword" to StitcherTextAttributesKeys.STITCHER_KEYWORD,
-            "op" to StitcherTextAttributesKeys.STITCHER_OPERATOR,
-            "num" to StitcherTextAttributesKeys.STITCHER_NUMBER,
-            "id" to StitcherTextAttributesKeys.STITCHER_IDENTIFIER,
-            "braces" to StitcherTextAttributesKeys.STITCHER_BRACES,
-            "const" to StitcherTextAttributesKeys.STITCHER_CONSTANT,
-            "dep" to StitcherTextAttributesKeys.STITCHER_DEPENDENCY
+            "marker" to AttributeKeys.MARKER,
+            "keyword" to AttributeKeys.KEYWORD,
+            "op" to AttributeKeys.OPERATOR,
+            "num" to AttributeKeys.NUMBER,
+            "id" to AttributeKeys.IDENTIFIER,
+            "braces" to AttributeKeys.BRACES,
+            "const" to AttributeKeys.CONSTANT,
+            "dep" to AttributeKeys.DEPENDENCY,
+            "repl" to AttributeKeys.REPLACEMENT,
+            "swap" to AttributeKeys.SWAP,
         )
     }
 }

@@ -9,7 +9,7 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij"> <!-- Stitcher -->
-        <annotator language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherLanguageAnnotator"/>
+        <annotator language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherAnnotator"/>
         <completion.contributor language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherCompletionContributor"/>
         <lang.parserDefinition language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherParserDef"/>
         <lang.syntaxHighlighter language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter"/>
@@ -43,13 +43,14 @@
         <multiHostInjector implementation="dev.kikugie.stonecutter.intellij.editor.StitcherInjector"/>
         <codeFoldingOptionsProvider instance="dev.kikugie.stonecutter.intellij.settings.FoldingOptions"/>
         <colorSettingsPage implementation="dev.kikugie.stonecutter.intellij.settings.StitcherColorSettingsPage"/>
+        <editorHighlighterProvider filetype="Stitcher"
+                                   implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <notificationGroup displayType="BALLOON" id="stonecutter-notifications" bundle="messages.StonecutterBundle"
                            key="stonecutter.notifications.group"/>
         <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
-        <applicationConfigurable parentId="settings" 
-                                 instance="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions"
+        <applicationConfigurable parentId="tools" instance="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions"
                                  id="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions"
-                                 displayName="Stonecutter"/>
+                                 displayName="Stonecutter Dev"/>
         <dependencySupport coordinate="dev.kikugie:stonecutter" displayName="Stonecutter" kind="java"/>
         <dependencySupport coordinate="dev.kikugie.stonecutter:dev.kikugie.stonecutter.gradle.plugin" displayName="Stonecutter" kind="java"/>
     </extensions>
