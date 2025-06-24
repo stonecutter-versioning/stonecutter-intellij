@@ -18,5 +18,6 @@ interface StonecutterModelLookup {
         yieldAll(nodes.values)
     }
 
+    fun isEmpty() = nodes.isEmpty()
     fun node(element: PsiElement): SCProjectNode?
 }

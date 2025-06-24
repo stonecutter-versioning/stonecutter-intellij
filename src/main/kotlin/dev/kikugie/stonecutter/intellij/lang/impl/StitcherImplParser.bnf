@@ -15,6 +15,11 @@
     implements("swap")="dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition"
 
     implements("condition")="dev.kikugie.stonecutter.intellij.lang.access.ConditionDefinition"
+
+    implements("string_version")="dev.kikugie.stonecutter.intellij.lang.access.VersionDefinition"
+    implements("semantic_version")="dev.kikugie.stonecutter.intellij.lang.access.VersionDefinition"
+
+    implements("predicate")="dev.kikugie.stonecutter.intellij.lang.access.PredicateDefinition"
 }
 
 definition ::= COND_MARKER condition
@@ -39,17 +44,15 @@ private binary_expression ::= simple_expression BINARY expression
 private unary_expression ::= UNARY expression
 private group_expression ::= LEFT_BRACE expression RIGHT_BRACE
 
-assignment ::= dependency ASSIGN predicate
-    | combined_predicate
+assignment ::= dependency ASSIGN predicate_list
+    | explicit_predicate_list
 
-predicate ::= any_predicate+
-private combined_predicate ::= explicit_predicate predicate* {
-    extends = predicate
-}
+private any_predicate ::= implicit_predicate | predicate { extends = predicate }
+private implicit_predicate ::= string_version | semantic_version { extends = predicate }
+predicate ::= COMPARATOR (string_version | semantic_version) | semantic_version
 
-private any_predicate ::= explicit_predicate | implicit_predicate
-private implicit_predicate ::= string_version | semantic_version
-private explicit_predicate ::= COMPARATOR (string_version | semantic_version) | semantic_version
+private explicit_predicate_list ::= predicate any_predicate* { extends = predicate_list }
+private predicate_list ::= any_predicate+
 
 constant ::= LITERAL { elementType = "CONSTANT" }
 dependency ::= LITERAL { elementType = "DEPENDENCY" }

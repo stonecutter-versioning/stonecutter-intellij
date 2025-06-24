@@ -24,6 +24,13 @@ import dev.kikugie.stonecutter.intellij.util.prevSiblings
 class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     object Constants {
         @JvmField val STITCHER_SCOPE = FoldingGroup.newGroup("stitcher-scope")
+        private val GROUPED: MutableList<FoldingGroup> = mutableListOf()
+
+        fun group(n: Int): FoldingGroup = when(n) {
+            in GROUPED.indices -> GROUPED[n]
+            GROUPED.size -> FoldingGroup.newGroup("stitcher-scope-$n").also(GROUPED::add)
+            else -> error("Attempted to skip groups ${GROUPED.size} -> $n")
+        }
     }
 
     private enum class CommentType { INDEPENDENT, SCOPED, OPEN, EXTENSION, CLOSED }
@@ -65,23 +72,25 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     private fun buildFoldingDescriptors(list: List<Pair<PsiComment, CommentType>>): List<FoldingDescriptor> = buildList {
         val conditions: MutableList<PsiComment> = mutableListOf()
         var range: TextRange = TextRange.EMPTY_RANGE
+        var index = 0
 
-        fun submit() {
+        fun submit(increment: Boolean) {
             if (conditions.isEmpty()) return
-            if (conditions.first().textRange != range) this += buildFoldingDescriptor(conditions, range)
+            if (conditions.first().textRange != range) this += buildFoldingDescriptor(conditions, range, index)
+                .also { if (increment) index++ }
             conditions.clear(); range = TextRange.EMPTY_RANGE
         }
 
         for ((index, pair) in list.withIndex()) when (pair.second) {
             CommentType.OPEN -> {
-                submit()
+                submit(false)
                 conditions += pair.first
                 range = range.expand(pair.first)
             }
 
             CommentType.EXTENSION -> {
                 if (list.getOrNull(index - 1)?.second != CommentType.SCOPED)
-                    submit()
+                    submit(true)
                 conditions += pair.first
                 range = range.expand(pair.first)
             }
@@ -91,20 +100,20 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
                     conditions += pair.first
                     range = range.expand(pair.first)
                 }
-                submit()
+                submit(true)
             }
 
             CommentType.SCOPED -> {
                 range = range.expand(pair.first)
             }
 
-            CommentType.INDEPENDENT -> submit()
+            CommentType.INDEPENDENT -> submit(true)
         }
 
-        if (conditions.isNotEmpty()) submit()
+        if (conditions.isNotEmpty()) submit(true)
     }
 
-    private fun buildFoldingDescriptor(conditions: List<PsiComment>, range: TextRange): FoldingDescriptor {
+    private fun buildFoldingDescriptor(conditions: List<PsiComment>, range: TextRange, index: Int): FoldingDescriptor {
         val primary = conditions.first()
         val last = conditions.last()
         val title = StringBuilder()
@@ -112,7 +121,8 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
         if (title.startsWith('}')) title.insert(0, "?") else title.insert(0, "? ")
         if (last.textRange.endOffset != range.endOffset) title.append(" ...")
 
-        val group = if (StonecutterSettings.STATE.linkDisabledBlocks) Constants.STITCHER_SCOPE else null
+        val group = if (StonecutterSettings.STATE.linkDisabledBlocks) Constants.STITCHER_SCOPE
+        else Constants.group(index)
         return FoldingDescriptor(primary.node, range, group).apply {
             placeholderText = ElementManipulators.getValueTextRange(primary).replace(primary.text, title.toString())
         }

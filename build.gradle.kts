@@ -6,6 +6,7 @@ plugins {
     idea
     `java-library`
     alias(libs.plugins.intellij)
+    alias(libs.plugins.grammarkit)
     alias(common.plugins.gradle.dotenv)
     alias(common.plugins.kotlin.jvm)
     alias(common.plugins.kotlin.serialization)
@@ -33,7 +34,7 @@ idea {
 
 sourceSets {
     main {
-        java.srcDir("src/main/gen")
+        java.srcDirs(layout.buildDirectory.files("generated/lexer", "generated/parser"))
     }
 }
 
@@ -72,6 +73,22 @@ tasks {
             jvmTarget.set(JvmTarget.JVM_21)
             freeCompilerArgs.add("-Xjvm-default=all")
         }
+
+        dependsOn(generateLexer, generateParser)
+    }
+
+    generateLexer {
+        sourceFile = file("src/main/kotlin/dev/kikugie/stonecutter/intellij/lang/impl/StitcherImplLexer.flex")
+        targetOutputDir = layout.buildDirectory.dir("generated/lexer/dev/kikugie/stonecutter/intellij/lang/impl")
+        purgeOldFiles = true
+    }
+
+    generateParser {
+        sourceFile = file("src/main/kotlin/dev/kikugie/stonecutter/intellij/lang/impl/StitcherImplParser.bnf")
+        targetRootOutputDir = layout.buildDirectory.dir("generated/parser")
+        pathToParser = "" // Defined in the .bnf
+        pathToPsiRoot = "" // Defined in the .bnf
+        purgeOldFiles = true
     }
 }
 
