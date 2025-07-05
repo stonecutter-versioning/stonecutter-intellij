@@ -5,10 +5,9 @@ import com.intellij.lang.injection.MultiHostRegistrar
 import com.intellij.openapi.project.DumbAware
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
-import com.intellij.psi.impl.source.tree.injected.InjectionBackgroundSuppressor
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 
-class StitcherInjector : MultiHostInjector, InjectionBackgroundSuppressor, DumbAware {
+class StitcherInjector : MultiHostInjector, DumbAware {
     private val comments: List<Class<out PsiElement>> = listOf(PsiCommentImpl::class.java)
     private val PsiElement.isStitcherComment: Boolean get() {
         if (this !is PsiComment) return false

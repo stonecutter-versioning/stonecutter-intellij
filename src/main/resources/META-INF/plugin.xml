@@ -42,6 +42,7 @@
     <extensions defaultExtensionNs="com.intellij"> <!-- General -->
         <multiHostInjector implementation="dev.kikugie.stonecutter.intellij.editor.StitcherInjector"/>
         <codeFoldingOptionsProvider instance="dev.kikugie.stonecutter.intellij.settings.FoldingOptions"/>
+        <colorSettingsPage implementation="dev.kikugie.stonecutter.intellij.settings.StitcherColorSettingsPage"/>
         <editorHighlighterProvider filetype="Stitcher"
                                    implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <notificationGroup displayType="BALLOON" id="stonecutter-notifications" bundle="messages.StonecutterBundle"
