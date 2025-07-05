@@ -9,22 +9,14 @@ import dev.kikugie.stonecutter.intellij.editor.StitcherTextAttributesKeys
 
 class StitcherColorSettingsPage : ColorSettingsPage {
     private val descriptors = arrayOf(
-        AttributesDescriptor("Markers//Conditional marker (//?)", StitcherTextAttributesKeys.STITCHER_MARKER),
-        AttributesDescriptor("Markers//Swap marker (//\$)", StitcherTextAttributesKeys.STITCHER_MARKER),
-        AttributesDescriptor("Markers//Replacement marker (//~)", StitcherTextAttributesKeys.STITCHER_MARKER),
-
-        AttributesDescriptor("Control Flow//Keywords (if, else, elif)", StitcherTextAttributesKeys.STITCHER_KEYWORD),
-
-        AttributesDescriptor("Operators//Comparison (>=, <=, ==, ~, ^)", StitcherTextAttributesKeys.STITCHER_OPERATOR),
-        AttributesDescriptor("Operators//Logical (&&, ||, !)", StitcherTextAttributesKeys.STITCHER_OPERATOR),
-        AttributesDescriptor("Operators//Assignment (:)", StitcherTextAttributesKeys.STITCHER_OPERATOR),
-
-        AttributesDescriptor("Syntax//Numbers", StitcherTextAttributesKeys.STITCHER_NUMBER),
-        AttributesDescriptor("Syntax//Identifiers", StitcherTextAttributesKeys.STITCHER_IDENTIFIER),
-        AttributesDescriptor("Syntax//Braces ( )", StitcherTextAttributesKeys.STITCHER_BRACES),
-
-        AttributesDescriptor("Semantic//Constants", StitcherTextAttributesKeys.STITCHER_CONSTANT),
-        AttributesDescriptor("Semantic//Dependencies", StitcherTextAttributesKeys.STITCHER_DEPENDENCY)
+        AttributesDescriptor("Markers", StitcherTextAttributesKeys.STITCHER_MARKER),
+        AttributesDescriptor("Keywords", StitcherTextAttributesKeys.STITCHER_KEYWORD),
+        AttributesDescriptor("Operators", StitcherTextAttributesKeys.STITCHER_OPERATOR),
+        AttributesDescriptor("Numbers", StitcherTextAttributesKeys.STITCHER_NUMBER),
+        AttributesDescriptor("Identifiers", StitcherTextAttributesKeys.STITCHER_IDENTIFIER),
+        AttributesDescriptor("Braces", StitcherTextAttributesKeys.STITCHER_BRACES),
+        AttributesDescriptor("Constants", StitcherTextAttributesKeys.STITCHER_CONSTANT),
+        AttributesDescriptor("Dependencies", StitcherTextAttributesKeys.STITCHER_DEPENDENCY)
     )
 
     override fun getDisplayName() = "Stonecutter"
@@ -34,25 +26,32 @@ class StitcherColorSettingsPage : ColorSettingsPage {
     override fun getHighlighter() = StitcherSyntaxHighlighter()
 
     override fun getDemoText() = """
-        <marker>//? if</marker> <dep>fabric</dep> <op>>=</op> <num>1.21.0</num> <braces>{</braces>
-        /*this.world.addParticle(
-        *<marker>//?}</marker> <keyword>else</keyword> <braces>{</braces>
-        this.world.spawnParticle(
-        <marker>//?}</marker>
-        
-        <marker>//? if</marker> <const>MC_VERSION</const> <op>>=</op> <num>1.20</num> <op>&&</op> <dep>minecraft</dep> <op>~</op> <num>1.20</num> <braces>{</braces>
-        // New API available
-        <marker>//?}</marker>
-        
-        <marker>//$</marker> <id>modernMethod</id> <op>>></op> <braces>{</braces>
-        // Modern implementation
-        <marker>//$}</marker> <keyword>else</keyword> <braces>{</braces>
-        // Legacy fallback
-        <marker>//$}</marker>
-        
-        <marker>//~</marker> <id>replaceThis</id>
-        // Content to be replaced
-        <marker>//~</marker>
+        public class TemplateMod implements ModInitializer {
+            public static final Logger LOGGER = LoggerFactory.getLogger("template");
+            public static final String VERSION = /*<marker>$</marker> <dep>mod_version</dep>*/ "0.1.0";
+
+            @Override
+            public void onInitialize() {
+
+                //<marker>?</marker> <keyword>if</keyword> <op>>=</op> <num>1.21.5</num> <braces>{</braces>
+                /* LOGGER.info("Running >= 1.21.5");
+                *///<marker>?</marker><braces>}</braces> <keyword>else</keyword> <keyword>if</keyword> <op>>=</op><num>1.20.4</num> <braces>{</braces>
+                /* LOGGER.info("Running >= 1.20.4");
+                *///<marker>?</marker><braces>}</braces> <keyword>else</keyword> <braces>{</braces>
+                LOGGER.info("Running Other Version");
+                //<marker>?</marker><braces>}</braces>
+
+
+
+                //<marker>?</marker> <keyword>if</keyword> <dep>bapi</dep><op>:</op> <op><</op><num>0.95</num> <braces>{</braces>
+                LOGGER.info("Fabric API is old on this version");
+                LOGGER.info("Please update me!");
+                //<marker>?</marker><braces>}</braces>
+
+
+                /*<marker>?</marker> <op>>=</op><num>1.21.5</num> <braces>{</braces>*/ /*Method*//*<marker>?</marker><braces>}</braces> <keyword>else</keyword> <braces>{</braces>*/ long vcar = 1; /*<marker>?</marker><braces>}</braces>
+            }
+        }
     """.trimIndent()
 
     override fun getAdditionalHighlightingTagToDescriptorMap(): Map<String, TextAttributesKey> {
