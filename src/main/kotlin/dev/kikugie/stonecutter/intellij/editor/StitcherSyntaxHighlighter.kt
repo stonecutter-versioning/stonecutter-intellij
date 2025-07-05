@@ -18,22 +18,25 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Colors
 
 class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
     class Provider : EditorHighlighterProvider {
-        override fun getEditorHighlighter(project: Project?, fileType: FileType, file: VirtualFile?, colors: EditorColorsScheme): EditorHighlighter =
-            LexerEditorHighlighter(StitcherSyntaxHighlighter(), colors)
+        override fun getEditorHighlighter(project: Project?, fileType: FileType, file: VirtualFile?, colors: EditorColorsScheme): EditorHighlighter {
+            return LexerEditorHighlighter(StitcherSyntaxHighlighter(), colors)
+        }
     }
 
     override fun getHighlightingLexer(): Lexer = StitcherLexer()
 
-    override fun getTokenHighlights(token: IElementType?): Array<out TextAttributesKey> =
-        (token as? StitcherTokenType)?.matchColor()?.let { arrayOf(it) } ?: emptyArray()
+    override fun getTokenHighlights(token: IElementType?): Array<out TextAttributesKey> {
+        val result = (token as? StitcherTokenType)?.matchColor()?.let { arrayOf(it) } ?: emptyArray()
+        return result
+    }
 
     private fun StitcherTokenType.matchColor(): TextAttributesKey? = when (this) {
-        COND_MARKER, SWAP_MARKER, REPL_MARKER -> Colors.FUNCTION_DECLARATION
-        COMPARATOR, UNARY, BINARY, ASSIGN -> Colors.OPERATION_SIGN
-        NUMERIC, DASH, PLUS, DOT -> Colors.NUMBER
-        IDENTIFIER, LITERAL -> Colors.IDENTIFIER
-        LEFT_BRACE, RIGHT_BRACE -> Colors.BRACES
-        SUGAR -> Colors.KEYWORD
+        COND_MARKER, SWAP_MARKER, REPL_MARKER -> StitcherTextAttributesKeys.STITCHER_MARKER
+        COMPARATOR, UNARY, BINARY, ASSIGN -> StitcherTextAttributesKeys.STITCHER_OPERATOR
+        NUMERIC, DASH, PLUS, DOT -> StitcherTextAttributesKeys.STITCHER_NUMBER
+        IDENTIFIER, LITERAL -> StitcherTextAttributesKeys.STITCHER_IDENTIFIER
+        LEFT_BRACE, RIGHT_BRACE, OPENER, CLOSER -> StitcherTextAttributesKeys.STITCHER_BRACES
+        SUGAR -> StitcherTextAttributesKeys.STITCHER_KEYWORD
         else -> null
     }
 }
