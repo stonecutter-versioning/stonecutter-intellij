@@ -30,38 +30,8 @@ class StitcherLanguageAnnotator : Annotator {
                 }
             }
         }
-
-        // Also handle composite elements by recursing into their children
-        element.children.forEach { child ->
-            annotate(child, holder)
-        }
     }
 
-    private fun StitcherTokenType.getTextAttributesKey() = when (this) {
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.COND_MARKER,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.SWAP_MARKER,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.REPL_MARKER -> StitcherTextAttributesKeys.STITCHER_MARKER
-
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.SUGAR -> StitcherTextAttributesKeys.STITCHER_KEYWORD
-
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.COMPARATOR,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.BINARY,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.UNARY,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.ASSIGN -> StitcherTextAttributesKeys.STITCHER_OPERATOR
-
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.NUMERIC,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.DASH,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.PLUS,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.DOT -> StitcherTextAttributesKeys.STITCHER_NUMBER
-
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.LITERAL -> StitcherTextAttributesKeys.STITCHER_DEPENDENCY
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.IDENTIFIER -> StitcherTextAttributesKeys.STITCHER_IDENTIFIER
-
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.LEFT_BRACE,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.RIGHT_BRACE,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.OPENER,
-        dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.CLOSER -> StitcherTextAttributesKeys.STITCHER_BRACES
-
-        else -> null
-    }
+    private fun StitcherTokenType.getTextAttributesKey() =
+        StitcherSyntaxHighlighter().getTokenHighlights(this).firstOrNull()
 }
