@@ -14,10 +14,10 @@ import com.intellij.psi.tree.TokenSet
 class StitcherParserDef : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = StitcherLexer()
     override fun createParser(project: Project?): PsiParser = StitcherParser()
-    override fun getFileNodeType(): IFileElementType = IFileElementType(StitcherLang)
+    override fun getFileNodeType(): IFileElementType = IFileElementType("STITCHER_FILE", StitcherLang)
     override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
     override fun getWhitespaceTokens(): TokenSet = TokenSet.WHITE_SPACE
     override fun getCommentTokens(): TokenSet = TokenSet.EMPTY
-    override fun createElement(node: ASTNode): PsiElement = StitcherTokenTypes.Factory.createElement(node)
+    override fun createElement(node: ASTNode): PsiElement = ASTWrapperPsiElement(node)
     override fun createFile(viewProvider: FileViewProvider): PsiFile = StitcherFile(viewProvider)
 }
