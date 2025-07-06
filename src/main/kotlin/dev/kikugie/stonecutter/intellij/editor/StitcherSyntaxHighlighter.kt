@@ -39,10 +39,15 @@ private fun StitcherSyntaxHighlighter.TemplateHighlighter.configure(project: Pro
 class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
     object AttributeKeys {
         @JvmField val MARKER = createTextAttributesKey("STONECUTTER_MARKER", DefaultLanguageHighlighterColors.KEYWORD)
+        @JvmField val COND_MARKER = createTextAttributesKey("STONECUTTER_COND_MARKER", MARKER)
+        @JvmField val SWAP_MARKER = createTextAttributesKey("STONECUTTER_SWAP_MARKER", MARKER)
+        @JvmField val REPL_MARKER = createTextAttributesKey("STONECUTTER_REPL_MARKER", MARKER)
+
         @JvmField val KEYWORD = createTextAttributesKey("STONECUTTER_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD)
         @JvmField val OPERATOR = createTextAttributesKey("STONECUTTER_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN)
         @JvmField val NUMBER = createTextAttributesKey("STONECUTTER_NUMBER", DefaultLanguageHighlighterColors.NUMBER)
         @JvmField val BRACES = createTextAttributesKey("STONECUTTER_BRACES", DefaultLanguageHighlighterColors.BRACES)
+
         @JvmField val IDENTIFIER = createTextAttributesKey("STONECUTTER_IDENTIFIER", DefaultLanguageHighlighterColors.CONSTANT)
         @JvmField val CONSTANT = createTextAttributesKey("STONECUTTER_CONSTANT", IDENTIFIER)
         @JvmField val DEPENDENCY = createTextAttributesKey("STONECUTTER_DEPENDENCY", IDENTIFIER)
@@ -71,7 +76,9 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
         (token as? StitcherTokenType)?.matchColor()?.let { arrayOf(it) } ?: emptyArray()
 
     private fun StitcherTokenType.matchColor(): TextAttributesKey? = when (this) {
-        COND_MARKER, SWAP_MARKER, REPL_MARKER -> AttributeKeys.MARKER
+        COND_MARKER -> AttributeKeys.COND_MARKER
+        SWAP_MARKER -> AttributeKeys.SWAP_MARKER
+        REPL_MARKER -> AttributeKeys.REPL_MARKER
         COMPARATOR, UNARY, BINARY, ASSIGN -> AttributeKeys.OPERATOR
         NUMERIC, DASH, PLUS, DOT -> AttributeKeys.NUMBER
         IDENTIFIER, LITERAL -> AttributeKeys.IDENTIFIER

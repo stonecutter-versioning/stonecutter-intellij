@@ -1,5 +1,8 @@
 package dev.kikugie.stonecutter.intellij.settings
 
+import com.intellij.lang.java.JavaLanguage
+import com.intellij.lang.java.JavaSyntaxHighlighterFactory
+import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
@@ -9,9 +12,10 @@ import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.Attribu
 
 class StitcherColorSettingsPage : ColorSettingsPage {
     private val descriptors = arrayOf(
-        AttributesDescriptor("Markers//Conditional marker (//?)", AttributeKeys.MARKER),
-        AttributesDescriptor("Markers//Swap marker (//$)", AttributeKeys.MARKER),
-        AttributesDescriptor("Markers//Replacement marker (//~)", AttributeKeys.MARKER),
+        AttributesDescriptor("Markers", AttributeKeys.MARKER),
+        AttributesDescriptor("Markers//Condition (?)", AttributeKeys.COND_MARKER),
+        AttributesDescriptor("Markers//Swap ($)", AttributeKeys.SWAP_MARKER),
+        AttributesDescriptor("Markers//Replacement (~)", AttributeKeys.REPL_MARKER),
 
         AttributesDescriptor("Control Flow//Keywords (if, else, elif)", AttributeKeys.KEYWORD),
 
@@ -33,7 +37,7 @@ class StitcherColorSettingsPage : ColorSettingsPage {
     override fun getIcon() = null
     override fun getAttributeDescriptors() = descriptors
     override fun getColorDescriptors() = ColorDescriptor.EMPTY_ARRAY
-    override fun getHighlighter() = StitcherSyntaxHighlighter()
+    override fun getHighlighter() = JavaSyntaxHighlighterFactory.getSyntaxHighlighter(JavaLanguage.INSTANCE, null, null)
 
     override fun getDemoText() = """
         public class TemplateMod implements ModInitializer {
@@ -42,7 +46,6 @@ class StitcherColorSettingsPage : ColorSettingsPage {
 
             @Override
             public void onInitialize() {
-
                 //<marker>?</marker> <keyword>if</keyword> <op>>=</op> <num>1.21.5</num> <braces>{</braces>
                 /* LOGGER.info("Running >= 1.21.5");
                 *///<marker>?</marker><braces>}</braces> <keyword>else</keyword> <keyword>if</keyword> <op>>=</op><num>1.20.4</num> <braces>{</braces>
@@ -50,15 +53,12 @@ class StitcherColorSettingsPage : ColorSettingsPage {
                 *///<marker>?</marker><braces>}</braces> <keyword>else</keyword> <braces>{</braces>
                 LOGGER.info("Running Other Version");
                 //<marker>?</marker><braces>}</braces>
-
-
-
+    
                 //<marker>?</marker> <keyword>if</keyword> <dep>bapi</dep><op>:</op> <op><</op><num>0.95</num> <braces>{</braces>
                 LOGGER.info("Fabric API is old on this version");
                 LOGGER.info("Please update me!");
                 //<marker>?</marker><braces>}</braces>
-
-
+    
                 /*<marker>?</marker> <op>>=</op><num>1.21.5</num> <braces>{</braces>*/ /*Method*//*<marker>?</marker><braces>}</braces> <keyword>else</keyword> <braces>{</braces>*/ long vcar = 1; /*<marker>?</marker><braces>}</braces>
             }
         }
