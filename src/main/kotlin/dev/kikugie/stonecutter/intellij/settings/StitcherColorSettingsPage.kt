@@ -21,7 +21,7 @@ class StitcherColorSettingsPage : ColorSettingsPage {
         AttributesDescriptor("Dependencies", AttributeKeys.DEPENDENCY),
     )
 
-    override fun getDisplayName() = "Stonecutter Coloring"
+    override fun getDisplayName() = "Stonecutter"
     override fun getIcon() = null
     override fun getAttributeDescriptors() = descriptors
     override fun getColorDescriptors() = ColorDescriptor.EMPTY_ARRAY
@@ -59,7 +59,7 @@ class StitcherColorSettingsPage : ColorSettingsPage {
                 *///<marker>?</marker><braces>}</braces>
                 
                 // Inline conditional comments
-                MinecraftClass.method(/*<marker>?</marker> <op><=</op><num>1.21.1</num> <braces>{</braces>*/ null /*<braces>}</braces> <keyword>else</keyword> <braces>{</braces>*//* 1.0 *//*<marker>?</marker><braces>}</braces>*/);
+                MinecraftClass.method(/*<marker>?</marker> <op><=</op><num>1.21.1</num> <braces>{</braces>*/ null /*<braces>}</braces> <keyword>else</keyword> <braces>{</braces>*//* <num>1.0</num> *//*<marker>?</marker><braces>}</braces>*/);
                 
                 // Line scope without braces
                 //<marker>?</marker> <keyword>if</keyword> <op><</op><num>1.21</num>

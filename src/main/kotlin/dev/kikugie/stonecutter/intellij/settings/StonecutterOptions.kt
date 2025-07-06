@@ -13,7 +13,7 @@ import dev.kikugie.stonecutter.intellij.settings.config.link
 import dev.kikugie.stonecutter.intellij.settings.config.selector
 import dev.kikugie.stonecutter.intellij.settings.config.comment
 
-class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Stonecutter", null) {
+class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Stonecutter Dev", null) {
     class EditorOptions : PropertyConfigurable("Editor") {
         init {
             checkbox("Use custom import optimiser", STATE::useImportOptimizer)
