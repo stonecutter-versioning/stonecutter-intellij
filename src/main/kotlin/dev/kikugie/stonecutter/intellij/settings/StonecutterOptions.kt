@@ -26,10 +26,10 @@ class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Sto
 
             link("Configure Syntax Coloring") { ShowSettingsUtil.getInstance().showSettingsDialog(
                     ProjectManager.getInstance().defaultProject,
-                    "Stonecutter Coloring") // Should match ColorSettingsPage displayName. Should be different from options Display name
+                    "Stonecutter") // Should match ColorSettingsPage displayName. Should be different from options Display name
             }
 
-            comment(" Or go to: Settings → Editor → Color Scheme → Stonecutter Coloring")
+            comment(" Or go to: Settings → Editor → Color Scheme → Stonecutter")
         }
     }
 
