@@ -38,7 +38,7 @@
     <extensions defaultExtensionNs="com.intellij"> <!-- Any -->
         <lang.inspectionSuppressor language="" order="first"
                                    implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.StitcherCommentInspectionSuppressor"/>
-        <!--        <localInspection language="" order="first" groupName="Stonecutter" displayName="Test" implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.StitcherOuterScopeInspection"/>-->
+        <!--<localInspection language="" order="first" groupName="Stonecutter" displayName="Test" implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.StitcherOuterScopeInspection"/>-->
 
     </extensions>
 
