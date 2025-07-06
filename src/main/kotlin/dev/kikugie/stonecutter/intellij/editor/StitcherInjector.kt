@@ -12,7 +12,7 @@ class StitcherInjector : MultiHostInjector, DumbAware {
     private val PsiElement.isStitcherComment: Boolean get() {
         if (this !is PsiComment) return false
         val char = ElementManipulators.getValueText(this).firstOrNull()
-        return char == '?' || char == '$'
+        return char == '?' || char == '$' || char == '~'
     }
 
     override fun getLanguagesToInject(registrar: MultiHostRegistrar, context: PsiElement) {

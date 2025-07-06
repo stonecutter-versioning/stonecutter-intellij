@@ -8,8 +8,11 @@ import com.intellij.psi.FileViewProvider
 import javax.swing.Icon
 
 class StitcherFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, StitcherLang) {
-    override fun getFileType(): FileType = StitcherFileType
-    object StitcherFileType : LanguageFileType(StitcherLang), TemplateLanguageFileType {
+    override fun getFileType(): FileType = StitcherFileType.INSTANCE
+    class StitcherFileType : LanguageFileType(StitcherLang), TemplateLanguageFileType {
+        @Suppress("CompanionObjectInExtension") companion object {
+            @JvmField val INSTANCE = StitcherFileType()
+        }
         override fun getName(): String = "Stitcher"
         override fun getDescription(): String = "Stitcher comments"
         override fun getDefaultExtension(): String = "stitcher"

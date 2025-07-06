@@ -9,11 +9,14 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij"> <!-- Stitcher -->
+        <fileType name="Stitcher" language="Stitcher" fieldName="INSTANCE" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherFile$StitcherFileType"/>
         <annotator language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherAnnotator"/>
         <completion.contributor language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherCompletionContributor"/>
         <lang.parserDefinition language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherParserDef"/>
         <lang.syntaxHighlighter language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter"/>
+        <lang.syntaxHighlighterFactory language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <lang.braceMatcher language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherBraceMatcher"/>
+        <editorHighlighterProvider filetype="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij"> <!-- Java -->

@@ -5,17 +5,36 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey
-import com.intellij.openapi.editor.ex.util.LexerEditorHighlighter
+import com.intellij.openapi.editor.ex.util.LayerDescriptor
+import com.intellij.openapi.editor.ex.util.LayeredLexerEditorHighlighter
 import com.intellij.openapi.editor.highlighter.EditorHighlighter
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileTypes.EditorHighlighterProvider
 import com.intellij.openapi.fileTypes.FileType
+import com.intellij.openapi.fileTypes.FileTypes
+import com.intellij.openapi.fileTypes.SyntaxHighlighter
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
+import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.templateLanguages.TemplateDataLanguageMappings
 import com.intellij.psi.tree.IElementType
+import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType
 import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.*
+
+private val APPLICABLE_TYPES = arrayOf(CONDITION, SWAP, REPLACEMENT_ID)
+
+private fun StitcherSyntaxHighlighter.TemplateHighlighter.configure(project: Project?, file: VirtualFile?) {
+    val type = if (project == null || file == null) FileTypes.PLAIN_TEXT
+    else TemplateDataLanguageMappings.getInstance(project).getMapping(file)
+        ?.associatedFileType ?: StitcherFile.StitcherFileType.INSTANCE
+    val outer = SyntaxHighlighterFactory.getSyntaxHighlighter(type, project, file)
+        ?.let { LayerDescriptor(it, "", TextAttributesKey.createTempTextAttributesKey("EMPTY", TextAttributes.ERASE_MARKER)) }
+    if (outer != null) for (it in APPLICABLE_TYPES)
+        registerLayer(it, outer)
+}
 
 class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
     object AttributeKeys {
@@ -31,9 +50,19 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
         @JvmField val SWAP = createTextAttributesKey("STONECUTTER_SWAP", IDENTIFIER)
     }
 
-    class Provider : EditorHighlighterProvider {
-        override fun getEditorHighlighter(project: Project?, fileType: FileType, file: VirtualFile?, colors: EditorColorsScheme): EditorHighlighter =
-            LexerEditorHighlighter(StitcherSyntaxHighlighter(), colors)
+    class TemplateHighlighter(project: Project?, file: VirtualFile?, scheme: EditorColorsScheme) :
+        LayeredLexerEditorHighlighter(StitcherSyntaxHighlighter(), scheme) {
+        init {
+            configure(project, file)
+        }
+    }
+
+    class Provider : SyntaxHighlighterFactory(), EditorHighlighterProvider {
+        override fun getSyntaxHighlighter(project: Project?, file: VirtualFile?): SyntaxHighlighter =
+            StitcherSyntaxHighlighter()
+
+        override fun getEditorHighlighter(project: Project?, type: FileType, file: VirtualFile?, colors: EditorColorsScheme): EditorHighlighter =
+            TemplateHighlighter(project, file, colors)
     }
 
     override fun getHighlightingLexer(): Lexer = StitcherLexer()

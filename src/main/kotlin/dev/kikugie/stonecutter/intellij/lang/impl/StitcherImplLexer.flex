@@ -21,31 +21,31 @@ SYMBOL      = {DIGIT}|{NON_DIGIT}
 
 NUMBER      = 0|([1-9]{DIGIT}*)
 
-%state DEFINTION
+%state DEFINITION
 
 %%
 
-<YYINITIAL> \? { yybegin(DEFINTION); return StitcherTokenTypes.COND_MARKER; }
-<YYINITIAL> \$ { yybegin(DEFINTION); return StitcherTokenTypes.SWAP_MARKER; }
-<YYINITIAL> \~ { yybegin(DEFINTION); return StitcherTokenTypes.REPL_MARKER; }
+<YYINITIAL> \? { yybegin(DEFINITION); return StitcherTokenTypes.COND_MARKER; }
+<YYINITIAL> \$ { yybegin(DEFINITION); return StitcherTokenTypes.SWAP_MARKER; }
+<YYINITIAL> \~ { yybegin(DEFINITION); return StitcherTokenTypes.REPL_MARKER; }
 
-<DEFINTION> \. { return StitcherTokenTypes.DOT; }
-<DEFINTION> \- { return StitcherTokenTypes.DASH; }
-<DEFINTION> \+ { return StitcherTokenTypes.PLUS; }
+<DEFINITION> \. { return StitcherTokenTypes.DOT; }
+<DEFINITION> \- { return StitcherTokenTypes.DASH; }
+<DEFINITION> \+ { return StitcherTokenTypes.PLUS; }
 
-<DEFINTION> "{"|">>" { return StitcherTokenTypes.OPENER; }
-<DEFINTION> "}" { return StitcherTokenTypes.CLOSER; }
-<DEFINTION> "if"|"else"|"elif" { return StitcherTokenTypes.SUGAR; }
-<DEFINTION> "&&"|"||" { return StitcherTokenTypes.BINARY; }
-<DEFINTION> "!" { return StitcherTokenTypes.UNARY; }
-<DEFINTION> ":" { return StitcherTokenTypes.ASSIGN; }
-<DEFINTION> "(" { return StitcherTokenTypes.LEFT_BRACE; }
-<DEFINTION> ")" { return StitcherTokenTypes.RIGHT_BRACE; }
-<DEFINTION> "="|">"|"<"|">="|"<="|"~"|"^" { return StitcherTokenTypes.COMPARATOR; }
+<DEFINITION> "{"|">>" { return StitcherTokenTypes.OPENER; }
+<DEFINITION> "}" { return StitcherTokenTypes.CLOSER; }
+<DEFINITION> "if"|"else"|"elif" { return StitcherTokenTypes.SUGAR; }
+<DEFINITION> "&&"|"||" { return StitcherTokenTypes.BINARY; }
+<DEFINITION> "!" { return StitcherTokenTypes.UNARY; }
+<DEFINITION> ":" { return StitcherTokenTypes.ASSIGN; }
+<DEFINITION> "(" { return StitcherTokenTypes.LEFT_BRACE; }
+<DEFINITION> ")" { return StitcherTokenTypes.RIGHT_BRACE; }
+<DEFINITION> "="|">"|"<"|">="|"<="|"~"|"^" { return StitcherTokenTypes.COMPARATOR; }
 
-<DEFINTION> ({LETTER}{SYMBOL}*) { return StitcherTokenTypes.LITERAL; }
-<DEFINTION> ({NUMBER}) { return StitcherTokenTypes.NUMERIC; }
-<DEFINTION> ({LETTER}{SYMBOL}*)|({NUMBER}*) { return StitcherTokenTypes.IDENTIFIER; }
+<DEFINITION> ({LETTER}{SYMBOL}*) { return StitcherTokenTypes.LITERAL; }
+<DEFINITION> ({NUMBER}) { return StitcherTokenTypes.NUMERIC; }
+<DEFINITION> ({LETTER}{SYMBOL}*)|({NUMBER}*) { return StitcherTokenTypes.IDENTIFIER; }
 
 [ \t]+ { return TokenType.WHITE_SPACE; }
 [^] { return TokenType.BAD_CHARACTER; }
