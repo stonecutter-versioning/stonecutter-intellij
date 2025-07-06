@@ -21,7 +21,7 @@ class StitcherColorSettingsPage : ColorSettingsPage {
         AttributesDescriptor("Dependencies", AttributeKeys.DEPENDENCY),
     )
 
-    override fun getDisplayName() = "Stonecutter"
+    override fun getDisplayName() = "Stonecutter Coloring"
     override fun getIcon() = null
     override fun getAttributeDescriptors() = descriptors
     override fun getColorDescriptors() = ColorDescriptor.EMPTY_ARRAY

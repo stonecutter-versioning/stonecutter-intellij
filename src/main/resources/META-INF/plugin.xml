@@ -38,7 +38,7 @@
     <extensions defaultExtensionNs="com.intellij"> <!-- Any -->
         <lang.inspectionSuppressor language="" order="first"
                                    implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.StitcherCommentInspectionSuppressor"/>
-        <!--        <localInspection language="" order="first" groupName="Stonecutter" displayName="Test" implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.StitcherOuterScopeInspection"/>-->
+        <!--<localInspection language="" order="first" groupName="Stonecutter" displayName="Test" implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.StitcherOuterScopeInspection"/>-->
 
     </extensions>
 
@@ -51,9 +51,9 @@
         <notificationGroup displayType="BALLOON" id="stonecutter-notifications" bundle="messages.StonecutterBundle"
                            key="stonecutter.notifications.group"/>
         <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
-        <applicationConfigurable parentId="tools" instance="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions"
+        <applicationConfigurable parentId="other" instance="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions"
                                  id="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions"
-                                 displayName="Stonecutter Dev"/>
+                                 displayName="Stonecutter"/>
         <dependencySupport coordinate="dev.kikugie:stonecutter" displayName="Stonecutter" kind="java"/>
         <dependencySupport coordinate="dev.kikugie.stonecutter:dev.kikugie.stonecutter.gradle.plugin" displayName="Stonecutter" kind="java"/>
     </extensions>

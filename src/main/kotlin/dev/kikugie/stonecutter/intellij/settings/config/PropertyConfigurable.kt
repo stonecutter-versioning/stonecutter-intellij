@@ -17,6 +17,12 @@ fun PropertyConfigurable.checkbox(title: @NlsContexts.Checkbox String, property:
 fun <E : Enum<E>> PropertyConfigurable.selector(title: @NlsContexts.Checkbox String, entries: Array<E>, property: KMutableProperty0<E>) =
     register(ComboBoxPropertyField(title, entries, property))
 
+fun PropertyConfigurable.link(text: String, action: () -> Unit) =
+    register(LinkPropertyField(text, action, ::UnitProperty))
+
+fun PropertyConfigurable.comment(text: String) =
+    register(CommentPropertyField(text, ::UnitProperty))
+
 abstract class PropertyConfigurable(
     protected var title: @NlsContexts.BorderTitle String? = null
 ) : UnnamedConfigurable, UiDslUnnamedConfigurable {
@@ -77,5 +83,37 @@ class ComboBoxPropertyField<E : Enum<E>>(
 
     override fun createComponent(): JPanel = panel {
         row(title) { cell(box) }
+    }
+}
+
+private var UnitProperty: Unit = Unit
+class LinkPropertyField(
+    private val text: String,
+    private val action: () -> Unit,
+    property: KMutableProperty0<Unit>
+) : PropertyField<Unit, JPanel>(property) {
+    override var value: Unit
+        get() = Unit
+        set(_) {}
+
+    override fun createComponent(): JPanel = panel {
+        row {
+            link(text) { action() }
+        }
+    }
+}
+
+class CommentPropertyField(
+    private val text: String,
+    property: KMutableProperty0<Unit>
+) : PropertyField<Unit, JPanel>(property) {
+    override var value: Unit
+        get() = Unit
+        set(_) {}
+
+    override fun createComponent(): JPanel = panel {
+        row {
+            comment(text)
+        }
     }
 }
