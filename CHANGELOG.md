@@ -1,3 +1,2 @@
-### Changes
-- Added an option to not link folded regions.
-- Added reference completion for dependencies, swaps and replacements.
+### Features
+- Added syntax highlighting settings (@vibzz)
