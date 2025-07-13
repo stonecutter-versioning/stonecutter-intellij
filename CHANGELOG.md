@@ -1,2 +1,2 @@
-### Features
-- Added syntax highlighting settings (@vibzz)
+### Fixes
+- Add missing color settings category.

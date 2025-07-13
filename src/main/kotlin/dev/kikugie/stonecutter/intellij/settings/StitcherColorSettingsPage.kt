@@ -18,7 +18,11 @@ class StitcherColorSettingsPage : ColorSettingsPage {
         AttributesDescriptor("Operators (>=, <=, ==, ^, &&, ||)", AttributeKeys.OPERATOR),
         AttributesDescriptor("Numbers", AttributeKeys.NUMBER),
         AttributesDescriptor("Braces { }", AttributeKeys.BRACES),
-        AttributesDescriptor("Dependencies", AttributeKeys.DEPENDENCY),
+        AttributesDescriptor("Identifiers", AttributeKeys.IDENTIFIER),
+        AttributesDescriptor("Identifiers//Constant", AttributeKeys.CONSTANT),
+        AttributesDescriptor("Identifiers//Swap", AttributeKeys.SWAP),
+        AttributesDescriptor("Identifiers//Dependency", AttributeKeys.DEPENDENCY),
+        AttributesDescriptor("Identifiers//Replacement", AttributeKeys.REPLACEMENT),
     )
 
     override fun getDisplayName() = "Stonecutter"
