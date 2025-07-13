@@ -17,6 +17,7 @@
         <lang.syntaxHighlighterFactory language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <lang.braceMatcher language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherBraceMatcher"/>
         <editorHighlighterProvider filetype="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
+        <platform.backend.documentation.targetProvider implementation="dev.kikugie.stonecutter.intellij.editor.StitcherDocumentationTargetProvider"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij"> <!-- Java -->
