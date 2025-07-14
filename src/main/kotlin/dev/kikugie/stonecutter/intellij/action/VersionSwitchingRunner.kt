@@ -1,24 +1,22 @@
 package dev.kikugie.stonecutter.intellij.action
 
 import com.intellij.ide.actions.runAnything.RunAnythingContext
-import com.intellij.ide.actions.runAnything.RunAnythingUtil
 import com.intellij.ide.actions.runAnything.activity.RunAnythingCommandLineProvider
 import com.intellij.ide.actions.runAnything.getPath
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil.findProjectNode
 import com.intellij.openapi.project.Project
-import dev.kikugie.stonecutter.intellij.PluginAssets
-import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import dev.kikugie.stonecutter.intellij.util.GradleUtil
+import dev.kikugie.stonecutter.intellij.StonecutterIcons
 import org.jetbrains.plugins.gradle.settings.GradleSettings
 import org.jetbrains.plugins.gradle.util.GradleConstants.SYSTEM_ID
 import javax.swing.Icon
 import kotlin.io.path.Path
 
 class VersionSwitchingRunner : RunAnythingCommandLineProvider() {
-    override fun getIcon(value: String): Icon = PluginAssets.STONECUTTER
-    override fun getHelpIcon(): Icon = PluginAssets.STONECUTTER
+    override fun getIcon(value: String): Icon = StonecutterIcons.STONECUTTER
+    override fun getHelpIcon(): Icon = StonecutterIcons.STONECUTTER
     override fun getHelpGroupTitle(): String = "Stonecutter"
     override fun getHelpCommand(): String = "stonecutter"
     override fun getHelpCommandAliases(): List<String> = listOf("sc")
