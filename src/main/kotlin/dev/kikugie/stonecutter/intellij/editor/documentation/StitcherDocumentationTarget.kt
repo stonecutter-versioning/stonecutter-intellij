@@ -13,9 +13,20 @@ import com.intellij.psi.createSmartPointer
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherAssignment
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
+import dev.kikugie.stonecutter.intellij.service.StonecutterModelLookup
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
+import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
 class StitcherDocumentationTarget(private val element: PsiElement) : DocumentationTarget {
+    companion object {
+        const val ICONS_FQN = "dev.kikugie.stonecutter.intellij.StonecutterIcons"
+
+        init {
+            // For some reason preloading the class here is needed for it to be available in the HTML
+            this::class.java.classLoader.loadClass(ICONS_FQN)
+        }
+    }
+
     override fun createPointer(): Pointer<out DocumentationTarget> {
         val elementPointer = element.createSmartPointer()
         return Pointer { elementPointer.element?.let(::StitcherDocumentationTarget) }
@@ -28,18 +39,17 @@ class StitcherDocumentationTarget(private val element: PsiElement) : Documentati
         .backgroundColor(file?.let { VfsPresentationUtil.getFileBackgroundColor(element.project, it) })
         .presentation()
 
-    override fun computeDocumentation() = DocumentationResult.Companion.documentation(generateDependencyDocs())
+    override fun computeDocumentation() = DocumentationResult.documentation(generateDependencyDocs())
 
     private fun generateDependencyDocs(): String = buildString {
-        val properties = element.stonecutterNode?.params
-        append("<html><body><div class='definition'><pre>")
-        resolveDependency(element, properties)
-        append("</pre></div></body></html>")
+        append("<html><body>")
+        resolveDependency(element)
+        append("</body></html>")
     }
 
-    private fun StringBuilder.resolveDependency(element: PsiElement, properties: SCProcessProperties?) = when (element) {
-        is StitcherConstant -> DocumentationResolver.Constant.generate(this, element, properties)
-        is StitcherAssignment -> DocumentationResolver.Dependency.generate(this, element, properties)
+    private fun StringBuilder.resolveDependency(element: PsiElement) = when (element) {
+        is StitcherConstant -> ConstantDocBuilder.applyTo(this, element)
+        is StitcherAssignment -> DependencyDocBuilder.applyTo(this, element)
         else -> error("Unsupported element type for $element")
     }
 }
