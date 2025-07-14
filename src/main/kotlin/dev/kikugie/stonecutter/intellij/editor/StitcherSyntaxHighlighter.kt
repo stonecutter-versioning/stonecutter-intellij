@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributes
 import com.intellij.openapi.editor.ex.util.LayerDescriptor
 import com.intellij.openapi.editor.ex.util.LayeredLexerEditorHighlighter
 import com.intellij.openapi.editor.highlighter.EditorHighlighter
+import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileTypes.EditorHighlighterProvider
 import com.intellij.openapi.fileTypes.FileType
@@ -19,10 +20,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.templateLanguages.TemplateDataLanguageMappings
 import com.intellij.psi.tree.IElementType
+import com.intellij.ui.JBColor
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType
 import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.*
+import java.awt.Font
 
 private val APPLICABLE_TYPES = arrayOf(CONDITION, SWAP, REPLACEMENT_ID)
 
@@ -38,7 +41,7 @@ private fun StitcherSyntaxHighlighter.TemplateHighlighter.configure(project: Pro
 
 class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
     object AttributeKeys {
-        @JvmField val MARKER = createTextAttributesKey("STONECUTTER_MARKER", DefaultLanguageHighlighterColors.KEYWORD)
+        @JvmField val MARKER = createTextAttributesKey("STONECUTTER_MARKER", DefaultLanguageHighlighterColors.FUNCTION_DECLARATION)
         @JvmField val COND_MARKER = createTextAttributesKey("STONECUTTER_COND_MARKER", MARKER)
         @JvmField val SWAP_MARKER = createTextAttributesKey("STONECUTTER_SWAP_MARKER", MARKER)
         @JvmField val REPL_MARKER = createTextAttributesKey("STONECUTTER_REPL_MARKER", MARKER)
@@ -53,6 +56,27 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
         @JvmField val DEPENDENCY = createTextAttributesKey("STONECUTTER_DEPENDENCY", IDENTIFIER)
         @JvmField val REPLACEMENT = createTextAttributesKey("STONECUTTER_REPLACEMENT", IDENTIFIER)
         @JvmField val SWAP = createTextAttributesKey("STONECUTTER_SWAP", IDENTIFIER)
+
+        @Suppress("DEPRECATION")
+        @JvmField val UNRESOLVED =
+            createTextAttributesKey("STONECUTTER_UNRESOLVED", TextAttributes(JBColor.RED, null, null, EffectType.BOXED, Font.BOLD))
+    }
+
+    object Attribute : (IElementType?) -> TextAttributesKey? {
+        override fun invoke(type: IElementType?): TextAttributesKey? =
+            (type as? StitcherTokenType)?.matchColor()
+
+        private fun StitcherTokenType.matchColor(): TextAttributesKey? = when (this) {
+            COND_MARKER -> AttributeKeys.COND_MARKER
+            SWAP_MARKER -> AttributeKeys.SWAP_MARKER
+            REPL_MARKER -> AttributeKeys.REPL_MARKER
+            COMPARATOR, UNARY, BINARY, ASSIGN -> AttributeKeys.OPERATOR
+            NUMERIC, DASH, PLUS, DOT -> AttributeKeys.NUMBER
+            IDENTIFIER, LITERAL -> AttributeKeys.IDENTIFIER
+            LEFT_BRACE, RIGHT_BRACE, OPENER, CLOSER -> AttributeKeys.BRACES
+            SUGAR -> AttributeKeys.KEYWORD
+            else -> null
+        }
     }
 
     class TemplateHighlighter(project: Project?, file: VirtualFile?, scheme: EditorColorsScheme) :
@@ -72,18 +96,6 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
 
     override fun getHighlightingLexer(): Lexer = StitcherLexer()
 
-    override fun getTokenHighlights(token: IElementType?): Array<out TextAttributesKey> =
-        (token as? StitcherTokenType)?.matchColor()?.let { arrayOf(it) } ?: emptyArray()
-
-    private fun StitcherTokenType.matchColor(): TextAttributesKey? = when (this) {
-        COND_MARKER -> AttributeKeys.COND_MARKER
-        SWAP_MARKER -> AttributeKeys.SWAP_MARKER
-        REPL_MARKER -> AttributeKeys.REPL_MARKER
-        COMPARATOR, UNARY, BINARY, ASSIGN -> AttributeKeys.OPERATOR
-        NUMERIC, DASH, PLUS, DOT -> AttributeKeys.NUMBER
-        IDENTIFIER, LITERAL -> AttributeKeys.IDENTIFIER
-        LEFT_BRACE, RIGHT_BRACE, OPENER, CLOSER -> AttributeKeys.BRACES
-        SUGAR -> AttributeKeys.KEYWORD
-        else -> null
-    }
+    override fun getTokenHighlights(type: IElementType?): Array<out TextAttributesKey> =
+        Attribute(type)?.let { arrayOf(it) } ?: emptyArray()
 }

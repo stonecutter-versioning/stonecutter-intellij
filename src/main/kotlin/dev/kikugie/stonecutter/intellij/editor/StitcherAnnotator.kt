@@ -11,6 +11,7 @@ import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.Attribu
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.psi.*
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
+import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import dev.kikugie.stonecutter.intellij.util.childrenSequence
 
@@ -42,7 +43,7 @@ class StitcherAnnotator: Annotator {
             .create()
 
         val text = element.text
-        val properties = element.stonecutterService.lookup.node(element)?.params
+        val properties = element.stonecutterNode?.params
             ?: return
         if (text !in type.variants(properties)) holder
             .newAnnotation(HighlightSeverity.ERROR, "Invalid ${type.name.lowercase()} ID")

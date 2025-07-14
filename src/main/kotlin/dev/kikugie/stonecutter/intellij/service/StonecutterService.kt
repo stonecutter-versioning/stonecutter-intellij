@@ -38,6 +38,9 @@ import kotlin.io.path.*
 val PsiElement.stonecutterService: StonecutterService
     get() = project.stonecutterService
 
+val PsiElement.stonecutterNode: SCProjectNode?
+    get() = stonecutterService.lookup.node(this)
+
 val Project.stonecutterService: StonecutterService
     get() = getService(StonecutterService::class.java)
 
