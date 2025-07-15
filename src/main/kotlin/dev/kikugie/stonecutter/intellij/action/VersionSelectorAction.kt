@@ -6,11 +6,11 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.jetbrains.rd.util.first
-import dev.kikugie.stonecutter.intellij.PluginAssets
 import dev.kikugie.stonecutter.intellij.model.SCProjectTree
 import dev.kikugie.stonecutter.intellij.service.StonecutterModelLookup
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import dev.kikugie.stonecutter.intellij.util.GradleUtil
+import dev.kikugie.stonecutter.intellij.StonecutterIcons
 import java.awt.Dimension
 import java.nio.file.Path
 import javax.swing.Icon
@@ -58,7 +58,7 @@ class VersionSelectorAction : ComboBoxAction() {
 
         val actions = nodes.map {
             val project = it.metadata.project
-            val icon = if (project == tree.vcs) PluginAssets.VERSION_VCS else PluginAssets.VERSION_ENTRY
+            val icon = if (project == tree.vcs) StonecutterIcons.VERSION_VCS else StonecutterIcons.VERSION_ENTRY
             VersionSwitchAction(project, icon, "stonecutterSwitchTo$project", tree.location)
         }
 

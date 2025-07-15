@@ -17,9 +17,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
 import com.intellij.platform.workspace.storage.MutableEntityStorage
 import com.intellij.psi.PsiElement
-import dev.kikugie.stonecutter.intellij.PluginAssets
 import dev.kikugie.stonecutter.intellij.model.*
 import dev.kikugie.stonecutter.intellij.model.serialized.*
+import dev.kikugie.stonecutter.intellij.StonecutterIcons
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.DeserializationStrategy
@@ -37,6 +37,9 @@ import kotlin.io.path.*
 
 val PsiElement.stonecutterService: StonecutterService
     get() = project.stonecutterService
+
+val PsiElement.stonecutterNode: SCProjectNode?
+    get() = stonecutterService.lookup.node(this)
 
 val Project.stonecutterService: StonecutterService
     get() = getService(StonecutterService::class.java)
@@ -83,7 +86,7 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
         val notification = NotificationGroupManager.getInstance()
             .getNotificationGroup("stonecutter-notifications")
             .createNotification(title, message, NotificationType.WARNING)
-            .setIcon(PluginAssets.STONECUTTER)
+            .setIcon(StonecutterIcons.STONECUTTER)
         with(notification) {
             configureDoNotAskOption("sc-model-err", title)
             addAction(NotificationAction.createSimple("Don't show again") {

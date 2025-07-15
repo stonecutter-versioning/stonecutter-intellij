@@ -11,6 +11,8 @@ value class GradleProjectHierarchy(val path: String) {
 
     fun orEmpty() = if (path == ":") "" else path
 
+    fun trim() = path.removePrefix(":")
+
     operator fun plus(child: String): GradleProjectHierarchy = GradleProjectHierarchy("${orEmpty()}:$child")
 
     override fun toString(): String = path
