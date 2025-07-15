@@ -58,13 +58,13 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
     private val json = Json { ignoreUnknownKeys = true }
     private val output = Path(PathManager.getLogPath()).resolve("stonecutter-log/latest.log")
     private val logger = SCLogger("StonecutterService", output)
-    var lookup: StonecutterModelLookup = StonecutterModelLookupImpl()
+    var lookup: SCModelLookup = SCModelLookupImpl()
         private set
 
     internal suspend fun reset(projects: Map<String, String>) = withBackgroundProgress(project, "Updating Stonecutter models") {
         output.parent.createDirectories()
         output.writeText("", Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)
-        lookup = StonecutterModelLookupImpl().apply {
+        lookup = SCModelLookupImpl().apply {
             if (projects.isEmpty()) return@apply
             val result = projects.entries.fold(false) { acc, (location, path) ->
                 buildTreeModel(Path(location), GradleProjectHierarchy(path)) || acc
@@ -105,7 +105,7 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
         }
     }
 
-    private suspend fun StonecutterModelLookupImpl.buildTreeModel(dir: Path, hierarchy: GradleProjectHierarchy): Boolean {
+    private suspend fun SCModelLookupImpl.buildTreeModel(dir: Path, hierarchy: GradleProjectHierarchy): Boolean {
         val tree: TreeModel = dir.resolve("build/stonecutter-cache/tree.json").readJson(TreeModel.serializer())
             ?: return false
 
@@ -115,7 +115,7 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
         return result
     }
 
-    private suspend fun StonecutterModelLookupImpl.buildBranchModel(info: BranchInfo, parent: GradleProjectHierarchy, current: String?): Boolean {
+    private suspend fun SCModelLookupImpl.buildBranchModel(info: BranchInfo, parent: GradleProjectHierarchy, current: String?): Boolean {
         val data = info.path.resolve("build/stonecutter-cache/branch.json").readJson(BranchModel.serializer())
             ?: return false
         if (data.nodes.isEmpty()) return true
@@ -125,7 +125,7 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
         return result
     }
 
-    private suspend fun StonecutterModelLookupImpl.buildNodeModel(info: NodeInfo, parent: GradleProjectHierarchy, current: String?): Boolean {
+    private suspend fun SCModelLookupImpl.buildNodeModel(info: NodeInfo, parent: GradleProjectHierarchy, current: String?): Boolean {
         val data = info.path.resolve("build/stonecutter-cache/node.json").readJson(NodeModel.serializer())
             ?: return false
         val hierarchy = parent + info.project
@@ -150,11 +150,11 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
     }
 }
 
-private class StonecutterModelLookupImpl(
+private class SCModelLookupImpl(
     override val trees: MutableMap<GradleProjectHierarchy, SCProjectTree> = mutableMapOf(),
     override val branches: MutableMap<GradleProjectHierarchy, SCProjectBranch> = mutableMapOf(),
     override val nodes: MutableMap<GradleProjectHierarchy, SCProjectNode> = mutableMapOf(),
-) : StonecutterModelLookup {
+) : SCModelLookup {
     override fun node(element: PsiElement): SCProjectNode? = element
         .let(ModuleUtil::findModuleForPsiElement)
         ?.let(GradleProjectResolverUtil::getGradleIdentityPathOrNull)

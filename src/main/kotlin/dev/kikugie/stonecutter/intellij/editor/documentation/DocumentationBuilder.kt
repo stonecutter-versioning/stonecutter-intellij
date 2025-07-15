@@ -8,7 +8,6 @@ import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.Attribu
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherAssignment
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
 import dev.kikugie.stonecutter.intellij.model.SCProjectNode
-import dev.kikugie.stonecutter.intellij.service.StonecutterModelLookup
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
@@ -36,23 +35,14 @@ private fun StringBuilder.appendSignature(title: String, section: String, name: 
     append(DocumentationMarkup.DEFINITION_END)
 }
 
-private fun StonecutterModelLookup.getAllSiblings(node: SCProjectNode): Sequence<SCProjectNode> {
-    val tree = branches[node.branch]?.tree?.let(trees::get)
-        ?: return emptySequence()
-    return tree.branches.asSequence()
-        .mapNotNull(branches::get)
-        .flatMap { it.nodes.asSequence().mapNotNull(nodes::get) }
-}
-
 private fun <T> StringBuilder.appendVariants(current: SCProjectNode, variants: Map<T?, List<SCProjectNode>>, mapper: StringBuilder.(T?) -> Unit) {
     if (variants.isEmpty()) return
     append("<div class=\"bottom\">")
     append(DocumentationMarkup.SECTIONS_START)
-    val identifier = current.hierarchy.trim()
     for ((value, nodes) in variants) {
-        val targets = buildSet { nodes.mapTo(this) { it.hierarchy.trim() } }
+        val targets = buildSet { nodes.mapTo(this) { it.metadata.project } }
         append("<tr><td>")
-        appendStonecutterIcon(if (identifier in targets) "VERSION_ENTRY" else "VERSION_EMPTY")
+        appendStonecutterIcon(if (current.metadata.project in targets) "VERSION_ENTRY" else "VERSION_EMPTY")
         append("</td><td>")
         mapper(value)
         append("</td><td>")
@@ -77,7 +67,7 @@ object ConstantDocBuilder : DocumentationBuilder<StitcherConstant> {
         appendSignature("Constant", "condition-constants", name, value, AttributeKeys.CONSTANT, AttributeKeys.KEYWORD)
 
         if (node == null) return@with
-        val variants = element.stonecutterService.lookup.getAllSiblings(node)
+        val variants = node.siblings(element.stonecutterService.lookup)
             .groupBy { it.params.constants[name] }
         appendVariants(node, variants) {
             if (it == null) appendStyled("UNDEFINED", AttributeKeys.UNRESOLVED)
@@ -95,7 +85,7 @@ object DependencyDocBuilder : DocumentationBuilder<StitcherAssignment> {
         appendSignature("Dependency", "condition-dependencies", name.ifEmpty { "minecraft" }, value, AttributeKeys.DEPENDENCY, AttributeKeys.NUMBER)
 
         if (node == null || name.isEmpty()) return@with
-        val variants = element.stonecutterService.lookup.getAllSiblings(node)
+        val variants = node.siblings(element.stonecutterService.lookup)
             .groupBy { it.params.dependencies[name] }
         appendVariants(node, variants) {
             if (it == null) appendStyled("UNDEFINED", AttributeKeys.UNRESOLVED)

@@ -1,13 +1,8 @@
-package dev.kikugie.stonecutter.intellij.service
+package dev.kikugie.stonecutter.intellij.model
 
 import com.intellij.psi.PsiElement
-import dev.kikugie.stonecutter.intellij.model.GradleMember
-import dev.kikugie.stonecutter.intellij.model.GradleProjectHierarchy
-import dev.kikugie.stonecutter.intellij.model.SCProjectBranch
-import dev.kikugie.stonecutter.intellij.model.SCProjectNode
-import dev.kikugie.stonecutter.intellij.model.SCProjectTree
 
-interface StonecutterModelLookup {
+interface SCModelLookup {
     val trees: Map<GradleProjectHierarchy, SCProjectTree>
     val branches: Map<GradleProjectHierarchy, SCProjectBranch>
     val nodes: Map<GradleProjectHierarchy, SCProjectNode>
