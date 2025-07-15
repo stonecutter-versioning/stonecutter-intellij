@@ -1,5 +1,6 @@
 package dev.kikugie.stonecutter.intellij.model
 
+import dev.kikugie.semver.data.Version
 import kotlinx.serialization.Serializable
 
 @Serializable

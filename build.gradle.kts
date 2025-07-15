@@ -40,6 +40,7 @@ sourceSets {
 
 repositories {
     mavenCentral()
+    maven("https://maven.kikugie.dev/releases")
     maven("https://repo.gradle.org/gradle/libs-releases")
     maven("https://central.sonatype.com/repository/maven-snapshots/")
 
@@ -49,6 +50,7 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.semver)
     implementation(common.misc.commons)
     implementation(common.kotlin.serialization)
     implementation(common.kotlin.serialization.json)
@@ -58,7 +60,6 @@ dependencies {
         intellijIdeaCommunity(libs.versions.intellij.ce.get())
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.plugins.gradle")
-        bundledPlugin("org.jetbrains.kotlin")
     }
 }
 
