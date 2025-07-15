@@ -7,10 +7,10 @@ import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.jetbrains.rd.util.first
 import dev.kikugie.stonecutter.intellij.model.SCProjectTree
-import dev.kikugie.stonecutter.intellij.service.StonecutterModelLookup
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import dev.kikugie.stonecutter.intellij.util.GradleUtil
 import dev.kikugie.stonecutter.intellij.StonecutterIcons
+import dev.kikugie.stonecutter.intellij.model.SCModelLookup
 import java.awt.Dimension
 import java.nio.file.Path
 import javax.swing.Icon
@@ -50,7 +50,7 @@ class VersionSelectorAction : ComboBoxAction() {
         }
     }
 
-    private fun createVersionList(lookup: StonecutterModelLookup, tree: SCProjectTree, context: DataContext, callback: Runnable?): JBPopup {
+    private fun createVersionList(lookup: SCModelLookup, tree: SCProjectTree, context: DataContext, callback: Runnable?): JBPopup {
         val nodes = tree.branches.asSequence()
             .mapNotNull { lookup.branches[it] }
             .flatMap { it.nodes.mapNotNull { lookup.nodes[it] } }

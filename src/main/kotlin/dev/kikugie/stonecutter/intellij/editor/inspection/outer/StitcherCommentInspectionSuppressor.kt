@@ -1,4 +1,4 @@
-package dev.kikugie.stonecutter.intellij.editor.inspection
+package dev.kikugie.stonecutter.intellij.editor.inspection.outer
 
 import com.intellij.codeInspection.InspectionSuppressor
 import com.intellij.codeInspection.SuppressQuickFix

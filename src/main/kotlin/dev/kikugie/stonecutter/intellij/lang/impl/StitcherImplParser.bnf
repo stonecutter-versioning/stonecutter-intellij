@@ -28,6 +28,13 @@ definition ::= COND_MARKER condition
 
 replacement ::= LITERAL { elementType = "REPLACEMENT_ID" }
 swap ::= CLOSER | (swap_id OPENER?)
+/* TODO: Require sugar to follow this notation (in a non-cancer way):
+condition ::= SUGAR_IF expression OPENER?
+    | CLOSER (
+        (SUGAR_ELSE SUGAR_IF | SUGAR_ELIF)? expression OPENER?
+        | SUGAR_ELSE OPENER?
+      )
+ */
 condition ::= CLOSER? SUGAR* expression? OPENER?
 
 swap_id ::= LITERAL { elementType = "SWAP_ID" }

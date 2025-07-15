@@ -9,14 +9,17 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij"> <!-- Stitcher -->
-        <fileType name="Stitcher" language="Stitcher" fieldName="INSTANCE" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherFile$StitcherFileType"/>
+        <fileType name="Stitcher" language="Stitcher" fieldName="INSTANCE"
+                  implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherFile$StitcherFileType"/>
         <annotator language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherAnnotator"/>
         <completion.contributor language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherCompletionContributor"/>
         <lang.parserDefinition language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.lang.StitcherParserDef"/>
         <lang.syntaxHighlighter language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter"/>
-        <lang.syntaxHighlighterFactory language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
+        <lang.syntaxHighlighterFactory language="Stitcher"
+                                       implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <lang.braceMatcher language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherBraceMatcher"/>
-        <editorHighlighterProvider filetype="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
+        <editorHighlighterProvider filetype="Stitcher"
+                                   implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <platform.backend.documentation.targetProvider implementation="dev.kikugie.stonecutter.intellij.editor.StitcherDocumentationTargetProvider"/>
     </extensions>
 
@@ -36,11 +39,14 @@
                                               implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherHintsProvider"/>
     </extensions>
 
-    <extensions defaultExtensionNs="com.intellij"> <!-- Any -->
+    <extensions defaultExtensionNs="com.intellij"> <!-- Inspections -->
+        <!--suppress PluginXmlValidity -->
+        <inspection.basicVisitor class="dev.kikugie.stonecutter.intellij.lang.psi.StitcherVisitor"/>
         <lang.inspectionSuppressor language="" order="first"
-                                   implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.StitcherCommentInspectionSuppressor"/>
-        <!--<localInspection language="" order="first" groupName="Stonecutter" displayName="Test" implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.StitcherOuterScopeInspection"/>-->
-
+                                   implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.outer.StitcherCommentInspectionSuppressor"/>
+        <localInspection language="Stitcher" enabledByDefault="true"
+                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.invariant_value"
+                         implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.InvariantValueInspection"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij"> <!-- General -->

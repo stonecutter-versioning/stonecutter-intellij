@@ -1,7 +1,6 @@
 package dev.kikugie.stonecutter.intellij.model.serialized
 
 import dev.kikugie.semver.data.Version
-import dev.kikugie.stonecutter.intellij.model.Version
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException

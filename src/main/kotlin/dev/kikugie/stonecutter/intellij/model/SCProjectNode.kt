@@ -20,17 +20,17 @@ data class SCProjectNode(
     fun tree(lookup: SCModelLookup): SCProjectTree =
         branch(lookup).tree(lookup)
 
-    fun peer(lookup: SCModelLookup, name: String): SCProjectNode? =
-        lookup.branches[branch]?.node(lookup, name)
-
-    fun peers(lookup: SCModelLookup): Sequence<SCProjectNode> =
-        lookup.branches[branch]?.nodes(lookup).orEmpty()
-
-    fun sibling(lookup: SCModelLookup, branch: GradleProjectHierarchy): SCProjectNode? =
+    fun peer(lookup: SCModelLookup, branch: GradleProjectHierarchy): SCProjectNode? =
         lookup.branches[branch]?.node(lookup, metadata.project)
 
-    fun siblings(lookup: SCModelLookup): Sequence<SCProjectNode> = tree(lookup).branches(lookup)
+    fun peers(lookup: SCModelLookup): Sequence<SCProjectNode> = tree(lookup).branches(lookup)
         .mapNotNull { it.node(lookup, metadata.project) }
+
+    fun sibling(lookup: SCModelLookup, name: String): SCProjectNode? =
+        branch(lookup).node(lookup, name)
+
+    fun siblings(lookup: SCModelLookup): Sequence<SCProjectNode> =
+        branch(lookup).nodes(lookup)
 
     fun all(lookup: SCModelLookup): Sequence<SCProjectNode> = tree(lookup).branches(lookup)
         .flatMap { it.nodes(lookup) }

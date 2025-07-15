@@ -1,4 +1,4 @@
-package dev.kikugie.stonecutter.intellij.editor.inspection
+package dev.kikugie.stonecutter.intellij.editor.inspection.outer
 
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.LocalInspectionToolSession
@@ -13,8 +13,10 @@ import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition
 import dev.kikugie.stonecutter.intellij.lang.access.ScopeType
 import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
 import java.lang.ref.WeakReference
+import kotlin.collections.plusAssign
 import kotlin.reflect.KClass
 
+@Deprecated("Is hard")
 class StitcherOuterScopeInspection : LocalInspectionTool(), DumbAware {
     override fun runForWholeFile(): Boolean = true
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean, session: LocalInspectionToolSession): PsiElementVisitor =
