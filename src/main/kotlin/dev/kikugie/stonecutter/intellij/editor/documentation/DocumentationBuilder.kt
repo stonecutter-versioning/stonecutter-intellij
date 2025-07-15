@@ -12,13 +12,13 @@ import dev.kikugie.stonecutter.intellij.service.StonecutterModelLookup
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
-private const val NBSP = "&nbsp;"
+internal const val NBSP = "&nbsp;"
 
-private fun StringBuilder.appendStonecutterIcon(name: String) {
+internal fun StringBuilder.appendStonecutterIcon(name: String) {
     append("<icon src=\"${StitcherDocumentationTarget.ICONS_FQN}.$name\"/>")
 }
 
-private fun StringBuilder.appendStyled(text: String, key: TextAttributesKey?) {
+internal fun StringBuilder.appendStyled(text: String, key: TextAttributesKey?) {
     if (key == null) append(text)
     else HtmlSyntaxInfoUtil.appendStyledSpan(this, key, text, 1F)
 }

@@ -10,14 +10,8 @@ import com.intellij.platform.backend.documentation.DocumentationTarget
 import com.intellij.platform.backend.presentation.TargetPresentation
 import com.intellij.psi.PsiElement
 import com.intellij.psi.createSmartPointer
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherAssignment
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
-import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
-import dev.kikugie.stonecutter.intellij.service.StonecutterModelLookup
-import dev.kikugie.stonecutter.intellij.service.stonecutterNode
-import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
-class StitcherDocumentationTarget(private val element: PsiElement) : DocumentationTarget {
+class StitcherDocumentationTarget<T : PsiElement>(private val element: T, private val builder: DocumentationBuilder<T>) : DocumentationTarget {
     companion object {
         const val ICONS_FQN = "dev.kikugie.stonecutter.intellij.StonecutterIcons"
 
@@ -29,7 +23,7 @@ class StitcherDocumentationTarget(private val element: PsiElement) : Documentati
 
     override fun createPointer(): Pointer<out DocumentationTarget> {
         val elementPointer = element.createSmartPointer()
-        return Pointer { elementPointer.element?.let(::StitcherDocumentationTarget) }
+        return Pointer { elementPointer.element?.let { StitcherDocumentationTarget(it, builder) } }
     }
 
     override fun computePresentation(): TargetPresentation = computePresentation(element.containingFile?.virtualFile)
@@ -43,13 +37,7 @@ class StitcherDocumentationTarget(private val element: PsiElement) : Documentati
 
     private fun generateDependencyDocs(): String = buildString {
         append("<html><body>")
-        resolveDependency(element)
+        builder.applyTo(this, element)
         append("</body></html>")
-    }
-
-    private fun StringBuilder.resolveDependency(element: PsiElement) = when (element) {
-        is StitcherConstant -> ConstantDocBuilder.applyTo(this, element)
-        is StitcherAssignment -> DependencyDocBuilder.applyTo(this, element)
-        else -> error("Unsupported element type for $element")
     }
 }
