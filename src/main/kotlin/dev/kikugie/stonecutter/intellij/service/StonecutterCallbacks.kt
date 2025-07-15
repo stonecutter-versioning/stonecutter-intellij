@@ -8,14 +8,13 @@ import com.intellij.openapi.editor.ex.EditorEventMulticasterEx
 import com.intellij.openapi.editor.ex.FocusChangeListener
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
-import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
 import com.intellij.openapi.vfs.toNioPathOrNull
 import dev.kikugie.stonecutter.intellij.action.VersionSelectorAction
 import dev.kikugie.stonecutter.intellij.editor.StitcherFoldingBuilder.Constants.STITCHER_SCOPE
-import dev.kikugie.stonecutter.intellij.settings.FoldingOptions.FoldingMode.AGGRESSIVE
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
+import dev.kikugie.stonecutter.intellij.settings.variants.FoldingMode.AGGRESSIVE
 import java.awt.event.FocusEvent
 
 object StonecutterCallbacks {

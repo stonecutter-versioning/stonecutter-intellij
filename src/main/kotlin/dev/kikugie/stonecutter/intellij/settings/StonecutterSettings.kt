@@ -8,7 +8,8 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import dev.kikugie.stonecutter.intellij.service.StonecutterCallbacks
-import dev.kikugie.stonecutter.intellij.settings.FoldingOptions.FoldingMode
+import dev.kikugie.stonecutter.intellij.settings.variants.FoldingMode
+import dev.kikugie.stonecutter.intellij.settings.variants.FoldingStyle
 
 @Service(Service.Level.APP) @State(
     name = "dev.kikugie.stonecutter.intellij.StonecutterSettings",
@@ -27,7 +28,9 @@ class StonecutterSettings : SerializablePersistentStateComponent<StonecutterSett
          * - [FoldingMode.LENIENT] - folding regions are added, but not automatically collapsed.
          * - [FoldingMode.AGGRESSIVE] - added folding regions are collapsed whenever the file is selected.
          */
-        var foldDisabledBlocks by enum(FoldingMode.DISABLED)
+        var foldDisabledBlocks by enum(FoldingMode.LENIENT)
+
+        var foldedPresentation by enum(FoldingStyle.KEEP_COMMENTS)
 
         var linkDisabledBlocks by property(true)
 

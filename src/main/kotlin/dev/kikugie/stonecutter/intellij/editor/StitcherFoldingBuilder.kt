@@ -16,8 +16,9 @@ import dev.kikugie.stonecutter.intellij.lang.access.ScopeType
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherCondition
 import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
 import dev.kikugie.stonecutter.intellij.lang.util.openerType
-import dev.kikugie.stonecutter.intellij.settings.FoldingOptions.FoldingMode.DISABLED
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
+import dev.kikugie.stonecutter.intellij.settings.variants.FoldingMode
+import dev.kikugie.stonecutter.intellij.settings.variants.FoldingStyle
 import dev.kikugie.stonecutter.intellij.util.filterNotWhitespace
 import dev.kikugie.stonecutter.intellij.util.prevSiblings
 
@@ -38,7 +39,7 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     override fun isCollapsedByDefault(node: ASTNode): Boolean = true
     override fun getPlaceholderText(node: ASTNode): String = ""
     override fun buildFoldRegions(root: PsiElement, document: Document, quick: Boolean): Array<out FoldingDescriptor> {
-        if (StonecutterSettings.STATE.foldDisabledBlocks == DISABLED) return emptyArray()
+        if (StonecutterSettings.STATE.foldDisabledBlocks == FoldingMode.DISABLED) return emptyArray()
 
         val comments: MutableList<Pair<PsiComment, CommentType>> = mutableListOf()
         PsiTreeUtil.findChildrenOfType(root, PsiComment::class.java).mapTo(comments) { it to it.type(comments.lastOrNull()) }
@@ -124,7 +125,18 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
         val group = if (StonecutterSettings.STATE.linkDisabledBlocks) Constants.STITCHER_SCOPE
         else Constants.group(index)
         return FoldingDescriptor(primary.node, range, group).apply {
-            placeholderText = ElementManipulators.getValueTextRange(primary).replace(primary.text, title.toString())
+            placeholderText = buildPlaceholderText(primary, title.toString())
         }
+    }
+
+    private fun buildPlaceholderText(primary: PsiComment, title: String): String {
+        val mode = StonecutterSettings.STATE.foldedPresentation
+        if (mode == FoldingStyle.HIDE_ALL) return title
+        val content = primary.text
+        val valueRange = ElementManipulators.getValueTextRange(primary)
+
+        if (mode == FoldingStyle.KEEP_COMMENTS) return valueRange.replace(content, title)
+        val isLineComment = content.substring(valueRange.endOffset).isBlank()
+        return if (isLineComment) valueRange.replace(content, title) else title
     }
 }
