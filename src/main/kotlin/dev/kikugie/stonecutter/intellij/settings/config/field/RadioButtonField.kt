@@ -1,7 +1,8 @@
-package dev.kikugie.stonecutter.intellij.settings.config
+package dev.kikugie.stonecutter.intellij.settings.config.field
 
 import com.intellij.ui.components.JBRadioButton
 import com.intellij.ui.dsl.builder.panel
+import dev.kikugie.stonecutter.intellij.settings.config.PropertyField
 import dev.kikugie.stonecutter.intellij.settings.naming.description
 import dev.kikugie.stonecutter.intellij.settings.naming.display
 import javax.swing.JPanel

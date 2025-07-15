@@ -1,5 +1,9 @@
 package dev.kikugie.stonecutter.intellij.settings.config
 
+import dev.kikugie.stonecutter.intellij.settings.config.field.CheckboxField
+import dev.kikugie.stonecutter.intellij.settings.config.field.ComboBoxField
+import dev.kikugie.stonecutter.intellij.settings.config.field.PlainField
+import dev.kikugie.stonecutter.intellij.settings.config.field.RadioButtonField
 import java.awt.event.ActionEvent
 import kotlin.enums.EnumEntries
 import kotlin.reflect.KMutableProperty0
@@ -16,5 +20,5 @@ fun PropertyConfigurable.checkbox(title: String, property: KMutableProperty0<Boo
 fun <E> PropertyConfigurable.buttonSelector(title: String, entries: EnumEntries<E>, property: KMutableProperty0<E>) where E : Enum<E> =
     RadioButtonField(title, entries, property).let(::register)
 
-fun <E> PropertyConfigurable.selector(title: String, entries: EnumEntries<E>, property: KMutableProperty0<E>) where E : Enum<E> =
+fun <E> PropertyConfigurable.dropdownSelector(title: String, entries: EnumEntries<E>, property: KMutableProperty0<E>) where E : Enum<E> =
     ComboBoxField(title, entries, property).let(::register)

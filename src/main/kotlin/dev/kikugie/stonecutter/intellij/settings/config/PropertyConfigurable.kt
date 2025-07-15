@@ -7,6 +7,9 @@ import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
 
+/**
+ * Settings category populated with [PropertyField]s.
+ */
 abstract class PropertyConfigurable(protected var title: @NlsContexts.BorderTitle String? = null) : UnnamedConfigurable, UiDslUnnamedConfigurable {
     protected val properties: MutableList<PropertyField<*, *>> = mutableListOf()
 

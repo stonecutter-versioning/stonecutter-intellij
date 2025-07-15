@@ -2,6 +2,9 @@ package dev.kikugie.stonecutter.intellij.model
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents an absolute Gradle project path.
+ */
 @JvmInline @Serializable
 value class GradleProjectHierarchy(val path: String) {
     init {
@@ -10,8 +13,6 @@ value class GradleProjectHierarchy(val path: String) {
     }
 
     fun orEmpty() = if (path == ":") "" else path
-
-    fun trim() = path.removePrefix(":")
 
     operator fun plus(child: String): GradleProjectHierarchy = GradleProjectHierarchy("${orEmpty()}:$child")
 

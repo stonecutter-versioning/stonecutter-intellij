@@ -1,5 +1,6 @@
-package dev.kikugie.stonecutter.intellij.settings.config
+package dev.kikugie.stonecutter.intellij.settings.config.field
 
+import dev.kikugie.stonecutter.intellij.settings.config.PropertyField
 import javax.swing.JCheckBox
 import kotlin.reflect.KMutableProperty0
 

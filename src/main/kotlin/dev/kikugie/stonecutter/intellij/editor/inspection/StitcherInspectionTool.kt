@@ -11,6 +11,8 @@ import dev.kikugie.stonecutter.intellij.lang.psi.StitcherVisitor
  *
  * The visitor should be implemented in the `visitor` subpackage, **without recursively traversing elements**.
  * The inspection should be implemented in `StitcherInspections.kt`, extending this class.
+ *
+ * @see InvariantValueInspection
  */
 abstract class StitcherInspectionTool(private val instantiator: (ProblemsHolder) -> Visitor) : LocalInspectionTool(), DumbAware {
     abstract class Visitor(protected val holder: ProblemsHolder) : StitcherVisitor()
