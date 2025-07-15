@@ -6,8 +6,8 @@ import org.jetbrains.annotations.PropertyKey
 import java.util.function.Supplier
 
 object StonecutterBundle {
-    private const val BUNDLE: @NonNls String = "messages.StonecutterBundle"
-    private val INSTANCE = DynamicBundle(StonecutterBundle::class.java, BUNDLE)
+    const val BUNDLE: @NonNls String = "messages.StonecutterBundle"
+    val INSTANCE = DynamicBundle(StonecutterBundle::class.java, BUNDLE)
 
     fun message(key: @PropertyKey(resourceBundle = BUNDLE) String, vararg params: Any): String =
         INSTANCE.getMessage(key, *params)
