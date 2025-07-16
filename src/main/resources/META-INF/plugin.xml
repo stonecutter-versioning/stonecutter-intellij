@@ -47,6 +47,9 @@
         <localInspection language="Stitcher" enabledByDefault="true"
                          bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.invariant_value"
                          implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.InvariantValueInspection"/>
+        <localInspection language="Stitcher" enabledByDefault="true"
+                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.inconsistent_value"
+                         implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.MissingValueInspection"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij"> <!-- General -->
