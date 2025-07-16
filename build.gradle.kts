@@ -56,7 +56,6 @@ dependencies {
     implementation(common.kotlin.serialization.json)
 
     intellijPlatform {
-        instrumentationTools()
         intellijIdeaCommunity(libs.versions.intellij.ce.get())
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.plugins.gradle")

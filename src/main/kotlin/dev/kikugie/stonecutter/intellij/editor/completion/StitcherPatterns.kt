@@ -6,11 +6,11 @@ import com.intellij.patterns.PsiElementPattern
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.IElementType
+import com.intellij.psi.util.elementType
 import com.intellij.psi.util.nextLeafs
 import com.intellij.psi.util.prevLeafs
 import com.intellij.util.ProcessingContext
 import dev.kikugie.stonecutter.intellij.util.filterNotWhitespace
-import org.toml.lang.psi.ext.elementType
 import kotlin.reflect.KClass
 
 object StitcherPatterns {

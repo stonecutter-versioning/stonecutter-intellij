@@ -4,6 +4,9 @@ import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.StonecutterBundle.BUNDLE
 import org.jetbrains.annotations.PropertyKey
 
+/**
+ * Provides naming by using translation keys from the [StonecutterBundle].
+ */
 interface Translated : Named {
     val namer: @PropertyKey(resourceBundle = BUNDLE) String
     val descriptor: @PropertyKey(resourceBundle = BUNDLE) String? get() = null

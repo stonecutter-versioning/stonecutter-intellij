@@ -15,30 +15,26 @@ import dev.kikugie.stonecutter.intellij.settings.variants.FoldingMode
 import dev.kikugie.stonecutter.intellij.settings.variants.FoldingStyle
 
 class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Stonecutter Dev", null) {
-    class FoldingOptions(title: String) : PropertyConfigurable(title), CodeFoldingOptionsProvider {
+    class FoldingOptions(title: String) : CodeFoldingOptionsProvider, PropertyConfigurable(title, {
+        buttonSelector("Mode", FoldingMode.entries, STATE::foldDisabledBlocks)
+        buttonSelector("Comment style", FoldingStyle.entries, STATE::foldedPresentation)
+        checkbox("Link regions", STATE::linkDisabledBlocks)
+            .tooltip("Fold Stonecutter regions together")
+    }) {
         @Suppress("unused") /* EP constructor */ constructor() : this("Stonecutter")
-
-        init {
-            buttonSelector("Mode", FoldingMode.entries, STATE::foldDisabledBlocks)
-            buttonSelector("Comment style", FoldingStyle.entries, STATE::foldedPresentation)
-            checkbox("Link regions", STATE::linkDisabledBlocks)
-                .tooltip("Fold Stonecutter regions together")
-        }
     }
 
-    class EditorOptions : PropertyConfigurable("Editor") {
-        init {
-            checkbox("Use custom import optimiser", STATE::useImportOptimizer)
-            checkbox("Lock generated files", STATE::lockGeneratedFiles)
+    class EditorOptions : PropertyConfigurable("Editor", {
+        checkbox("Use custom import optimiser", STATE::useImportOptimizer)
+        checkbox("Lock generated files", STATE::lockGeneratedFiles)
 
-            link("Configure Syntax Coloring") {
-                ShowSettingsUtil.getInstance().showSettingsDialog(
-                    ProjectManager.getInstance().defaultProject,
-                    "Stonecutter"
-                ) // Should match ColorSettingsPage displayName. Should be different from options Display name
-            }
+        link("Configure Syntax Coloring") {
+            ShowSettingsUtil.getInstance().showSettingsDialog(
+                ProjectManager.getInstance().defaultProject,
+                "Stonecutter"
+            ) // Should match ColorSettingsPage displayName. Should be different from options Display name
         }
-    }
+    })
 
     override fun createConfigurables(): List<PropertyConfigurable> = listOf(
         EditorOptions(),

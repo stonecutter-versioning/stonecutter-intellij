@@ -22,26 +22,10 @@ class StonecutterSettings : SerializablePersistentStateComponent<StonecutterSett
     }
 
     class Settings : BaseState() {
-        /**
-         * Configures the behaviour of [StitcherFoldingBuilder][dev.kikugie.stonecutter.intellij.editor.StitcherFoldingBuilder].
-         * - [FoldingMode.DISABLED] - no folding regions are added.
-         * - [FoldingMode.LENIENT] - folding regions are added, but not automatically collapsed.
-         * - [FoldingMode.AGGRESSIVE] - added folding regions are collapsed whenever the file is selected.
-         */
         var foldDisabledBlocks by enum(FoldingMode.LENIENT)
-
         var foldedPresentation by enum(FoldingStyle.KEEP_COMMENTS)
-
         var linkDisabledBlocks by property(true)
-
-        /**
-         * Toggles the functionality of [StitcherImportOptimizer][dev.kikugie.stonecutter.intellij.editor.StitcherImportOptimizer].
-         */
         var useImportOptimizer by property(true)
-
-        /**
-         * Marks files in generated Stonecutter sources as read-only.
-         */
         var lockGeneratedFiles by property(true)
     }
 

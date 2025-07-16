@@ -2,10 +2,10 @@ package dev.kikugie.stonecutter.intellij.settings.config.field
 
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
-import dev.kikugie.stonecutter.intellij.settings.config.PropertyField
+import dev.kikugie.stonecutter.intellij.settings.config.KPropertyField
 import javax.swing.JPanel
 
-class PlainField(config: Panel.() -> Unit) : PropertyField<Unit, JPanel>(::UNIT) {
+class PlainField(config: Panel.() -> Unit) : KPropertyField<Unit, JPanel>(::UNIT) {
     private companion object {
         @JvmField var UNIT = Unit
     }

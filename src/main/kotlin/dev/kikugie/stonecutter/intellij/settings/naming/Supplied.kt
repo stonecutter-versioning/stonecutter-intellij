@@ -2,6 +2,9 @@ package dev.kikugie.stonecutter.intellij.settings.naming
 
 import java.util.function.Supplier
 
+/**
+ * Provides naming using dynamic [namer] and [descriptor].
+ */
 interface Supplied : Named {
     val namer: Supplier<String>
     val descriptor: Supplier<String>? get() = null

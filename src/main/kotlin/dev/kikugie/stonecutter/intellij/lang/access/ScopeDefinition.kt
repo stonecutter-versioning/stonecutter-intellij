@@ -6,7 +6,12 @@ import dev.kikugie.stonecutter.intellij.lang.psi.StitcherCondition
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwap
 import dev.kikugie.stonecutter.intellij.util.childrenSeqOfType
 
-interface ScopeDefinition : PsiElement {
+/**
+ * Groups [StitcherCondition][dev.kikugie.stonecutter.intellij.lang.psi.StitcherCondition],
+ * [StitcherSwap][dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwap]
+ * and [StitcherReplacement][dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement].
+ */
+sealed interface ScopeDefinition : PsiElement {
     val closer: PsiElement? get() = childrenSeqOfType(StitcherTokenTypes.CLOSER).firstOrNull()
     val opener: PsiElement? get() = childrenSeqOfType(StitcherTokenTypes.OPENER).firstOrNull()
     val type: ScopeType get() = determineType()
@@ -15,7 +20,6 @@ interface ScopeDefinition : PsiElement {
 private fun ScopeDefinition.determineType(): ScopeType = when (this) {
     is StitcherCondition -> determineConditionType()
     is StitcherSwap -> determineSwapType()
-    else -> ScopeType.INVALID
 }
 
 private fun StitcherSwap.determineSwapType(): ScopeType =

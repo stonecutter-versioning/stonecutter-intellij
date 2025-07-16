@@ -15,21 +15,24 @@ import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition
 
 private val SCOPE_DEF: Key<SmartPsiElementPointer<ScopeDefinition>> = Key.create("STITCHER_DEFINITION")
 
-internal val PsiComment.stitcherFile: StitcherFile?
+/**Injected Stitcher file instance, or `null` if it doesn't exist.*/
+val PsiComment.stitcherFile: StitcherFile?
     get() = InjectedLanguageManager.getInstance(project).getInjectedPsiFiles(this)
         ?.firstNotNullOfOrNull { it.first as? StitcherFile }
 
-internal val StitcherFile.containingComment: PsiComment
+/**The host [PsiComment] for the injected file.*/
+val StitcherFile.containingComment: PsiComment
     get() = FileContextUtil.getFileContext(this) as PsiComment
 
-internal val PsiComment.commentDefinition: SmartPsiElementPointer<ScopeDefinition>? get() = nullableLazyValueUnsafe(SCOPE_DEF) {
+/**Cached injected [ScopeDefinition] for this comment.*/
+val PsiComment.commentDefinition: SmartPsiElementPointer<ScopeDefinition>? get() = nullableLazyValueUnsafe(SCOPE_DEF) {
     val file = stitcherFile ?: return@nullableLazyValueUnsafe null
     val def = file.descendantsOfType<ScopeDefinition>().firstOrNull()
         ?: return@nullableLazyValueUnsafe null
     SmartPointerManager.getInstance(project).createSmartPsiElementPointer(def, file)
 }
 
-internal val PsiElement?.openerType: OpenerType get() = when(this?.text ?: "\u0000") {
+val PsiElement?.openerType: OpenerType get() = when(this?.text ?: "\u0000") {
     "{" -> OpenerType.OPEN
     ">>" -> OpenerType.WORD
     "\u0000" -> OpenerType.LINE
