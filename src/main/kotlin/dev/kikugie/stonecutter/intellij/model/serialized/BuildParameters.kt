@@ -31,7 +31,7 @@ data class StringReplacement(
 
 @Serializable
 data class RegexReplacement(
-    val pattern: @Serializable(with = RegexPatternsSerializer::class) Regex,
+    val pattern: String,
     val target: String,
     override val phase: ReplacementPhase,
     override val identifier: String?

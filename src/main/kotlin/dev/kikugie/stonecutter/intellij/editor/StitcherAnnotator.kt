@@ -11,15 +11,18 @@ import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.Attribu
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.psi.*
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
+import dev.kikugie.stonecutter.intellij.model.named
+import dev.kikugie.stonecutter.intellij.model.serialized.Replacement
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import dev.kikugie.stonecutter.intellij.util.childrenSequence
 
+// TODO: move the missing value logic entirely to the inspection
 class StitcherAnnotator: Annotator {
     private enum class ReferenceType(val attribute: TextAttributesKey, val variants: (SCProcessProperties) -> Collection<String>) {
         CONSTANT(AttributeKeys.CONSTANT, { it.constants.keys }),
         DEPENDENCY(AttributeKeys.DEPENDENCY, { it.dependencies.keys }),
-        REPLACEMENT(AttributeKeys.REPLACEMENT, SCProcessProperties::replacements),
+        REPLACEMENT(AttributeKeys.REPLACEMENT, { it.replacements.mapNotNull(Replacement::identifier) }),
         SWAP(AttributeKeys.SWAP, SCProcessProperties::swaps);
     }
 

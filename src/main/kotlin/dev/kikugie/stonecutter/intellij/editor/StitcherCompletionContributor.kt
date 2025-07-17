@@ -36,6 +36,7 @@ class StitcherCompletionContributor : CompletionContributor() {
             if (variants.isNotEmpty()) result.addAllElements(variants)
         }
 
+        // FIXME: It suggests constant names
         register(targets.withParent(StitcherReplacement::class.java)) { params, _, result ->
             val variants = params.getNode()?.params?.replacements.orEmpty()
                 .map(LookupElementBuilder::create)

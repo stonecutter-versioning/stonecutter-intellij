@@ -20,6 +20,7 @@ import com.intellij.psi.PsiElement
 import dev.kikugie.stonecutter.intellij.model.*
 import dev.kikugie.stonecutter.intellij.model.serialized.*
 import dev.kikugie.stonecutter.intellij.StonecutterIcons
+import dev.kikugie.stonecutter.intellij.model.SCProcessProperties.Replacements
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.DeserializationStrategy
@@ -123,7 +124,7 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
         val hierarchy = parent + info.project
         val meta = SCProjectMetadata(info.project, info.version, info.project == current)
         val params = data.parameters.run {
-            SCProcessProperties(constants, dependencies, swaps.keys, replacements.mapNotNull { it.identifier }.toSet())
+            SCProcessProperties(constants, dependencies, swaps.keys, Replacements(replacements))
         }
         nodes[hierarchy] = SCProjectNode(hierarchy, info.path, meta, parent, params)
         return true

@@ -9,10 +9,12 @@ import com.intellij.psi.util.parents
 import dev.kikugie.stonecutter.intellij.editor.documentation.ASTInspectionBuilder
 import dev.kikugie.stonecutter.intellij.editor.documentation.ConstantDocBuilder
 import dev.kikugie.stonecutter.intellij.editor.documentation.DependencyDocBuilder
+import dev.kikugie.stonecutter.intellij.editor.documentation.ReplacementDocBuilder
 import dev.kikugie.stonecutter.intellij.editor.documentation.StitcherDocumentationTarget
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherAssignment
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
 
 class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
     override fun documentationTargets(file: PsiFile, offset: Int): List<DocumentationTarget> =
@@ -26,8 +28,12 @@ class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
     }
 
     private fun findDocumentationTarget(element: PsiElement): DocumentationTarget? = element.parents(true)
-        .find { it is StitcherConstant || it is StitcherAssignment }?.let {
-            if (it is StitcherConstant) StitcherDocumentationTarget(it, ConstantDocBuilder)
-            else StitcherDocumentationTarget(it as StitcherAssignment, DependencyDocBuilder)
-        }
+        .firstNotNullOfOrNull(::matchDocumentationTarget)
+
+    private fun matchDocumentationTarget(element: PsiElement) = when(element) {
+        is StitcherConstant -> StitcherDocumentationTarget(element, ConstantDocBuilder)
+        is StitcherAssignment -> StitcherDocumentationTarget(element, DependencyDocBuilder)
+        is StitcherReplacement -> StitcherDocumentationTarget(element, ReplacementDocBuilder)
+        else -> null
+    }
 }
