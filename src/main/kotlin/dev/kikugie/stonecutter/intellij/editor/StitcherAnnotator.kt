@@ -23,7 +23,7 @@ class StitcherAnnotator: Annotator {
         CONSTANT(AttributeKeys.CONSTANT, { it.constants.keys }),
         DEPENDENCY(AttributeKeys.DEPENDENCY, { it.dependencies.keys }),
         REPLACEMENT(AttributeKeys.REPLACEMENT, { it.replacements.mapNotNull(Replacement::identifier) }),
-        SWAP(AttributeKeys.SWAP, SCProcessProperties::swaps);
+        SWAP(AttributeKeys.SWAP, { it.swaps.keys });
     }
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {

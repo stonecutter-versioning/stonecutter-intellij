@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 data class SCProcessProperties(
     val constants: Map<String, Boolean>,
     val dependencies: Map<String, Version>,
-    val swaps: Set<String>,
+    val swaps: Map<String, String>,
     val replacements: Replacements,
 ) {
     @JvmInline

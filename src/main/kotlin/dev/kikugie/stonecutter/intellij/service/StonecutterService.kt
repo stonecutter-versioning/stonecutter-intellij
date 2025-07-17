@@ -124,7 +124,7 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
         val hierarchy = parent + info.project
         val meta = SCProjectMetadata(info.project, info.version, info.project == current)
         val params = data.parameters.run {
-            SCProcessProperties(constants, dependencies, swaps.keys, Replacements(replacements))
+            SCProcessProperties(constants, dependencies, swaps, Replacements(replacements))
         }
         nodes[hierarchy] = SCProjectNode(hierarchy, info.path, meta, parent, params)
         return true
