@@ -1,17 +1,18 @@
-package dev.kikugie.stonecutter.intellij.editor.inspection.visitor
+package dev.kikugie.stonecutter.intellij.editor.inspection.local
 
+import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElement
 import dev.kikugie.stonecutter.intellij.StonecutterBundle
-import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherInspectionTool
+import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherLocalInspectionTool
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherDependency
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapId
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
-class MissingValueVisitor(holder: ProblemsHolder) : StitcherInspectionTool.Visitor(holder) {
+class MissingValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
     override fun visitConstant(o: StitcherConstant) =
         o.registerInconsistency("constant", o.missingValues { it !in constants }.joinToString())
 

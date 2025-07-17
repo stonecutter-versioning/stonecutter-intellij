@@ -1,12 +1,13 @@
-package dev.kikugie.stonecutter.intellij.editor.inspection.visitor
+package dev.kikugie.stonecutter.intellij.editor.inspection.local
 
+import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElement
 import dev.kikugie.semver.data.Version
 import dev.kikugie.semver.data.VersionPredicate
 import dev.kikugie.stonecutter.intellij.StonecutterBundle
-import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherInspectionTool
+import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherLocalInspectionTool
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherAssignment
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherDependency
@@ -25,7 +26,7 @@ In that case there are a couple steps to be done:
   If next is an `else if` extension, modify it to be a valid opener or merge with the previous block.
 **Don't do this until the framework for manipulating code fragments is designed.**
  */
-class InvariantValueVisitor(holder: ProblemsHolder) : StitcherInspectionTool.Visitor(holder) {
+class InvariantValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
     override fun visitConstant(element: StitcherConstant) {
         if (element.variance { constants[it] } != 1) return
         val value = element.stonecutterNode!!.params.constants[element.text].toString()
