@@ -58,6 +58,7 @@ dependencies {
     intellijPlatform {
         intellijIdeaCommunity(libs.versions.intellij.ce.get())
         bundledPlugin("com.intellij.java")
+        bundledPlugin("org.jetbrains.kotlin")
         bundledPlugin("org.jetbrains.plugins.gradle")
     }
 }
@@ -65,9 +66,19 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
+
+    @Suppress("UnstableApiUsage")
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+        vendor = JvmVendorSpec.JETBRAINS
+    }
 }
 
 tasks {
+    runIde {
+        jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-XX:ReservedCodeCacheSize=1G")
+    }
+
     compileKotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
