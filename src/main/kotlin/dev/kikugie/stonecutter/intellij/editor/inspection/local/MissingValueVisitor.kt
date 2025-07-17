@@ -24,7 +24,7 @@ class MissingValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSe
         o.registerInconsistency("replacement", o.missingValues { name -> replacements.any { it.identifier == name } })
 
     override fun visitSwapId(o: StitcherSwapId) =
-        o.registerInconsistency("swap", o.missingValues { it !in swaps })
+        o.registerInconsistency("swap", o.missingValues { it in swaps })
 
     private fun PsiElement.registerInconsistency(type: String, undefined: Sequence<String>) = undefined.joinToString().let {
         if (it.isNotEmpty()) holder.registerProblem(
