@@ -9,7 +9,7 @@ import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
 import dev.kikugie.stonecutter.intellij.util.filterNotWhitespace
 import dev.kikugie.stonecutter.intellij.util.prevSiblings
 
-class StitcherCommentInspectionSuppressor : InspectionSuppressor {
+class CommentInspectionSuppressor : InspectionSuppressor {
     override fun isSuppressedFor(element: PsiElement, toolId: String): Boolean = toolId == "CommentedOutCode"
         && element is PsiComment
         && element.prevSiblings.filterNotWhitespace().firstOrNull()

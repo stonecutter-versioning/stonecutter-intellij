@@ -43,12 +43,20 @@
         <!--suppress PluginXmlValidity -->
         <inspection.basicVisitor class="dev.kikugie.stonecutter.intellij.lang.psi.StitcherVisitor"/>
         <lang.inspectionSuppressor language="" order="first"
-                                   implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.outer.StitcherCommentInspectionSuppressor"/>
+                                   implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.outer.CommentInspectionSuppressor"/>
+
+        <localInspection language="" enabledByDefault="true"
+                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.late_replacement"
+                         implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.outer.LateReplacementInspection"/>
+        <localInspection language="" enabledByDefault="true"
+                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.duplicate_replacement"
+                         implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.outer.DuplicateReplacementInspection"/>
+
         <localInspection language="Stitcher" enabledByDefault="true"
                          bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.invariant_value"
                          implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.InvariantValueInspection"/>
         <localInspection language="Stitcher" enabledByDefault="true"
-                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.inconsistent_value"
+                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.missing_value"
                          implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.MissingValueInspection"/>
     </extensions>
 

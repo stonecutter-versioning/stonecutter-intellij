@@ -5,6 +5,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.nullableLazyValueUnsafe
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.SmartPsiElementPointer
 import com.intellij.psi.impl.source.resolve.FileContextUtil
@@ -14,6 +15,9 @@ import dev.kikugie.stonecutter.intellij.lang.access.OpenerType
 import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition
 
 private val SCOPE_DEF: Key<SmartPsiElementPointer<ScopeDefinition>> = Key.create("STITCHER_DEFINITION")
+
+val PsiFile.isInjected: Boolean
+    get() = InjectedLanguageManager.getInstance(project).isInjectedFragment(this)
 
 /**Injected Stitcher file instance, or `null` if it doesn't exist.*/
 val PsiComment.stitcherFile: StitcherFile?
