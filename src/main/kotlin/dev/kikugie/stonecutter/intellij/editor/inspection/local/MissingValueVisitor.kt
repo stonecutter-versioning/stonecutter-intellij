@@ -8,24 +8,28 @@ import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherLocalInspectionTool
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherDependency
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapId
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
 class MissingValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
     override fun visitConstant(o: StitcherConstant) =
-        o.registerInconsistency("constant", o.missingValues { it !in constants }.joinToString())
+        o.registerInconsistency("constant", o.missingValues { it in constants })
 
     override fun visitDependency(o: StitcherDependency) =
-        o.registerInconsistency("dependency", o.missingValues { it !in dependencies }.joinToString())
+        o.registerInconsistency("dependency", o.missingValues { it in dependencies })
+
+    override fun visitReplacement(o: StitcherReplacement) =
+        o.registerInconsistency("replacement", o.missingValues { name -> replacements.any { it.identifier == name } })
 
     override fun visitSwapId(o: StitcherSwapId) =
-        o.registerInconsistency("swap", o.missingValues { it !in swaps }.joinToString())
+        o.registerInconsistency("swap", o.missingValues { it !in swaps })
 
-    private fun PsiElement.registerInconsistency(type: String, undefined: String) {
-        if (undefined.isNotEmpty()) holder.registerProblem(
+    private fun PsiElement.registerInconsistency(type: String, undefined: Sequence<String>) = undefined.joinToString().let {
+        if (it.isNotEmpty()) holder.registerProblem(
             this,
-            StonecutterBundle.message("stonecutter.inspection.missing_value.$type", undefined),
+            StonecutterBundle.message("stonecutter.inspection.missing_value.$type", it),
             ProblemHighlightType.ERROR
         )
     }
@@ -33,6 +37,6 @@ class MissingValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSe
     private inline fun PsiElement.missingValues(name: String = text, crossinline selector: SCProcessProperties.(String) -> Boolean): Sequence<String> {
         val lookup = stonecutterService.lookup
         val siblings = (lookup.node(this) ?: return emptySequence()).siblings(lookup)
-        return siblings.filter { it.params.selector(name) }.map { it.metadata.project }
+        return siblings.filterNot { it.params.selector(name) }.map { it.metadata.project }
     }
 }
