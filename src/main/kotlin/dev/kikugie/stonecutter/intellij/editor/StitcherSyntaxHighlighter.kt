@@ -8,24 +8,16 @@ import com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributes
 import com.intellij.openapi.editor.ex.util.LayerDescriptor
 import com.intellij.openapi.editor.ex.util.LayeredLexerEditorHighlighter
 import com.intellij.openapi.editor.highlighter.EditorHighlighter
-import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.fileTypes.EditorHighlighterProvider
-import com.intellij.openapi.fileTypes.FileType
-import com.intellij.openapi.fileTypes.FileTypes
-import com.intellij.openapi.fileTypes.SyntaxHighlighter
-import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
-import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
+import com.intellij.openapi.fileTypes.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.templateLanguages.TemplateDataLanguageMappings
 import com.intellij.psi.tree.IElementType
-import com.intellij.ui.JBColor
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType
 import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.*
-import java.awt.Font
 
 private val APPLICABLE_TYPES = arrayOf(CONDITION, SWAP, REPLACEMENT_ID)
 
@@ -56,10 +48,6 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
         @JvmField val DEPENDENCY = createTextAttributesKey("STONECUTTER_DEPENDENCY", IDENTIFIER)
         @JvmField val REPLACEMENT = createTextAttributesKey("STONECUTTER_REPLACEMENT", IDENTIFIER)
         @JvmField val SWAP = createTextAttributesKey("STONECUTTER_SWAP", IDENTIFIER)
-
-        @Suppress("DEPRECATION")
-        @JvmField val UNRESOLVED =
-            createTextAttributesKey("STONECUTTER_UNRESOLVED", TextAttributes(JBColor.RED, null, null, EffectType.BOXED, Font.BOLD))
     }
 
     object Attribute : (IElementType?) -> TextAttributesKey? {
