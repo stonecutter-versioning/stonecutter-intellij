@@ -16,6 +16,11 @@
 
     implements("condition")="dev.kikugie.stonecutter.intellij.lang.access.ConditionDefinition"
 
+    implements("expression")="dev.kikugie.stonecutter.intellij.lang.access.ExpressionDefinition"
+    implements("expression")="dev.kikugie.stonecutter.intellij.lang.access.ExpressionDefinition"
+    implements("assignment")="dev.kikugie.stonecutter.intellij.lang.access.ExpressionDefinition.Member"
+    implements("constant")="dev.kikugie.stonecutter.intellij.lang.access.ExpressionDefinition.Member"
+
     implements("string_version")="dev.kikugie.stonecutter.intellij.lang.access.VersionDefinition"
     implements("semantic_version")="dev.kikugie.stonecutter.intellij.lang.access.VersionDefinition"
 
