@@ -83,6 +83,7 @@ tasks {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
             freeCompilerArgs.add("-Xjvm-default=all")
+            freeCompilerArgs.add("-Xnested-type-aliases")
         }
 
         dependsOn(generateLexer, generateParser)

@@ -8,7 +8,7 @@ import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes
 import dev.kikugie.stonecutter.intellij.util.childrenSequence
 
 sealed interface ExpressionDefinition : PsiElement {
-    sealed interface Member : PsiElement
+    interface Member : PsiElement
 
     @JvmInline
     value class Binary internal constructor(private val definition: ExpressionDefinition) : Member, PsiElement by definition {
