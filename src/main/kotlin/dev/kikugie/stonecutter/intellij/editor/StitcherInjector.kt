@@ -6,11 +6,12 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
+import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
 class StitcherInjector : MultiHostInjector, DumbAware {
     private val comments: List<Class<out PsiElement>> = listOf(PsiCommentImpl::class.java)
     private val PsiElement.isStitcherComment: Boolean get() {
-        if (this !is PsiComment) return false
+        if (this !is PsiComment || stonecutterService.lookup.nodes.isEmpty()) return false
         val char = ElementManipulators.getValueText(this).firstOrNull()
         return char == '?' || char == '$' || char == '~'
     }
