@@ -21,7 +21,8 @@ object StitcherScriptIndexer : DataIndexer<StitcherIndexKey, Int, FileContent> {
     typealias Collector = MutableMap<StitcherIndexKey, Int>
 
     override fun map(input: FileContent): Map<StitcherIndexKey, Int> = buildMap {
-        if (isKotlinPluginLoaded()) input.psiFile.accept(StringFinder(this))
+        // FIXME: It crashes even with Kotlin plugin installed
+//        if (isKotlinPluginLoaded()) input.psiFile.accept(StringFinder(this))
     }
 
     private class StringFinder(val collector: Collector) : PsiRecursiveElementVisitor() {

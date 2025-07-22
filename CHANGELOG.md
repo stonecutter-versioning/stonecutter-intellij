@@ -1,2 +1,2 @@
-### Changes
-- Made Kotlin plugin dependency optional.
+### Fixes
+- Fixed crash due to missing Kotlin PSI element classes.
