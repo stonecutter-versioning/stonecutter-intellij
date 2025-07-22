@@ -1,5 +1,7 @@
 package dev.kikugie.stonecutter.intellij.editor.index
 
+import com.intellij.ide.plugins.PluginManager
+import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.progress.ProgressIndicatorProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiRecursiveElementVisitor
@@ -9,11 +11,17 @@ import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
 import org.jetbrains.uast.ULiteralExpression
 import org.jetbrains.uast.toUElementOfType
 
+private val KOTLIN_PLUGIN_ID by lazy { PluginId.findId("org.jetbrains.kotlin") }
+
+private fun isKotlinPluginLoaded(): Boolean =
+    if (KOTLIN_PLUGIN_ID == null) false
+    else PluginManager.isPluginInstalled(KOTLIN_PLUGIN_ID)
+
 object StitcherScriptIndexer : DataIndexer<StitcherIndexKey, Int, FileContent> {
     typealias Collector = MutableMap<StitcherIndexKey, Int>
 
     override fun map(input: FileContent): Map<StitcherIndexKey, Int> = buildMap {
-        input.psiFile.accept(StringFinder(this))
+        if (isKotlinPluginLoaded()) input.psiFile.accept(StringFinder(this))
     }
 
     private class StringFinder(val collector: Collector) : PsiRecursiveElementVisitor() {

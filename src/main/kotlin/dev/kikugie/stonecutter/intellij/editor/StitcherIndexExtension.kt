@@ -34,8 +34,10 @@ class StitcherIndexExtension : FileBasedIndexExtension<StitcherIndexKey, Int>() 
         override fun getHashCode(value: StitcherIndexKey?): Int = value.hashCode()
         override fun isEqual(val1: StitcherIndexKey?, val2: StitcherIndexKey?): Boolean =
             val1 == val2
+
         override fun save(output: DataOutput, value: StitcherIndexKey?) =
             output.writeNullable(value) { writeString(it.value) }
+
         override fun read(input: DataInput): StitcherIndexKey? =
             input.readNullable { StitcherIndexKey(readString()) }
     }

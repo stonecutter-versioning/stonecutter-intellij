@@ -4,7 +4,6 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
-    <depends>org.jetbrains.kotlin</depends>
     <depends>org.jetbrains.plugins.gradle</depends>
 
     <!-- Extension points defined by the plugin.
