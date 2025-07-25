@@ -76,6 +76,13 @@
         <dependencySupport coordinate="dev.kikugie:stonecutter" displayName="Stonecutter" kind="java"/>
         <dependencySupport coordinate="dev.kikugie.stonecutter:dev.kikugie.stonecutter.gradle.plugin" displayName="Stonecutter" kind="java"/>
     </extensions>
+
+    <extensions defaultExtensionNs="com.intellij"> <!-- Fletching Table -->
+        <lang.inspectionSuppressor language="JAVA"
+                                   implementationClass="dev.kikugie.stonecutter.intellij.fletching_table.editor.UnusedMixinInspectionSuppressor"/>
+        <lang.inspectionSuppressor language="JAVA"
+                                   implementationClass="dev.kikugie.stonecutter.intellij.fletching_table.editor.UnusedEntrypointInspectionSuppressor"/>
+    </extensions>
     <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
         <syncContributor implementation="dev.kikugie.stonecutter.intellij.service.GradleReloadListener"/>
     </extensions>

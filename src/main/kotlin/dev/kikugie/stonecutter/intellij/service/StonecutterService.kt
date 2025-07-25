@@ -21,6 +21,8 @@ import dev.kikugie.stonecutter.intellij.model.*
 import dev.kikugie.stonecutter.intellij.model.serialized.*
 import dev.kikugie.stonecutter.intellij.StonecutterIcons
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties.Replacements
+import dev.kikugie.stonecutter.intellij.util.GradleUtil.findGradlePath
+import dev.kikugie.stonecutter.intellij.util.GradleUtil.findGradleHierarchy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.DeserializationStrategy
@@ -148,10 +150,8 @@ private class SCModelLookupImpl(
     override val branches: MutableMap<GradleProjectHierarchy, SCProjectBranch> = mutableMapOf(),
     override val nodes: MutableMap<GradleProjectHierarchy, SCProjectNode> = mutableMapOf(),
 ) : SCModelLookup {
-    override fun node(element: PsiElement): SCProjectNode? = element
-        .let(ModuleUtil::findModuleForPsiElement)
-        ?.let(GradleProjectResolverUtil::getGradleIdentityPathOrNull)
-        ?.let { nodes[GradleProjectHierarchy(it)] }
+    override fun node(element: PsiElement): SCProjectNode? =
+        element.findGradleHierarchy()?.let(nodes::get)
 }
 
 @Suppress("UnstableApiUsage")

@@ -60,6 +60,7 @@ dependencies {
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.kotlin")
         bundledPlugin("org.jetbrains.plugins.gradle")
+        plugin("com.demonwav.minecraft-dev:2024.3-1.8.5-576@nightly")
     }
 }
 
