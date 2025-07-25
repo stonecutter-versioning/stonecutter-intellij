@@ -21,9 +21,9 @@ data class FTMixinModel(
         val LIST_SERIALIZER = ListSerializer(serializer())
 
         internal fun isOf(path: Path) = path.fileName.toString() == MIXIN_CONFIG
-        internal fun readModel(path: Path): List<FTMixinModel> = path.inputStream().use {
-            Json.decodeFromStream(LIST_SERIALIZER, it)
-        }
+        internal fun readModel(path: Path): List<FTMixinModel> = path.runCatching {
+            inputStream().use { Json.decodeFromStream(LIST_SERIALIZER, it) }
+        }.getOrElse { emptyList() }
     }
 
     @Serializable
