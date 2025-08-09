@@ -14,6 +14,7 @@ import org.jetbrains.plugins.gradle.util.GradleConstants.SYSTEM_ID
 import javax.swing.Icon
 import kotlin.io.path.Path
 
+@Deprecated("Bwaaa it no longer work")
 class VersionSwitchingRunner : RunAnythingCommandLineProvider() {
     override fun getIcon(value: String): Icon = StonecutterIcons.STONECUTTER
     override fun getHelpIcon(): Icon = StonecutterIcons.STONECUTTER

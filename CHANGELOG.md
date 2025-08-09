@@ -1,2 +1,6 @@
 ### Minor features
-- Added inspection suppressors for unused mixins and entrypoints when using them with Fletching Table.
+- Added task listener to sync projects after a version switch.
+
+### Changes
+- Improved setting naming and provided translation entries.
+- Updated model deserializer to be compatible with Stonecutter 0.7.7.

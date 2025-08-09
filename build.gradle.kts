@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "dev.kikugie"
-version = "0.5.4"
+version = "0.6.0"
 
 buildscript {
     repositories {
