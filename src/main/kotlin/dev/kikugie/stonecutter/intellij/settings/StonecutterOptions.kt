@@ -27,6 +27,7 @@ class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Sto
     class EditorOptions : PropertyConfigurable("Editor", {
         checkbox("Use custom import optimiser", STATE::useImportOptimizer)
         checkbox("Lock generated files", STATE::lockGeneratedFiles)
+        checkbox("Refresh project after switch", STATE::refreshAfterSwitch)
 
         link("Configure Syntax Coloring") {
             ShowSettingsUtil.getInstance().showSettingsDialog(

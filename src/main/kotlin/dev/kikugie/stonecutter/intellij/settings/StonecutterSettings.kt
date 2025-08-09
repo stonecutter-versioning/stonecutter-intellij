@@ -27,6 +27,8 @@ class StonecutterSettings : SerializablePersistentStateComponent<StonecutterSett
         var linkDisabledBlocks by property(true)
         var useImportOptimizer by property(true)
         var lockGeneratedFiles by property(true)
+
+        var refreshAfterSwitch by property(true)
     }
 
     init {
