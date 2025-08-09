@@ -1,6 +1,5 @@
 package dev.kikugie.stonecutter.intellij.service
 
-import com.intellij.ide.impl.ProjectUtil
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
@@ -10,18 +9,15 @@ import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
-import com.intellij.platform.workspace.storage.MutableEntityStorage
 import com.intellij.psi.PsiElement
 import dev.kikugie.stonecutter.intellij.model.*
 import dev.kikugie.stonecutter.intellij.model.serialized.*
 import dev.kikugie.stonecutter.intellij.StonecutterIcons
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties.Replacements
-import dev.kikugie.stonecutter.intellij.util.GradleUtil.findGradlePath
 import dev.kikugie.stonecutter.intellij.util.GradleUtil.findGradleHierarchy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -29,10 +25,6 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import org.jetbrains.plugins.gradle.model.ExternalProject
-import org.jetbrains.plugins.gradle.service.project.GradleProjectResolverUtil
-import org.jetbrains.plugins.gradle.service.project.ProjectResolverContext
-import org.jetbrains.plugins.gradle.service.syncAction.GradleSyncContributor
 import java.io.FileNotFoundException
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
@@ -154,18 +146,3 @@ private class SCModelLookupImpl(
         element.findGradleHierarchy()?.let(nodes::get)
 }
 
-@Suppress("UnstableApiUsage")
-private class GradleReloadListener : GradleSyncContributor {
-    override suspend fun onModelFetchCompleted(context: ProjectResolverContext, storage: MutableEntityStorage) {
-        val project = ProjectUtil.findProject(context.projectPath.let(::Path)) ?: return
-        val candidates = context.rootBuild.projects.mapNotNull { build ->
-            context.getProjectModel(build, ExternalProject::class.java)
-                ?.takeIf { it.buildFile?.name?.startsWith("stonecutter.gradle") == true }
-        }.associate {
-            it.projectDir.invariantSeparatorsPath to it.identityPath
-        }
-
-        project.stonecutterService.reset(candidates)
-        PropertiesComponent.getInstance(project).setList("dev.kikugie.stonecutter.projects", candidates.map { (k, v) -> "$k#$v" })
-    }
-}

@@ -85,7 +85,7 @@
                                    implementationClass="dev.kikugie.stonecutter.intellij.fletching_table.editor.UnusedEntrypointInspectionSuppressor"/>
     </extensions>
     <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
-        <syncContributor implementation="dev.kikugie.stonecutter.intellij.service.GradleReloadListener"/>
+        <syncContributor implementation="dev.kikugie.stonecutter.intellij.service.gradle.GradleReloadListener"/>
     </extensions>
     <actions>
         <action id="dev.kikugie.stonecutter.intellij.select_version"
