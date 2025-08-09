@@ -1,6 +1,7 @@
 @file:UseSerializers(PathSerializer::class)
 package dev.kikugie.stonecutter.intellij.model
 
+import dev.kikugie.stonecutter.intellij.model.serialized.ActiveInfo
 import dev.kikugie.stonecutter.intellij.model.serialized.PathSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -12,6 +13,7 @@ data class SCProjectTree(
     override val location: Path,
     val vcs: String,
     val current: String?,
+    val currentProvider: ActiveInfo = ActiveInfo.UNKNOWN,
     val branches: Collection<GradleProjectHierarchy>
 ) : GradleMember {
     /**Finds a branch with the given [name].*/

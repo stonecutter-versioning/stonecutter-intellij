@@ -3,6 +3,7 @@
 package dev.kikugie.stonecutter.intellij.model.serialized
 
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import java.nio.file.Path
@@ -46,4 +47,6 @@ data class TreeModel(
     val branches: List<BranchInfo>,
     val nodes: List<NodeInfo>,
     val flags: Map<String, @Contextual Any>,
+    @SerialName("current_provider")
+    val currentProvider: ActiveInfo = ActiveInfo.UNKNOWN,
 )
