@@ -1,13 +1,14 @@
 package dev.kikugie.stonecutter.intellij.model
 
 import dev.kikugie.semver.data.Version
+import dev.kikugie.stonecutter.intellij.model.serialized.CompatibleVersionSerializer
 import dev.kikugie.stonecutter.intellij.model.serialized.Replacement
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class SCProcessProperties(
     val constants: Map<String, Boolean>,
-    val dependencies: Map<String, Version>,
+    val dependencies: Map<String, @Serializable(with = CompatibleVersionSerializer::class) Version>,
     val swaps: Map<String, String>,
     val replacements: Replacements,
 ) {
