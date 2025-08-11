@@ -51,6 +51,9 @@
         <localInspection language="" enabledByDefault="true"
                          bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.duplicate_replacement"
                          implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.DuplicateReplacementInspection"/>
+        <localInspection language="" enabledByDefault="true"
+                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.naming"
+                         implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.NamingConventionInspection"/>
 
         <localInspection language="Stitcher" enabledByDefault="true"
                          bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.invariant_value"

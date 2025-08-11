@@ -11,6 +11,8 @@ class InvariantValueInspection : StitcherLocalInspectionTool(::InvariantValueVis
 
 class MissingValueInspection : StitcherLocalInspectionTool(::MissingValueVisitor)
 
+class NamingConventionInspection : StitcherLocalInspectionTool(::NamingConventionVisitor)
+
 // Outer
 class DuplicateReplacementInspection : StitcherOuterInspectionTool(::DuplicateReplacementVisitor)
 
