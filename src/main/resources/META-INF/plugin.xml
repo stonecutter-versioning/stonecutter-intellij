@@ -65,7 +65,6 @@
 
     <extensions defaultExtensionNs="com.intellij"> <!-- General -->
         <multiHostInjector implementation="dev.kikugie.stonecutter.intellij.editor.StitcherInjector"/>
-        <fileBasedIndex implementation="dev.kikugie.stonecutter.intellij.editor.StitcherIndexExtension"/>
         <codeFoldingOptionsProvider instance="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions$FoldingOptions"/>
         <colorSettingsPage implementation="dev.kikugie.stonecutter.intellij.settings.StitcherColorSettingsPage"/>
         <editorHighlighterProvider filetype="Stitcher"
