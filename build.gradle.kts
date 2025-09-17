@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "dev.kikugie"
-version = "0.6.0"
+version = "0.6.1"
 
 buildscript {
     repositories {
@@ -50,7 +50,7 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.semver)
+    implementation(common.misc.semver)
     implementation(common.misc.commons)
     implementation(common.kotlin.serialization)
     implementation(common.kotlin.serialization.json)
@@ -125,7 +125,7 @@ intellijPlatform {
 
         ideaVersion {
             sinceBuild = "243"
-            untilBuild = "252.*"
+            untilBuild = "253.*"
         }
 
         vendor {
