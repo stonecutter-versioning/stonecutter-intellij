@@ -1,6 +1,5 @@
 ### Minor features
-- Added task listener to sync projects after a version switch.
+- Added a filter for generated Stonecutter sources.
 
 ### Changes
-- Improved setting naming and provided translation entries.
-- Updated model deserializer to be compatible with Stonecutter 0.7.7.
+- Updated Kotlin to 2.2, SemVer parser to 2.0.
