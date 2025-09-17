@@ -77,6 +77,7 @@
                                  id="dev.kikugie.stonecutter.intellij.settings.StonecutterOptions"
                                  displayName="Stonecutter Dev"/>
         <externalSystemTaskNotificationListener implementation="dev.kikugie.stonecutter.intellij.service.gradle.StonecutterTaskListener"/>
+        <generatedSourcesFilter implementation="dev.kikugie.stonecutter.intellij.editor.StonecutterSourcesFilter"/>
         <dependencySupport coordinate="dev.kikugie:stonecutter" displayName="Stonecutter" kind="java"/>
         <dependencySupport coordinate="dev.kikugie.stonecutter:dev.kikugie.stonecutter.gradle.plugin" displayName="Stonecutter" kind="java"/>
     </extensions>

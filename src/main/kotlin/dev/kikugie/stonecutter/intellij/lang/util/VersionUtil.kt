@@ -16,7 +16,6 @@ import dev.kikugie.stonecutter.intellij.util.childrenSeqOfType
 fun Version.Companion.convert(element: VersionDefinition): Version = when (element) {
     is StitcherStringVersion -> StringVersion.convert(element)
     is StitcherSemanticVersion -> SemanticVersion.convert(element)
-    else -> error("Unsupported version type")
 }
 
 fun StringVersion.Companion.convert(element: StitcherStringVersion): StringVersion =
