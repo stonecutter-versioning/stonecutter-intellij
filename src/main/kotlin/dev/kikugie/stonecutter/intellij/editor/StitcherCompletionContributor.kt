@@ -9,7 +9,7 @@ import com.intellij.util.ProcessingContext
 import dev.kikugie.stonecutter.intellij.editor.completion.StitcherPatterns
 import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapId
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapKey
 import dev.kikugie.stonecutter.intellij.model.SCProjectNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
@@ -30,7 +30,7 @@ class StitcherCompletionContributor : CompletionContributor() {
             if (variants.isNotEmpty()) result.addAllElements(variants)
         }
 
-        register(targets.withParent(StitcherSwapId::class.java)) { params, _, result ->
+        register(targets.withParent(StitcherSwapKey::class.java)) { params, _, result ->
             val variants = params.getNode()?.params?.swaps.orEmpty()
                 .map(LookupElementBuilder::create)
             if (variants.isNotEmpty()) result.addAllElements(variants)

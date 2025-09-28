@@ -13,7 +13,7 @@ import dev.kikugie.stonecutter.intellij.editor.documentation.ReplacementDocBuild
 import dev.kikugie.stonecutter.intellij.editor.documentation.StitcherDocumentationTarget
 import dev.kikugie.stonecutter.intellij.editor.documentation.SwapDocBuilder
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapId
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapKey
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherAssignment
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
@@ -33,7 +33,7 @@ class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
         .firstNotNullOfOrNull(::matchDocumentationTarget)
 
     private fun matchDocumentationTarget(element: PsiElement) = when(element) {
-        is StitcherSwapId -> StitcherDocumentationTarget(element, SwapDocBuilder)
+        is StitcherSwapKey -> StitcherDocumentationTarget(element, SwapDocBuilder)
         is StitcherConstant -> StitcherDocumentationTarget(element, ConstantDocBuilder)
         is StitcherAssignment -> StitcherDocumentationTarget(element, DependencyDocBuilder)
         is StitcherReplacement -> StitcherDocumentationTarget(element, ReplacementDocBuilder)

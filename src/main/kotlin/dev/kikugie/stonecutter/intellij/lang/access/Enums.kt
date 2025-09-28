@@ -5,7 +5,7 @@ import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.Attribu
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherDependency
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapId
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapKey
 
 enum class ReferenceType {
     CONSTANT, DEPENDENCY, REPLACEMENT, SWAP;
@@ -17,7 +17,7 @@ enum class ReferenceType {
                 is StitcherConstant -> CONSTANT
                 is StitcherDependency -> DEPENDENCY
                 is StitcherReplacement -> REPLACEMENT
-                is StitcherSwapId -> SWAP
+                is StitcherSwapKey -> SWAP
                 else -> null
             }
 

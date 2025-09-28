@@ -11,13 +11,15 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 
+private val COMMENTS: TokenSet = TokenSet.create(StitcherTokenTypes.COMMENT)
+
 class StitcherParserDef : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = StitcherLexer()
     override fun createParser(project: Project?): PsiParser = StitcherParser()
     override fun getFileNodeType(): IFileElementType = IFileElementType(StitcherLang)
     override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
     override fun getWhitespaceTokens(): TokenSet = TokenSet.WHITE_SPACE
-    override fun getCommentTokens(): TokenSet = TokenSet.EMPTY
+    override fun getCommentTokens(): TokenSet = COMMENTS
     override fun createElement(node: ASTNode): PsiElement = StitcherTokenTypes.Factory.createElement(node)
     override fun createFile(viewProvider: FileViewProvider): PsiFile = StitcherFile(viewProvider)
 }

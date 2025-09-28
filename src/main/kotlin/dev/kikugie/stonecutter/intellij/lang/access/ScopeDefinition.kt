@@ -23,7 +23,7 @@ private fun ScopeDefinition.determineType(): ScopeType = when (this) {
 }
 
 private fun StitcherSwap.determineSwapType(): ScopeType =
-    match(closer != null, opener != null || swapId != null).let {
+    match(closer != null, opener != null || swapKey != null).let {
         if (it != ScopeType.OPENER && it != ScopeType.CLOSER) ScopeType.INVALID else it
     }
 

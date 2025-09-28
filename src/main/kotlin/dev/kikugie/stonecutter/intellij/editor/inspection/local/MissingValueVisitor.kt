@@ -9,7 +9,7 @@ import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherLocalInspectio
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherDependency
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapId
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapKey
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
@@ -23,7 +23,7 @@ class MissingValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSe
     override fun visitReplacement(o: StitcherReplacement) =
         o.registerInconsistency("replacement", o.missingValues { name -> replacements.any { it.identifier == name } })
 
-    override fun visitSwapId(o: StitcherSwapId) =
+    override fun visitSwapKey(o: StitcherSwapKey) =
         o.registerInconsistency("swap", o.missingValues { it in swaps })
 
     private fun PsiElement.registerInconsistency(type: String, undefined: Sequence<String>) = undefined.joinToString().let {
