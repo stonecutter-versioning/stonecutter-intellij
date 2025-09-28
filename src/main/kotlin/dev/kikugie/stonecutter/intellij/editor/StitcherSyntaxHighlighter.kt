@@ -40,8 +40,10 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
 
         @JvmField val KEYWORD = createTextAttributesKey("STONECUTTER_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD)
         @JvmField val OPERATOR = createTextAttributesKey("STONECUTTER_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN)
-        @JvmField val NUMBER = createTextAttributesKey("STONECUTTER_NUMBER", DefaultLanguageHighlighterColors.NUMBER)
+        @JvmField val VERSION = createTextAttributesKey("STONECUTTER_VERSION", DefaultLanguageHighlighterColors.NUMBER)
+        @JvmField val LITERAL = createTextAttributesKey("STONECUTTER_LITERAL", DefaultLanguageHighlighterColors.STRING)
         @JvmField val BRACES = createTextAttributesKey("STONECUTTER_BRACES", DefaultLanguageHighlighterColors.BRACES)
+        @JvmField val COMMENT = createTextAttributesKey("STONECUTTER_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT)
 
         @JvmField val IDENTIFIER = createTextAttributesKey("STONECUTTER_IDENTIFIER", DefaultLanguageHighlighterColors.CONSTANT)
         @JvmField val CONSTANT = createTextAttributesKey("STONECUTTER_CONSTANT", IDENTIFIER)
@@ -59,10 +61,12 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
             SWAP_MARKER -> AttributeKeys.SWAP_MARKER
             REPL_MARKER -> AttributeKeys.REPL_MARKER
             COMPARATOR, UNARY, BINARY, ASSIGN -> AttributeKeys.OPERATOR
-            NUMERIC, DASH, PLUS, DOT -> AttributeKeys.NUMBER
-            IDENTIFIER, LITERAL -> AttributeKeys.IDENTIFIER
+            VERSION, NUMERIC, DASH, PLUS, DOT -> AttributeKeys.VERSION
+            IDENTIFIER -> AttributeKeys.IDENTIFIER
+            LITERAL, QUOTED -> AttributeKeys.LITERAL
+            COMMENT -> AttributeKeys.COMMENT
             LEFT_BRACE, RIGHT_BRACE, OPENER, CLOSER -> AttributeKeys.BRACES
-            SUGAR -> AttributeKeys.KEYWORD
+            SUGAR_IF, SUGAR_ELIF, SUGAR_ELSE -> AttributeKeys.KEYWORD
             else -> null
         }
     }
