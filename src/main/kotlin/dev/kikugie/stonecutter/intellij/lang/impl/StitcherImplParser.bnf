@@ -25,24 +25,28 @@
     implements("semantic_version")="dev.kikugie.stonecutter.intellij.lang.access.VersionDefinition"
 
     implements("predicate")="dev.kikugie.stonecutter.intellij.lang.access.PredicateDefinition"
+
+    tokens=["COMMENT"]
 }
 
 definition ::= COND_MARKER condition
     | SWAP_MARKER swap
     | REPL_MARKER replacement
 
-replacement ::= LITERAL { elementType = "REPLACEMENT_ID" }
-swap ::= CLOSER | (swap_id OPENER?)
-/* TODO: Require sugar to follow this notation (in a non-cancer way):
-condition ::= SUGAR_IF expression OPENER?
-    | CLOSER (
-        (SUGAR_ELSE SUGAR_IF | SUGAR_ELIF)? expression OPENER?
-        | SUGAR_ELSE OPENER?
-      )
- */
-condition ::= CLOSER? SUGAR* expression? OPENER?
+replacement ::= IDENTIFIER { elementType = "REPLACEMENT_ID" }
+swap ::= CLOSER | (swap_key swap_arg* scope_opener?)
 
-swap_id ::= LITERAL { elementType = "SWAP_ID" }
+swap_key ::= IDENTIFIER { elementType = "SWAP_ID" }
+swap_arg ::= IDENTIFIER | QUOTED { elementType = "STRING" }
+
+condition ::= SUGAR_IF expression scope_opener?
+    | CLOSER (
+        (SUGAR_ELSE SUGAR_IF | SUGAR_ELIF | SUGAR_ELSE)? expression scope_opener?
+        | SUGAR_ELSE scope_opener?
+        |
+      )
+
+scope_opener ::= OPENER | WORD
 
 expression ::= binary_expression
     | simple_expression
@@ -66,12 +70,14 @@ predicate ::= COMPARATOR (string_version | semantic_version) | semantic_version
 private explicit_predicate_list ::= predicate any_predicate* { extends = predicate_list }
 private predicate_list ::= any_predicate+
 
-constant ::= LITERAL { elementType = "CONSTANT" }
-dependency ::= LITERAL { elementType = "DEPENDENCY" }
+constant ::= IDENTIFIER { elementType = "CONSTANT_ID" }
+dependency ::= IDENTIFIER { elementType = "DEPENDENCY_ID" }
 
-string_version ::= LITERAL
+string_version ::= IDENTIFIER
 semantic_version ::= version_core (DASH pre_release)? (PLUS build_metadata)?
 
 version_core ::= NUMERIC (DOT NUMERIC)*
-pre_release ::= IDENTIFIER (DOT IDENTIFIER)*
-build_metadata ::= IDENTIFIER (DOT IDENTIFIER)*
+pre_release ::= metadata (DOT metadata)*
+build_metadata ::= metadata (DOT metadata)*
+
+metadata ::= NUMERIC | LITERAL { elementType = "VERSION" }
