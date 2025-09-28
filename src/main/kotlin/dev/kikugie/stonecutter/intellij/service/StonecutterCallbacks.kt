@@ -19,11 +19,13 @@ import java.awt.event.FocusEvent
 
 object StonecutterCallbacks {
     internal fun invokeAppLoad(settings: StonecutterSettings) {
-//        GradleSyncContributor.EP_NAME
-//
-//        val bus = ApplicationManager.getApplication().messageBus.connect(settings)
-//        @Suppress("UnstableApiUsage") bus.subscribe(GradleSyncListener.TOPIC, GradleReloadListener)
-
+        //? if >=2025 {
+        /*val bus = ApplicationManager.getApplication().messageBus.connect(settings)
+        @Suppress("UnstableApiUsage") bus.subscribe(
+            org.jetbrains.plugins.gradle.service.syncAction.GradleSyncListener.TOPIC,
+            dev.kikugie.stonecutter.intellij.service.gradle.GradleReloadListener
+        )
+        *///?}
         (EditorFactory.getInstance().eventMulticaster as? EditorEventMulticasterEx)
             ?.addFocusChangeListener(createFocusListener(), settings)
     }
