@@ -56,11 +56,11 @@ dependencies {
     implementation(common.kotlin.serialization.json)
 
     intellijPlatform {
-        intellijIdeaCommunity(libs.versions.intellij.ce.get())
+        intellijIdeaUltimate(libs.versions.intellij.ce.get())
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.kotlin")
         bundledPlugin("org.jetbrains.plugins.gradle")
-        plugin("com.demonwav.minecraft-dev:2024.3-1.8.5-576@nightly")
+//        plugin("com.demonwav.minecraft-dev:2024.3-1.8.5-576@nightly")
     }
 }
 
@@ -124,8 +124,8 @@ intellijPlatform {
         changeNotes = fileProperty("CHANGELOG.md").map { it.mdtoHtml() }
 
         ideaVersion {
-            sinceBuild = "243"
-            untilBuild = "252.*"
+            sinceBuild = "253.2"
+            untilBuild = "254.*"
         }
 
         vendor {

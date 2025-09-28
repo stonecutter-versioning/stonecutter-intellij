@@ -1,6 +1,6 @@
 [versions]
 intellij = "2.7.1"
-intellij-ce = "2024.3.6"
+intellij-ce = "253.22441.33"
 grammarkit = "2022.3.2.2"
 commonmark = "0.24.0"
 
