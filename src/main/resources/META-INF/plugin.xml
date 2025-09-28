@@ -87,6 +87,9 @@
         <lang.inspectionSuppressor language="JAVA"
                                    implementationClass="dev.kikugie.stonecutter.intellij.fletching_table.editor.UnusedEntrypointInspectionSuppressor"/>
     </extensions>
+    <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
+        <!--@sync-contributor@-->
+    </extensions>
     <actions>
         <action id="dev.kikugie.stonecutter.intellij.select_version"
                 text="Switch Active Version"

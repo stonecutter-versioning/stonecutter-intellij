@@ -1,3 +1,4 @@
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -88,18 +89,31 @@ tasks {
         dependsOn(generateLexer, generateParser)
     }
 
+    processResources {
+        val sync = if (stonecutter.eval(stonecutter.current.version, ">=2025")) "no-op"
+        else "--><syncContributor implementation=\"dev.kikugie.stonecutter.intellij.service.gradle.GradleReloadListener\"/><!--"
+
+        filesMatching("**/plugin.xml") {
+            filter<ReplaceTokens>("tokens" to mapOf("sync-contributor" to sync))
+        }
+    }
+
     generateLexer {
-        sourceFile = file("src/main/kotlin/dev/kikugie/stonecutter/intellij/lang/impl/StitcherImplLexer.flex")
+        sourceFile = rootProject.file("src/main/kotlin/dev/kikugie/stonecutter/intellij/lang/impl/StitcherImplLexer.flex")
         targetOutputDir = layout.buildDirectory.dir("generated/lexer/dev/kikugie/stonecutter/intellij/lang/impl")
         purgeOldFiles = true
     }
 
     generateParser {
-        sourceFile = file("src/main/kotlin/dev/kikugie/stonecutter/intellij/lang/impl/StitcherImplParser.bnf")
+        sourceFile = rootProject.file("src/main/kotlin/dev/kikugie/stonecutter/intellij/lang/impl/StitcherImplParser.bnf")
         targetRootOutputDir = layout.buildDirectory.dir("generated/parser")
         pathToParser = "" // Defined in the .bnf
         pathToPsiRoot = "" // Defined in the .bnf
         purgeOldFiles = true
+    }
+
+    patchPluginXml {
+        dependsOn(stonecutterGenerate)
     }
 }
 
