@@ -13,12 +13,17 @@ import com.intellij.openapi.vfs.findDocument
 import com.intellij.openapi.vfs.toNioPathOrNull
 import dev.kikugie.stonecutter.intellij.action.VersionSelectorAction
 import dev.kikugie.stonecutter.intellij.editor.StitcherFoldingBuilder.Constants.STITCHER_SCOPE
+import dev.kikugie.stonecutter.intellij.service.gradle.GradleReloadListener
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
 import dev.kikugie.stonecutter.intellij.settings.variants.FoldingMode.AGGRESSIVE
+import org.jetbrains.plugins.gradle.service.syncAction.GradleSyncListener
 import java.awt.event.FocusEvent
 
 object StonecutterCallbacks {
     internal fun invokeAppLoad(settings: StonecutterSettings) {
+        val bus = ApplicationManager.getApplication().messageBus.connect(settings)
+        @Suppress("UnstableApiUsage") bus.subscribe(GradleSyncListener.TOPIC, GradleReloadListener)
+
         (EditorFactory.getInstance().eventMulticaster as? EditorEventMulticasterEx)
             ?.addFocusChangeListener(createFocusListener(), settings)
     }
