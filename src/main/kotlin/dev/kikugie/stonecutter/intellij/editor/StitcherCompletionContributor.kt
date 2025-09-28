@@ -56,22 +56,6 @@ class StitcherCompletionContributor : CompletionContributor() {
                 .map(LookupElementBuilder::create)
             if (variants.isNotEmpty()) result.addAllElements(variants)
         }
-
-
-//        register(versions) { params, _, result ->
-//            val lookup = params.originalPosition?.stonecutterService?.lookup
-//                ?: return@register
-//
-//            val assignment = params.originalFile.parents(false)
-//                .find { it is StitcherAssignment } as? StitcherAssignment ?: return@register
-//            val dependency = assignment.dependency?.text.orEmpty()
-//            val versions = lookup.nodes.values.mapNotNull {
-//                it.params.dependencies[dependency]?.toString()
-//            }
-//
-//            val variants = versions.map(LookupElementBuilder::create)
-//            if (variants.isNotEmpty()) result.addAllElements(variants)
-//        }
     }
 
     private inline fun register(

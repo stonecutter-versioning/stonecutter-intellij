@@ -7,13 +7,11 @@ plugins {
     `java-library`
     alias(libs.plugins.intellij)
     alias(libs.plugins.grammarkit)
-    alias(common.plugins.gradle.dotenv)
     alias(common.plugins.kotlin.jvm)
     alias(common.plugins.kotlin.serialization)
 }
 
-group = "dev.kikugie"
-version = "0.6.1"
+version = "0.7.0+${property("intellij.suffix")}"
 
 buildscript {
     repositories {
@@ -56,7 +54,7 @@ dependencies {
     implementation(common.kotlin.serialization.json)
 
     intellijPlatform {
-        intellijIdeaUltimate(libs.versions.intellij.ce.get())
+        intellijIdeaUltimate(property("intellij.version") as String)
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.kotlin")
         bundledPlugin("org.jetbrains.plugins.gradle")
@@ -106,7 +104,7 @@ tasks {
 }
 
 intellijPlatform {
-    fun fileProperty(path: String) = provider { file(path) }
+    fun fileProperty(path: String) = provider { rootProject.file(path) }
 
     fun File.mdtoHtml(): String {
         val parser = Parser.builder().build()
@@ -124,8 +122,8 @@ intellijPlatform {
         changeNotes = fileProperty("CHANGELOG.md").map { it.mdtoHtml() }
 
         ideaVersion {
-            sinceBuild = "253.2"
-            untilBuild = "254.*"
+            sinceBuild = property("intellij.min") as String
+            untilBuild = property("intellij.max") as String
         }
 
         vendor {
@@ -136,6 +134,9 @@ intellijPlatform {
     }
 
     publishing {
-        token = env.fetch("PUBLISH", "")
+        fun File.readToken() = useLines {lines ->
+            lines.first { it.startsWith("PUBLISH=") }.substringAfter('"').substringBeforeLast('"')
+        }
+        token = fileProperty(".env").map { if (it.exists()) it.readToken() else null }
     }
 }
