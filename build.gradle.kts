@@ -113,27 +113,34 @@ tasks {
     }
 
     patchPluginXml {
-        dependsOn(stonecutterGenerate)
+        dependsOn("stonecutterGenerate")
     }
 }
 
 intellijPlatform {
-    fun fileProperty(path: String) = provider { rootProject.file(path) }
+    val parser = Parser.builder().build()
+    val renderer = HtmlRenderer.builder().build()
 
-    fun File.mdtoHtml(): String {
-        val parser = Parser.builder().build()
-        val document = reader().use { parser.parseReader(it) }
-        val renderer = HtmlRenderer.builder().build()
-        return renderer.render(document)
+    fun env(str: String): Map<String, String> = buildMap {
+        for (line in str.lineSequence().filter(String::isNotBlank)) {
+            val (key, value) = line.split('=', limit = 2)
+            this[key] = value.trim(' ', '"')
+        }
     }
+
+    fun env(contents: File): Map<String, String> =
+        contents.readText().let(::env)
+
+    fun mdToHtml(contents: File): String =
+        contents.readText().let { parser.parse(it).let(renderer::render) }
 
     buildSearchableOptions = false
     pluginConfiguration {
         id = "dev.kikugie.stonecutter"
         name = "Stonecutter Dev"
         version = project.version.toString()
-        description = fileProperty("README.md").map { it.mdtoHtml() }
-        changeNotes = fileProperty("CHANGELOG.md").map { it.mdtoHtml() }
+        description = rootProject.file("README.md").let(::mdToHtml)
+        changeNotes = rootProject.file("CHANGELOG.md").let(::mdToHtml)
 
         ideaVersion {
             sinceBuild = property("intellij.min") as String
@@ -148,9 +155,6 @@ intellijPlatform {
     }
 
     publishing {
-        fun File.readToken() = useLines {lines ->
-            lines.first { it.startsWith("PUBLISH=") }.substringAfter('"').substringBeforeLast('"')
-        }
-        token = fileProperty(".env").map { if (it.exists()) it.readToken() else null }
+        token = rootProject.file(".env").let(::env)["PUBLISH"]
     }
 }

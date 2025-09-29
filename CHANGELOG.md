@@ -1,5 +1,7 @@
-### Minor features
-- Added a filter for generated Stonecutter sources.
+### Features
+- Added support for Stonecutter 0.8 in-development features.
+  - Adapter the parser for comments and swap arguments.
 
 ### Changes
-- Updated Kotlin to 2.2, SemVer parser to 2.0.
+- Split the plugin release for IntelliJ 2025.3.
+- Improved syntax highlighting and parsing logic.
