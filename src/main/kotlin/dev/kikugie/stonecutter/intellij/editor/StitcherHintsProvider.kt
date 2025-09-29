@@ -61,7 +61,7 @@ class StitcherHintsProvider : InlayHintsProvider {
                     else break
                 if (modifier) value else !value
             })
-            is StitcherDependency -> collectFromResolved(parameter, sink, offset, parameter.value { dependencies[it] })
+            is StitcherDependency -> collectFromResolved(parameter, sink, offset, parameter.value { dependencies[it]?.value })
             else -> {}
         }
 
