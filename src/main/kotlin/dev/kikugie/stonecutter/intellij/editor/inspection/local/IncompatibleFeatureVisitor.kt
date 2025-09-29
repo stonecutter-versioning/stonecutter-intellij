@@ -1,14 +1,13 @@
 package dev.kikugie.stonecutter.intellij.editor.inspection.local
 
 import com.intellij.codeInspection.LocalInspectionToolSession
-import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import dev.kikugie.semver.data.SemanticVersion
-import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.StonecutterBundle.BUNDLE
 import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherLocalInspectionTool
+import dev.kikugie.stonecutter.intellij.editor.inspection.error
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapArg
 import dev.kikugie.stonecutter.intellij.lang.util.SemanticVersion
 import dev.kikugie.stonecutter.intellij.model.SCModelLookup
@@ -32,6 +31,6 @@ class IncompatibleFeatureVisitor(holder: ProblemsHolder, session: LocalInspectio
     }
 
     private fun PsiElement.check(version: SemanticVersion, @PropertyKey(resourceBundle = BUNDLE) key: String) {
-        if ((stonecutter ?: return) < version) holder.registerProblem(this, StonecutterBundle.message(key), ProblemHighlightType.ERROR)
+        if ((stonecutter ?: return) < version) holder.error(this, key)
     }
 }

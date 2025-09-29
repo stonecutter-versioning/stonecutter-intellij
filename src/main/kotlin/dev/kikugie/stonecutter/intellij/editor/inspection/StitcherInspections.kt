@@ -15,6 +15,8 @@ class NamingConventionInspection : StitcherLocalInspectionTool(::NamingConventio
 
 class IncompatibleFeatureInspection : StitcherLocalInspectionTool(::IncompatibleFeatureVisitor)
 
+class SwapArgumentInspection : StitcherLocalInspectionTool(::SwapArgumentVisitor)
+
 // Outer
 class DuplicateReplacementInspection : StitcherOuterInspectionTool(::DuplicateReplacementVisitor)
 
