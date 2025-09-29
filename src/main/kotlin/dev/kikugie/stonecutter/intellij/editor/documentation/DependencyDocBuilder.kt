@@ -21,7 +21,7 @@ object DependencyDocBuilder : DocumentationBuilder<StitcherAssignment> {
         if (variants.isNotEmpty()) variants(node, variants) {
             cell {
                 if (it == null) text("UNDEFINED", RED)
-                else text(it.toString(), AttributeKeys.VERSION)
+                else text(it.value, AttributeKeys.VERSION)
             }
         }
     }

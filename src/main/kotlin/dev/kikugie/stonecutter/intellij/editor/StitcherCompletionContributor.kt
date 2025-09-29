@@ -3,58 +3,70 @@ package dev.kikugie.stonecutter.intellij.editor
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.patterns.ElementPattern
-import com.intellij.patterns.PlatformPatterns
+import com.intellij.patterns.PlatformPatterns.psiElement
+import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
-import dev.kikugie.stonecutter.intellij.editor.completion.StitcherPatterns
+import dev.kikugie.commons.collections.ifNotEmpty
 import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes
+import dev.kikugie.stonecutter.intellij.lang.access.VersionDefinition
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherAssignment
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherDependency
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapKey
-import dev.kikugie.stonecutter.intellij.model.SCProjectNode
+import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
+import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
+
+private val CompletionParameters.stonecutter: SCProcessProperties?
+    get() = originalPosition?.stonecutterNode?.params
+
+private inline fun <reified T : PsiElement> PsiElementPattern.Capture<*>.withParent() =
+    withParent(T::class.java)
+
+private inline fun <reified T : PsiElement> PsiElementPattern.Capture<*>.inside() =
+    inside(T::class.java)
 
 class StitcherCompletionContributor : CompletionContributor() {
     init {
-        val targets = PlatformPatterns
-            .psiElement(StitcherTokenTypes.LITERAL)
-
-        register(targets.beforeLeaf(PlatformPatterns.psiElement(StitcherTokenTypes.BINARY))) { params, _, result ->
-            val variants = params.getNode()?.params?.constants?.keys.orEmpty()
-                .map(LookupElementBuilder::create)
-            if (variants.isNotEmpty()) result.addAllElements(variants)
+        register(psiElement(StitcherTokenTypes.IDENTIFIER).withParent<StitcherReplacement>()) { params, _, result ->
+            params.stonecutter?.replacements.orEmpty()
+                .mapNotNull { LookupElementBuilder.create(it.identifier ?: return@mapNotNull null) }
+                .ifNotEmpty(result::addAllElements)
         }
 
-        register(targets.beforeLeaf(PlatformPatterns.psiElement(StitcherTokenTypes.ASSIGN))) { params, _, result ->
-            val variants = params.getNode()?.params?.dependencies?.keys.orEmpty()
+        register(psiElement(StitcherTokenTypes.IDENTIFIER).withParent<StitcherSwapKey>()) { params, _, result ->
+            params.stonecutter?.swaps?.keys.orEmpty()
                 .map(LookupElementBuilder::create)
-            if (variants.isNotEmpty()) result.addAllElements(variants)
+                .ifNotEmpty(result::addAllElements)
         }
 
-        register(targets.withParent(StitcherSwapKey::class.java)) { params, _, result ->
-            val variants = params.getNode()?.params?.swaps.orEmpty()
+        register(psiElement(StitcherTokenTypes.IDENTIFIER).withParent<StitcherDependency>()) { params, _, result ->
+            params.stonecutter?.dependencies?.keys.orEmpty()
                 .map(LookupElementBuilder::create)
-            if (variants.isNotEmpty()) result.addAllElements(variants)
+                .ifNotEmpty(result::addAllElements)
         }
 
-        // FIXME: It suggests constant names
-        register(targets.withParent(StitcherReplacement::class.java)) { params, _, result ->
-            val variants = params.getNode()?.params?.replacements.orEmpty()
+        register(psiElement(StitcherTokenTypes.IDENTIFIER).withParent<StitcherConstant>()) { params, _, result ->
+            params.stonecutter?.constants?.keys.orEmpty()
                 .map(LookupElementBuilder::create)
-            if (variants.isNotEmpty()) result.addAllElements(variants)
+                .ifNotEmpty(result::addAllElements)
+            params.stonecutter?.dependencies?.keys.orEmpty()
+                .map { LookupElementBuilder.create("$it:") }
+                .ifNotEmpty(result::addAllElements)
         }
 
-        register(
-            targets
-                .without(StitcherPatterns.beforeLeafCondition(StitcherTokenTypes.ASSIGN, StitcherTokenTypes.BINARY))
-                .without(StitcherPatterns.afterLeafCondition(StitcherTokenTypes.ASSIGN))
-        ) { params, _, result ->
-            val params = params.getNode()?.params
-            val constants = params?.constants?.keys.orEmpty()
-            val dependencies = params?.dependencies?.keys.orEmpty()
-
-            val variants = (constants + dependencies)
-                .map(LookupElementBuilder::create)
-            if (variants.isNotEmpty()) result.addAllElements(variants)
+        // FIXME: Doesn't do shit
+        register(psiElement().inside<VersionDefinition>()) { params, _, result ->
+            val element = params.originalPosition ?: return@register
+            val dependency = (element.parentOfType<StitcherAssignment>() ?: return@register)
+                .dependency?.text.orEmpty()
+            element
+                .run { stonecutterNode?.siblings(stonecutterService.lookup).orEmpty().mapNotNull { it.params.dependencies[dependency] } }
+                .distinct().map { LookupElementBuilder.create(it.value) }
+                .toList().ifNotEmpty(result::addAllElements)
         }
     }
 
@@ -67,10 +79,5 @@ class StitcherCompletionContributor : CompletionContributor() {
                 action(parameters, context, result)
             }
         })
-    }
-
-    private fun CompletionParameters.getNode(): SCProjectNode? {
-        val element = originalPosition ?: return null
-        return element.stonecutterService.lookup.node(element)
     }
 }
