@@ -13,6 +13,9 @@ import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSemanticVersion
 import dev.kikugie.stonecutter.intellij.lang.psi.StitcherStringVersion
 import dev.kikugie.stonecutter.intellij.util.childrenSeqOfType
 
+fun SemanticVersion(vararg components: Int, preRelease: String = "", buildMetadata: String = ""): SemanticVersion =
+    SemanticVersion(components, preRelease, buildMetadata)
+
 fun Version.Companion.convert(element: VersionDefinition): Version = when (element) {
     is StitcherStringVersion -> StringVersion.convert(element)
     is StitcherSemanticVersion -> SemanticVersion.convert(element)

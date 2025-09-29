@@ -13,6 +13,8 @@ class MissingValueInspection : StitcherLocalInspectionTool(::MissingValueVisitor
 
 class NamingConventionInspection : StitcherLocalInspectionTool(::NamingConventionVisitor)
 
+class IncompatibleFeatureInspection : StitcherLocalInspectionTool(::IncompatibleFeatureVisitor)
+
 // Outer
 class DuplicateReplacementInspection : StitcherOuterInspectionTool(::DuplicateReplacementVisitor)
 

@@ -14,6 +14,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
 import com.intellij.psi.PsiElement
+import dev.kikugie.semver.data.SemanticVersion
 import dev.kikugie.stonecutter.intellij.model.*
 import dev.kikugie.stonecutter.intellij.model.serialized.*
 import dev.kikugie.stonecutter.intellij.StonecutterIcons
@@ -98,7 +99,8 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
 
         if (tree.branches.isEmpty()) return true
         val result = tree.branches.fold(false) { acc, branch -> buildBranchModel(branch, hierarchy, tree.current) || acc }
-        trees[hierarchy] = SCProjectTree(hierarchy, dir, tree.vcs, tree.current, tree.currentProvider, tree.branches.map { hierarchy + it.id })
+        val stonecutter = SemanticVersion.parse(tree.stonecutter).getOrThrow()
+        trees[hierarchy] = SCProjectTree(hierarchy, dir, tree.vcs, tree.current, stonecutter, tree.branches.map { hierarchy + it.id })
         return result
     }
 

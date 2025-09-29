@@ -61,6 +61,9 @@
         <localInspection language="Stitcher" enabledByDefault="true"
                          bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.missing_value"
                          implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.MissingValueInspection"/>
+        <localInspection language="Stitcher" enabledByDefault="true"
+                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.feature"
+                         implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.IncompatibleFeatureInspection"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij"> <!-- General -->
