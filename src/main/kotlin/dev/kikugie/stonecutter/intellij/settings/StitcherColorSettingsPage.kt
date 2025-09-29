@@ -17,6 +17,8 @@ class StitcherColorSettingsPage : ColorSettingsPage {
         AttributesDescriptor("Keywords (if, else, elif)", AttributeKeys.KEYWORD),
         AttributesDescriptor("Operators (>=, <=, ==, ^, &&, ||)", AttributeKeys.OPERATOR),
         AttributesDescriptor("Versions", AttributeKeys.VERSION),
+        AttributesDescriptor("Literals", AttributeKeys.LITERAL),
+        AttributesDescriptor("Comments", AttributeKeys.COMMENT),
         AttributesDescriptor("Braces { }", AttributeKeys.BRACES),
         AttributesDescriptor("Identifiers", AttributeKeys.IDENTIFIER),
         AttributesDescriptor("Identifiers//Constant", AttributeKeys.CONSTANT),
