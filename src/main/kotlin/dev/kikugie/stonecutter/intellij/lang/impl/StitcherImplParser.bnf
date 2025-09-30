@@ -43,8 +43,7 @@ condition ::= SUGAR_IF expression scope_opener?
     | CLOSER (
         (SUGAR_ELSE SUGAR_IF | SUGAR_ELIF | SUGAR_ELSE)? expression scope_opener?
         | SUGAR_ELSE scope_opener?
-        |
-      )
+      )?
 
 scope_opener ::= OPENER | WORD
 
