@@ -4,15 +4,14 @@ import org.commonmark.renderer.html.HtmlRenderer
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    idea
+    antlr
     `java-library`
     alias(libs.plugins.intellij)
-    alias(libs.plugins.grammarkit)
     alias(common.plugins.kotlin.jvm)
     alias(common.plugins.kotlin.serialization)
 }
 
-version = "0.7.1+${property("intellij.suffix")}"
+version = "0.8+${property("intellij.suffix")}"
 
 buildscript {
     repositories {
@@ -24,23 +23,11 @@ buildscript {
     }
 }
 
-idea {
-    module {
-        isDownloadJavadoc = true
-        isDownloadSources = true
-    }
-}
-
-sourceSets {
-    main {
-        java.srcDirs(layout.buildDirectory.files("generated/lexer", "generated/parser"))
-    }
-}
-
 repositories {
     mavenCentral()
-    maven("https://maven.kikugie.dev/releases")
-    maven("https://repo.gradle.org/gradle/libs-releases")
+    maven("https://maven.kikugie.dev/releases/")
+    maven("https://maven.kikugie.dev/third-party/")
+    maven("https://repo.gradle.org/gradle/libs-releases/")
     maven("https://central.sonatype.com/repository/maven-snapshots/")
 
     intellijPlatform {
@@ -49,6 +36,7 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.antlr.adapter)
     implementation(common.misc.semver)
     implementation(common.misc.commons)
     implementation(common.kotlin.serialization)
@@ -85,8 +73,6 @@ tasks {
             freeCompilerArgs.add("-Xjvm-default=all")
             freeCompilerArgs.add("-Xnested-type-aliases")
         }
-
-        dependsOn(generateLexer, generateParser)
     }
 
     processResources {
@@ -96,20 +82,6 @@ tasks {
         filesMatching("**/plugin.xml") {
             filter<ReplaceTokens>("tokens" to mapOf("sync-contributor" to sync))
         }
-    }
-
-    generateLexer {
-        sourceFile = rootProject.file("src/main/kotlin/dev/kikugie/stonecutter/intellij/lang/impl/StitcherImplLexer.flex")
-        targetOutputDir = layout.buildDirectory.dir("generated/lexer/dev/kikugie/stonecutter/intellij/lang/impl")
-        purgeOldFiles = true
-    }
-
-    generateParser {
-        sourceFile = rootProject.file("src/main/kotlin/dev/kikugie/stonecutter/intellij/lang/impl/StitcherImplParser.bnf")
-        targetRootOutputDir = layout.buildDirectory.dir("generated/parser")
-        pathToParser = "" // Defined in the .bnf
-        pathToPsiRoot = "" // Defined in the .bnf
-        purgeOldFiles = true
     }
 
     patchPluginXml {

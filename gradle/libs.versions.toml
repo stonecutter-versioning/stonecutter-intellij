@@ -2,10 +2,11 @@
 intellij = "2.7.1"
 grammarkit = "2022.3.2.2"
 commonmark = "0.24.0"
+adaptor = "0.2+latest" # https://maven.kikugie.dev/#/third-party/org/antlr/antlr4-intellij-adaptor because it's not on maven central :/
 
 [plugins]
 intellij = { id = "org.jetbrains.intellij.platform", version.ref = "intellij" }
-grammarkit = { id = "org.jetbrains.grammarkit", version.ref = "grammarkit" }
 
 [libraries]
+antlr-adapter = { group="org.antlr", name = "antlr4-intellij-adaptor", version.ref = "adaptor" }
 commonmark = { group = "org.commonmark", name = "commonmark", version.ref = "commonmark" }
