@@ -16,6 +16,15 @@ internal val PsiElement.childrenSequence: Sequence<PsiElement>
         }
     }
 
+internal val PsiElement.reverseChildrenSequence: Sequence<PsiElement>
+    get() = sequence {
+        var child: PsiElement? = lastChild
+        while (child != null) {
+            yield(child)
+            child = child.prevSibling
+        }
+    }
+
 internal val PsiElement.prevSiblings: Sequence<PsiElement>
     get() = generateSequence({ prevSibling }, { it.prevSibling })
 
@@ -25,32 +34,14 @@ internal val PsiElement.nextSiblings: Sequence<PsiElement>
 internal fun Sequence<PsiElement>.filterNotWhitespace(): Sequence<PsiElement> =
     filter { it !is PsiWhiteSpace }
 
-internal fun PsiElement.childOfType(type: IElementType): PsiElement =
-    childOfTypeOrNull(type) ?: error("No child with type $type found")
+internal fun Sequence<PsiElement>.elementOfType(type: IElementType): PsiElement? =
+    find { it.elementType == type }
 
-internal fun PsiElement.childOfTypeOrNull(type: IElementType): PsiElement? =
-    childrenSequence.find { it.elementType == type }
+internal fun Sequence<PsiElement>.elementOfAnyType(vararg types: IElementType): PsiElement? =
+    find { it.elementType in types }
 
-internal fun PsiElement.tokenOfType(type: Int): PsiElement =
-    tokenOfTypeOrNull(type) ?: error("No child with type $type found")
+internal fun Sequence<PsiElement>.elementOfToken(type: Int): PsiElement? =
+    find { it.antlrType == type }
 
-internal fun PsiElement.tokenOfTypeOrNull(type: Int): PsiElement? =
-    childrenSequence.find { it.antlrType == type }
-
-internal fun PsiElement.ruleOfType(type: Int): PsiElement =
-    tokenOfTypeOrNull(type) ?: error("No child with type $type found")
-
-internal fun PsiElement.ruleOfTypeOrNull(type: Int): PsiElement? =
-    childrenSequence.find { it.antlrRule == type }
-
-internal fun PsiElement.childrenSeqOfType(type: IElementType): Sequence<PsiElement> =
-    childrenSequence.filter { it.elementType == type }
-
-internal fun PsiElement.tokenSeqOfType(type: Int): Sequence<PsiElement> =
-    childrenSequence.filter { it.antlrType == type }
-
-internal fun PsiElement.ruleSeqOfType(type: Int): Sequence<PsiElement> =
-    childrenSequence.filter { it.antlrRule == type }
-
-internal inline fun <reified T : PsiElement> PsiElement.childrenSeqOfType(): Sequence<T> =
-    childrenSequence.filterIsInstance<T>()
+internal fun Sequence<PsiElement>.elementOfAnyToken(vararg types: Int): PsiElement? =
+    find { it.antlrType in types }

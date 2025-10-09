@@ -22,7 +22,7 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiVersionPredicate
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiPredicate
 import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory.defineLanguageIElementTypes
@@ -70,8 +70,8 @@ class StitcherParserDef : ParserDefinition {
         StitcherParserExtras.RULE_conditionExpression_assignment -> PsiExpression.Assignment(node)
         StitcherParserExtras.RULE_conditionExpression_constant -> PsiExpression.Constant(node)
 
-        StitcherParserExtras.RULE_versionPredicate_semantic -> PsiVersionPredicate.Semantic(node)
-        StitcherParserExtras.RULE_versionPredicate_string -> PsiVersionPredicate.String(node)
+        StitcherParserExtras.RULE_versionPredicate_semantic -> PsiPredicate.Semantic(node)
+        StitcherParserExtras.RULE_versionPredicate_string -> PsiPredicate.String(node)
 
         StitcherParser.RULE_definition -> PsiDefinition(node)
         StitcherParser.RULE_replacement -> PsiReplacement(node)
