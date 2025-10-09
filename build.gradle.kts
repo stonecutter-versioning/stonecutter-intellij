@@ -4,7 +4,6 @@ import org.commonmark.renderer.html.HtmlRenderer
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    antlr
     `java-library`
     alias(libs.plugins.intellij)
     alias(common.plugins.kotlin.jvm)
@@ -36,6 +35,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":lang"))
     implementation(libs.antlr.adapter)
     implementation(common.misc.semver)
     implementation(common.misc.commons)

@@ -26,5 +26,6 @@ stonecutter {
     }
 }
 
+include("lang")
 rootProject.name = "stonecutter-intellij"
 

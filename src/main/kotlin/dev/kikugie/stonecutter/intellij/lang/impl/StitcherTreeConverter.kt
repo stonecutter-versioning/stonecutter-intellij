@@ -1,0 +1,73 @@
+package dev.kikugie.stonecutter.intellij.lang.impl
+
+import com.intellij.lang.PsiBuilder
+import com.intellij.openapi.progress.ProgressIndicatorProvider
+import com.intellij.psi.tree.IElementType
+import dev.kikugie.stonecutter.intellij.lang.StitcherLang
+import org.antlr.intellij.adaptor.parser.ANTLRParseTreeToPSIConverter
+import org.antlr.v4.runtime.ParserRuleContext
+
+private inline fun checked(action: () -> Unit) {
+    ProgressIndicatorProvider.checkCanceled()
+    action()
+}
+
+@Suppress("PublicApiImplicitType")
+class StitcherTreeConverter(parser: StitcherParser, builder: PsiBuilder) :
+    ANTLRParseTreeToPSIConverter(StitcherLang, parser, builder),
+    StitcherListener {
+    override fun enterDefinition(ctx: StitcherParser.DefinitionContext) = mark()
+    override fun exitDefinition(ctx: StitcherParser.DefinitionContext) = release(ctx)
+
+    override fun enterReplacement(ctx: StitcherParser.ReplacementContext) = mark()
+    override fun exitReplacement(ctx: StitcherParser.ReplacementContext) = release(ctx)
+
+    override fun enterSwap(ctx: StitcherParser.SwapContext) = mark()
+    override fun exitSwap(ctx: StitcherParser.SwapContext) = release(ctx)
+
+    override fun enterCondition(ctx: StitcherParser.ConditionContext) = mark()
+    override fun exitCondition(ctx: StitcherParser.ConditionContext) = release(ctx)
+
+    // Avoid boxing the opener
+    override fun enterScopeOpener(ctx: StitcherParser.ScopeOpenerContext) = Unit
+    override fun exitScopeOpener(ctx: StitcherParser.ScopeOpenerContext) = Unit
+
+    override fun enterSwapArguments(ctx: StitcherParser.SwapArgumentsContext) = mark()
+    override fun exitSwapArguments(ctx: StitcherParser.SwapArgumentsContext) = release(ctx)
+
+    override fun enterAssignment(ctx: StitcherParser.AssignmentContext) = mark()
+    override fun exitAssignment(ctx: StitcherParser.AssignmentContext) =
+        release(ruleElementTypes[StitcherParserExtras.RULE_conditionExpression_assignment])
+
+    override fun enterUnary(ctx: StitcherParser.UnaryContext) = mark()
+    override fun exitUnary(ctx: StitcherParser.UnaryContext) =
+        release(ruleElementTypes[StitcherParserExtras.RULE_conditionExpression_unary])
+
+    override fun enterGroup(ctx: StitcherParser.GroupContext) = mark()
+    override fun exitGroup(ctx: StitcherParser.GroupContext) =
+        release(ruleElementTypes[StitcherParserExtras.RULE_conditionExpression_group])
+
+    override fun enterConstant(ctx: StitcherParser.ConstantContext) = mark()
+    override fun exitConstant(ctx: StitcherParser.ConstantContext) =
+        release(ruleElementTypes[StitcherParserExtras.RULE_conditionExpression_constant])
+
+    override fun enterBinary(ctx: StitcherParser.BinaryContext) = mark()
+    override fun exitBinary(ctx: StitcherParser.BinaryContext) =
+        release(ruleElementTypes[StitcherParserExtras.RULE_conditionExpression_binary])
+
+    override fun enterSemantic(ctx: StitcherParser.SemanticContext) = mark()
+    override fun exitSemantic(ctx: StitcherParser.SemanticContext) = release(ctx)
+
+    override fun enterString(ctx: StitcherParser.StringContext) = mark()
+    override fun exitString(ctx: StitcherParser.StringContext) = release(ctx)
+
+    override fun enterSemanticComparator(ctx: StitcherParser.SemanticComparatorContext) = mark()
+    override fun exitSemanticComparator(ctx: StitcherParser.SemanticComparatorContext) = release(ctx)
+
+    override fun enterStringComparator(ctx: StitcherParser.StringComparatorContext) = mark()
+    override fun exitStringComparator(ctx: StitcherParser.StringComparatorContext) = release(ctx)
+
+    private fun mark() = checked { markers.push(builder.mark()) }
+    private fun release(ctx: ParserRuleContext) = release(ruleElementTypes[ctx.ruleIndex])
+    private fun release(type: IElementType) = checked { markers.pop().done(type) }
+}

@@ -11,7 +11,7 @@ class StitcherFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, S
     override fun getFileType(): FileType = StitcherFileType.INSTANCE
     class StitcherFileType : LanguageFileType(StitcherLang), TemplateLanguageFileType {
         @Suppress("CompanionObjectInExtension") companion object {
-            @JvmField val INSTANCE = StitcherFileType()
+            @JvmField val INSTANCE: StitcherFileType = StitcherFileType()
         }
         override fun getName(): String = "Stitcher"
         override fun getDescription(): String = "Stitcher comments"

@@ -1,4 +1,5 @@
 [versions]
+antlr = "4.13.2"
 intellij = "2.7.1"
 grammarkit = "2022.3.2.2"
 commonmark = "0.24.0"
@@ -8,5 +9,7 @@ adaptor = "0.2+latest" # https://maven.kikugie.dev/#/third-party/org/antlr/antlr
 intellij = { id = "org.jetbrains.intellij.platform", version.ref = "intellij" }
 
 [libraries]
+antlr = { group = "org.antlr", name="antlr4", version.ref = "antlr" }
+antlr-runtime = { group = "org.antlr", name="antlr4-runtime", version.ref = "antlr" }
 antlr-adapter = { group="org.antlr", name = "antlr4-intellij-adaptor", version.ref = "adaptor" }
 commonmark = { group = "org.commonmark", name = "commonmark", version.ref = "commonmark" }
