@@ -10,7 +10,7 @@ import com.intellij.openapi.util.getAndUpdateUserData
 import com.intellij.psi.PsiComment
 import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherOuterInspectionTool
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -31,7 +31,7 @@ class DuplicateReplacementVisitor(holder: ProblemsHolder, session: LocalInspecti
 
     override fun visitComment(comment: PsiComment) {
         ProgressIndicatorProvider.checkCanceled()
-        val definition = comment.commentDefinition?.element as? StitcherReplacement
+        val definition = comment.commentDefinition?.element?.component as? PsiReplacement
             ?: return
         val new = AtomicBoolean()
         session.getAndUpdateUserData(SEEN_KEY) {

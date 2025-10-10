@@ -4,12 +4,12 @@ import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.Attribu
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.cell
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.html
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.text
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
-object ConstantDocBuilder : DocumentationBuilder<StitcherConstant> {
-    override fun applyTo(builder: StringBuilder, element: StitcherConstant) = html(builder) {
+object ConstantDocBuilder : DocumentationBuilder<PsiExpression.Constant> {
+    override fun applyTo(builder: StringBuilder, element: PsiExpression.Constant) = html(builder) {
         val name = element.text
         val node = element.stonecutterNode
         signature("Constant", "condition-constants", name, AttributeKeys.CONSTANT, node)

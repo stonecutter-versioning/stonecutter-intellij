@@ -1,33 +1,17 @@
 package dev.kikugie.stonecutter.intellij.editor
 
 import com.intellij.lang.ImportOptimizer
-import com.intellij.lang.LanguageImportStatements
-import com.intellij.openapi.util.EmptyRunnable
-import com.intellij.openapi.util.TextRange
-import com.intellij.psi.*
-import com.intellij.psi.codeStyle.JavaCodeStyleManager
-import com.intellij.psi.util.endOffset
-import com.intellij.psi.util.siblings
-import com.intellij.psi.util.startOffset
-import dev.kikugie.stonecutter.intellij.editor.imports.CategorizedImport
-import dev.kikugie.stonecutter.intellij.editor.imports.GroupedImport
-import dev.kikugie.stonecutter.intellij.editor.imports.RegularImport
-import dev.kikugie.stonecutter.intellij.lang.access.OpenerType
-import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition
-import dev.kikugie.stonecutter.intellij.lang.access.ScopeType
-import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
-import dev.kikugie.stonecutter.intellij.lang.util.openerType
-import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
-import dev.kikugie.stonecutter.intellij.util.childrenSequence
-import dev.kikugie.stonecutter.intellij.util.filterNotWhitespace
-import dev.kikugie.stonecutter.intellij.util.prevSiblings
+import com.intellij.psi.PsiFile
 import kotlinx.coroutines.Runnable
 
+// FIXME: temporarily disabled
 class StitcherImportOptimizer : ImportOptimizer {
-    override fun supports(file: PsiFile): Boolean = file is PsiJavaFile
-        && StonecutterSettings.STATE.useImportOptimizer
+    override fun supports(file: PsiFile): Boolean = false
+        // file is PsiJavaFile && StonecutterSettings.STATE.useImportOptimizer
 
     override fun processFile(file: PsiFile): Runnable {
+        return Runnable {  }
+        /*
         val imports: PsiImportList = (file as? PsiJavaFile)?.importList
             ?: return EmptyRunnable.getInstance()
 
@@ -39,8 +23,11 @@ class StitcherImportOptimizer : ImportOptimizer {
             return file.getNativeOptimiser().processFile(file)
 
         return Runnable { groups.replaceImports(file, optimized) }
+
+         */
     }
 
+    /*
     private fun List<CategorizedImport>.replaceImports(file: PsiJavaFile, optimized: PsiImportList) {
         val range = textRange()
         val block = rearrangeImports(optimized).removeSuffix("\n")
@@ -130,4 +117,6 @@ class StitcherImportOptimizer : ImportOptimizer {
 
     private inline fun Sequence<PsiElement>.findDefinition(check: (ScopeDefinition) -> Boolean): PsiElement? = filterNotWhitespace()
         .find { (it as? PsiComment)?.commentDefinition?.element?.let(check) ?: false }
+
+     */
 }

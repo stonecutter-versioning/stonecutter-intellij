@@ -15,11 +15,11 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.templateLanguages.TemplateDataLanguageMappings
 import com.intellij.psi.tree.IElementType
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
-import dev.kikugie.stonecutter.intellij.lang.StitcherLexer
-import dev.kikugie.stonecutter.intellij.lang.StitcherTokenType
-import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes.*
-
-private val APPLICABLE_TYPES = arrayOf(CONDITION, SWAP, REPLACEMENT_ID)
+import dev.kikugie.stonecutter.intellij.lang.StitcherLang
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
+import dev.kikugie.stonecutter.intellij.lang.util.antlrType
+import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor
 
 private fun StitcherSyntaxHighlighter.TemplateHighlighter.configure(project: Project?, file: VirtualFile?) {
     val type = if (project == null || file == null) FileTypes.PLAIN_TEXT
@@ -27,8 +27,7 @@ private fun StitcherSyntaxHighlighter.TemplateHighlighter.configure(project: Pro
         ?.associatedFileType ?: StitcherFile.StitcherFileType.INSTANCE
     val outer = SyntaxHighlighterFactory.getSyntaxHighlighter(type, project, file)
         ?.let { LayerDescriptor(it, "", TextAttributesKey.createTempTextAttributesKey("EMPTY", TextAttributes.ERASE_MARKER)) }
-    if (outer != null) for (it in APPLICABLE_TYPES)
-        registerLayer(it, outer)
+    if (outer != null) registerLayer(StitcherLang.ruleTypeOf(StitcherParser.RULE_definition), outer)
 }
 
 class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
@@ -53,20 +52,37 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
     }
 
     object Attribute : (IElementType?) -> TextAttributesKey? {
-        override fun invoke(type: IElementType?): TextAttributesKey? =
-            (type as? StitcherTokenType)?.matchColor()
+        override fun invoke(type: IElementType?): TextAttributesKey? = when (type.antlrType) {
+            StitcherParser.COND_MARK -> AttributeKeys.COND_MARKER
+            StitcherParser.SWAP_MARK -> AttributeKeys.SWAP_MARKER
+            StitcherParser.REPL_MARK -> AttributeKeys.REPL_MARKER
 
-        private fun StitcherTokenType.matchColor(): TextAttributesKey? = when (this) {
-            COND_MARKER -> AttributeKeys.COND_MARKER
-            SWAP_MARKER -> AttributeKeys.SWAP_MARKER
-            REPL_MARKER -> AttributeKeys.REPL_MARKER
-            COMPARATOR, UNARY, BINARY, ASSIGN -> AttributeKeys.OPERATOR
-            VERSION, NUMERIC, DASH, PLUS, DOT -> AttributeKeys.VERSION
-            IDENTIFIER -> AttributeKeys.IDENTIFIER
-            LITERAL, QUOTED -> AttributeKeys.LITERAL
-            COMMENT -> AttributeKeys.COMMENT
-            LEFT_BRACE, RIGHT_BRACE, OPENER, CLOSER -> AttributeKeys.BRACES
-            SUGAR_IF, SUGAR_ELIF, SUGAR_ELSE -> AttributeKeys.KEYWORD
+            StitcherParser.COMMON_COMP,
+            StitcherParser.SEMVER_COMP,
+            StitcherParser.OP_NOT,
+            StitcherParser.OP_AND,
+            StitcherParser.OP_OR,
+            StitcherParser.OP_ASSIGN -> AttributeKeys.OPERATOR
+
+            StitcherParser.NUMERIC,
+            StitcherParser.DOT,
+            StitcherParser.DASH,
+            StitcherParser.PLUS -> AttributeKeys.VERSION
+
+            StitcherParser.SUGAR_IF,
+            StitcherParser.SUGAR_ELIF,
+            StitcherParser.SUGAR_ELSE -> AttributeKeys.KEYWORD
+
+            StitcherParser.LEFT_BRACE,
+            StitcherParser.RIGHT_BRACE,
+            StitcherParser.SCOPE_OPEN,
+            StitcherParser.SCOPE_WORD,
+            StitcherParser.SCOPE_CLOSE -> AttributeKeys.BRACES
+
+            StitcherParser.IDENTIFIER -> AttributeKeys.IDENTIFIER
+            StitcherParser.QUOTED -> AttributeKeys.LITERAL
+            StitcherParser.COMMENT -> AttributeKeys.COMMENT
+
             else -> null
         }
     }
@@ -86,7 +102,7 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
             TemplateHighlighter(project, file, colors)
     }
 
-    override fun getHighlightingLexer(): Lexer = StitcherLexer()
+    override fun getHighlightingLexer(): Lexer = ANTLRLexerAdaptor(StitcherLang, StitcherLexer(null))
 
     override fun getTokenHighlights(type: IElementType?): Array<out TextAttributesKey> =
         Attribute(type)?.let { arrayOf(it) } ?: emptyArray()

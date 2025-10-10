@@ -4,14 +4,14 @@ import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.Attribu
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.cell
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.html
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.text
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapKey
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as DefaultColors
 
-object SwapDocBuilder : DocumentationBuilder<StitcherSwapKey> {
-    override fun applyTo(builder: StringBuilder, element: StitcherSwapKey) = html(builder) {
+object SwapDocBuilder : DocumentationBuilder<PsiSwap> {
+    override fun applyTo(builder: StringBuilder, element: PsiSwap) = html(builder) {
         val name = element.text.orEmpty()
         val node = element.stonecutterNode
         signature("Swap", "string-swaps", name, AttributeKeys.SWAP, node)

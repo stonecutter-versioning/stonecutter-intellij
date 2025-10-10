@@ -14,7 +14,7 @@ import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherOuterInspectionTool
-import dev.kikugie.stonecutter.intellij.util.childrenSequence
+import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
 import kotlin.math.min
 
 class LateReplacementVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) :

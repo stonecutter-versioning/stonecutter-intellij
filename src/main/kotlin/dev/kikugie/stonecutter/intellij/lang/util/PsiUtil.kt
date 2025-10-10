@@ -1,11 +1,9 @@
-package dev.kikugie.stonecutter.intellij.util
+package dev.kikugie.stonecutter.intellij.lang.util
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.elementType
-import dev.kikugie.stonecutter.intellij.lang.util.antlrRule
-import dev.kikugie.stonecutter.intellij.lang.util.antlrType
 
 internal val PsiElement.childrenSequence: Sequence<PsiElement>
     get() = sequence {
@@ -45,3 +43,6 @@ internal fun Sequence<PsiElement>.elementOfToken(type: Int): PsiElement? =
 
 internal fun Sequence<PsiElement>.elementOfAnyToken(vararg types: Int): PsiElement? =
     find { it.antlrType in types }
+
+internal fun Sequence<PsiElement>.elementOfRule(index: Int): PsiElement? =
+    find { it.antlrRule == index }

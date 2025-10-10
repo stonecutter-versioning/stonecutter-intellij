@@ -1,78 +1,70 @@
 package dev.kikugie.stonecutter.intellij.editor
 
-import com.intellij.codeInsight.hints.declarative.HintColorKind
-import com.intellij.codeInsight.hints.declarative.HintFontSize
-import com.intellij.codeInsight.hints.declarative.HintFormat
-import com.intellij.codeInsight.hints.declarative.HintMarginPadding
-import com.intellij.codeInsight.hints.declarative.InlayHintsCollector
-import com.intellij.codeInsight.hints.declarative.InlayHintsProvider
-import com.intellij.codeInsight.hints.declarative.InlayTreeSink
-import com.intellij.codeInsight.hints.declarative.SharedBypassCollector
-import com.intellij.codeInsight.hints.declarative.InlineInlayPosition
+import com.intellij.codeInsight.hints.declarative.*
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.ElementManipulators
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.descendants
-import com.intellij.psi.util.elementType
 import com.intellij.psi.util.endOffset
-import com.intellij.psi.util.prevLeaf
-import com.intellij.psi.util.prevLeafs
+import com.intellij.psi.util.parents
 import com.intellij.psi.util.startOffset
-import dev.kikugie.stonecutter.intellij.lang.StitcherFile
-import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes
-import dev.kikugie.stonecutter.intellij.lang.access.ConditionDefinition
-import dev.kikugie.stonecutter.intellij.lang.access.ScopeDefinition
-import dev.kikugie.stonecutter.intellij.lang.access.VersionDefinition
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherDependency
+import dev.kikugie.commons.takeAsOrNull
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiCondition
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
-import dev.kikugie.stonecutter.intellij.util.filterNotWhitespace
+
+private class StitcherHintsCollector : SharedBypassCollector {
+    override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
+        val definition = element.takeAsOrNull<PsiComment>()?.commentDefinition?.element
+            ?: return
+        val component = definition.component?.takeAsOrNull<PsiCondition>()
+            ?: return
+
+        val offset = element.startOffset + ElementManipulators.getOffsetInElement(element)
+        collectFromCondition(component, sink, offset)
+    }
+
+    private fun collectFromCondition(component: PsiCondition, sink: InlayTreeSink, offset: Int) {
+        for (element in component.descendants(canGoInside = ::isVisitable)) when (element) {
+            is PsiExpression.Constant -> collectFromConstant(element, sink, offset)
+            is PsiExpression.Assignment -> collectFromAssignment(element, sink, offset)
+        }
+    }
+
+    private fun collectFromConstant(constant: PsiExpression.Constant, sink: InlayTreeSink, offset: Int): Unit =
+        collectFromResolved(constant, sink, offset, constant.value {
+            var bool = constants[it] ?: return@value null
+            for (parent in constant.parents(false))
+                if (parent !is PsiExpression.Unary) break
+                else bool = !bool
+            bool
+        })
+
+    private fun collectFromAssignment(assignment: PsiExpression.Assignment, sink: InlayTreeSink, offset: Int): Unit =
+        collectFromResolved(assignment, sink, offset, assignment.value { dependencies[it]?.value })
+
+    private fun collectFromResolved(parameter: PsiElement, sink: InlayTreeSink, offset: Int, value: String?) {
+        if (value == null) return
+        val position = InlineInlayPosition(parameter.endOffset + offset, true)
+        val format = HintFormat(HintColorKind.TextWithoutBackground, HintFontSize.ABitSmallerThanInEditor, HintMarginPadding.MarginAndSmallerPadding)
+        sink.addPresentation(position, hintFormat = format) { text("($value)") }
+    }
+
+    private fun isVisitable(element: PsiElement): Boolean = when (element) {
+        is PsiExpression.Constant,
+        is PsiExpression.Assignment -> false
+
+        else -> true
+    }
+
+    private inline fun PsiElement.value(provider: SCProcessProperties.(String) -> Any?): String? =
+        stonecutterService.lookup.node(this)?.params?.provider(text)?.toString()
+}
 
 class StitcherHintsProvider : InlayHintsProvider {
-    override fun createCollector(file: PsiFile, editor: Editor): InlayHintsCollector = Collector()
-
-    private class Collector : SharedBypassCollector {
-        override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
-            if (element is PsiComment) element.commentDefinition?.element?.let {
-                // Carry the start of this comment because it doesn't work for injected languages
-                val offset = element.startOffset + ElementManipulators.getOffsetInElement(element)
-                collectFromDefinition(it, sink, offset)
-            }
-        }
-
-
-        private fun collectFromDefinition(definition: ScopeDefinition, sink: InlayTreeSink, offset: Int) {
-            if (definition is ConditionDefinition) for (it in definition.descendants { it !is VersionDefinition })
-                collectFromParameter(it, sink, offset)
-        }
-
-        private fun collectFromParameter(parameter: PsiElement, sink: InlayTreeSink, offset: Int) = when (parameter) {
-            is StitcherConstant -> collectFromResolved(parameter, sink, offset, parameter.value {
-                val value = constants[it] ?: return@value null
-                // Inverted constants showing the opposite hint would be inconvenient
-                var modifier = true
-                for (it in parameter.prevLeafs.filterNotWhitespace())
-                    if (it.elementType == StitcherTokenTypes.UNARY) modifier = !modifier
-                    else break
-                if (modifier) value else !value
-            })
-            is StitcherDependency -> collectFromResolved(parameter, sink, offset, parameter.value { dependencies[it]?.value })
-            else -> {}
-        }
-
-        private fun collectFromResolved(parameter: PsiElement, sink: InlayTreeSink, offset: Int, value: String?) {
-            if (value == null) return
-            val position = InlineInlayPosition(parameter.endOffset + offset, true)
-            val format = HintFormat(HintColorKind.TextWithoutBackground, HintFontSize.ABitSmallerThanInEditor, HintMarginPadding.MarginAndSmallerPadding)
-            sink.addPresentation(position, hintFormat = format) { text("($value)") }
-        }
-
-        private inline fun PsiElement.value(provider: SCProcessProperties.(String) -> Any?): String? =
-            stonecutterService.lookup.node(this)?.params?.provider(text)?.toString()
-    }
+    override fun createCollector(file: PsiFile, editor: Editor): InlayHintsCollector = StitcherHintsCollector()
 }

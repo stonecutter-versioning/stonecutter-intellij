@@ -4,14 +4,14 @@ import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.Attribu
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.cell
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.html
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.text
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherAssignment
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
-object DependencyDocBuilder : DocumentationBuilder<StitcherAssignment> {
+object DependencyDocBuilder : DocumentationBuilder<PsiExpression.Assignment> {
     // TODO: store implicit receiver in the tree
-    override fun applyTo(builder: StringBuilder, element: StitcherAssignment) = html(builder) {
-        val name = element.dependency?.text.orEmpty()
+    override fun applyTo(builder: StringBuilder, element: PsiExpression.Assignment) = html(builder) {
+        val name = element.target?.text.orEmpty()
         val node = element.stonecutterNode
         signature("Dependency", "condition-dependencies", name.ifEmpty { "minecraft" }, AttributeKeys.DEPENDENCY, node)
 

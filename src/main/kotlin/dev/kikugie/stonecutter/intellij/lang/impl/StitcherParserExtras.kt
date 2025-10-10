@@ -1,7 +1,7 @@
 package dev.kikugie.stonecutter.intellij.lang.impl
 
 object StitcherParserExtras {
-    private const val OFFSET: Int = 12
+    private const val OFFSET: Int = 14
 
     const val RULE_conditionExpression_binary: Int = 0 + OFFSET
     const val RULE_conditionExpression_unary: Int = 1 + OFFSET

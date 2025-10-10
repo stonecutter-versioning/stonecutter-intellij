@@ -6,22 +6,9 @@ import com.intellij.lang.folding.FoldingDescriptor
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.FoldingGroup
 import com.intellij.openapi.project.DumbAware
-import com.intellij.openapi.util.TextRange
-import com.intellij.psi.ElementManipulators
-import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.PsiTreeUtil
-import dev.kikugie.stonecutter.intellij.lang.access.OpenerType
-import dev.kikugie.stonecutter.intellij.lang.access.ScopeType
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherCondition
-import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
-import dev.kikugie.stonecutter.intellij.lang.util.openerType
-import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
-import dev.kikugie.stonecutter.intellij.settings.variants.FoldingMode
-import dev.kikugie.stonecutter.intellij.settings.variants.FoldingStyle
-import dev.kikugie.stonecutter.intellij.util.filterNotWhitespace
-import dev.kikugie.stonecutter.intellij.util.prevSiblings
 
+// FIXME: temporarily disabled
 class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     object Constants {
         @JvmField val STITCHER_SCOPE = FoldingGroup.newGroup("stitcher-scope")
@@ -34,18 +21,20 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
         }
     }
 
-    private enum class CommentType { INDEPENDENT, SCOPED, OPEN, EXTENSION, CLOSED }
-
     override fun isCollapsedByDefault(node: ASTNode): Boolean = true
     override fun getPlaceholderText(node: ASTNode): String = ""
     override fun buildFoldRegions(root: PsiElement, document: Document, quick: Boolean): Array<out FoldingDescriptor> {
+        return emptyArray()
+        /*
         if (StonecutterSettings.STATE.foldDisabledBlocks == FoldingMode.DISABLED) return emptyArray()
 
         val comments: MutableList<Pair<PsiComment, CommentType>> = mutableListOf()
         PsiTreeUtil.findChildrenOfType(root, PsiComment::class.java).mapTo(comments) { it to it.type(comments.lastOrNull()) }
         return buildFoldingDescriptors(comments).toTypedArray()
+         */
     }
 
+    /*
     private fun PsiComment.type(previous: Pair<PsiComment, CommentType>?): CommentType = when (val injected = commentDefinition) {
         null -> previous?.let { (comment, type) ->
             val last = prevSiblings.filterNotWhitespace().firstOrNull()
@@ -139,4 +128,5 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
         val isLineComment = content.substring(valueRange.endOffset).isBlank()
         return if (isLineComment) valueRange.replace(content, title) else title
     }
+     */
 }

@@ -5,7 +5,7 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.psi.PsiElementVisitor
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherVisitor
+import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherPsiVisitor
 
 /**
  * Implements a local inspection using a problem collecting [Visitor].
@@ -23,7 +23,7 @@ import dev.kikugie.stonecutter.intellij.lang.psi.StitcherVisitor
  */
 abstract class StitcherLocalInspectionTool(private val instantiator: (ProblemsHolder, LocalInspectionToolSession) -> Visitor) :
     LocalInspectionTool(), DumbAware {
-    abstract class Visitor(protected val holder: ProblemsHolder, protected val session: LocalInspectionToolSession) : StitcherVisitor()
+    abstract class Visitor(protected val holder: ProblemsHolder, protected val session: LocalInspectionToolSession) : StitcherPsiVisitor()
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean, session: LocalInspectionToolSession): PsiElementVisitor =
         instantiator(holder, session)

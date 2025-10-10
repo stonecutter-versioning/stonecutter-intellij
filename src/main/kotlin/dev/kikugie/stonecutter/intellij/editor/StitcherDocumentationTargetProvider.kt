@@ -6,17 +6,15 @@ import com.intellij.platform.backend.documentation.DocumentationTargetProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parents
-import dev.kikugie.stonecutter.intellij.editor.documentation.ASTInspectionBuilder
-import dev.kikugie.stonecutter.intellij.editor.documentation.ConstantDocBuilder
-import dev.kikugie.stonecutter.intellij.editor.documentation.DependencyDocBuilder
-import dev.kikugie.stonecutter.intellij.editor.documentation.ReplacementDocBuilder
-import dev.kikugie.stonecutter.intellij.editor.documentation.StitcherDocumentationTarget
-import dev.kikugie.stonecutter.intellij.editor.documentation.SwapDocBuilder
+import dev.kikugie.stonecutter.intellij.editor.documentation.*
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherSwapKey
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherAssignment
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherConstant
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParserExtras
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
+import dev.kikugie.stonecutter.intellij.lang.util.antlrRule
+import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
 
 class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
     override fun documentationTargets(file: PsiFile, offset: Int): List<DocumentationTarget> =
@@ -32,11 +30,19 @@ class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
     private fun findDocumentationTarget(element: PsiElement): DocumentationTarget? = element.parents(true)
         .firstNotNullOfOrNull(::matchDocumentationTarget)
 
-    private fun matchDocumentationTarget(element: PsiElement) = when(element) {
-        is StitcherSwapKey -> StitcherDocumentationTarget(element, SwapDocBuilder)
-        is StitcherConstant -> StitcherDocumentationTarget(element, ConstantDocBuilder)
-        is StitcherAssignment -> StitcherDocumentationTarget(element, DependencyDocBuilder)
-        is StitcherReplacement -> StitcherDocumentationTarget(element, ReplacementDocBuilder)
+    private fun matchDocumentationTarget(element: PsiElement): StitcherDocumentationTarget<out ANTLRPsiNode>? = when (element.antlrRule) {
+        StitcherParserExtras.RULE_conditionExpression_assignment ->
+            StitcherDocumentationTarget(element as PsiExpression.Assignment, DependencyDocBuilder)
+
+        StitcherParserExtras.RULE_conditionExpression_constant ->
+            StitcherDocumentationTarget(element as PsiExpression.Constant, ConstantDocBuilder)
+
+        StitcherParser.RULE_replacement ->
+            StitcherDocumentationTarget(element as PsiReplacement, ReplacementDocBuilder)
+
+        StitcherParser.RULE_swap ->
+            StitcherDocumentationTarget(element as PsiSwap, SwapDocBuilder)
+
         else -> null
     }
 }

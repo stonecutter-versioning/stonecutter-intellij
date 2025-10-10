@@ -5,7 +5,7 @@ import com.intellij.lang.Language
 import com.intellij.openapi.project.Project
 import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.AttributeKeys
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.*
-import dev.kikugie.stonecutter.intellij.lang.psi.StitcherReplacement
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.model.serialized.RegexReplacement
 import dev.kikugie.stonecutter.intellij.model.serialized.Replacement
 import dev.kikugie.stonecutter.intellij.model.serialized.StringReplacement
@@ -44,8 +44,8 @@ private fun RowHtmlBuilder.regexReplacement(project: Project, replacement: Regex
     cell { text(replacement.target, DefaultColors.STRING) }
 }
 
-object ReplacementDocBuilder : DocumentationBuilder<StitcherReplacement> {
-    override fun applyTo(builder: StringBuilder, element: StitcherReplacement) = html(builder) {
+object ReplacementDocBuilder : DocumentationBuilder<PsiReplacement> {
+    override fun applyTo(builder: StringBuilder, element: PsiReplacement) = html(builder) {
         val name = element.text
         val node = element.stonecutterNode
         signature("Replacement", "replacements", name, AttributeKeys.REPLACEMENT, node)

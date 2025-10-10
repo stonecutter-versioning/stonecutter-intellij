@@ -15,7 +15,7 @@ private inline fun checked(action: () -> Unit) {
 @Suppress("PublicApiImplicitType")
 class StitcherTreeConverter(parser: StitcherParser, builder: PsiBuilder) :
     ANTLRParseTreeToPSIConverter(StitcherLang, parser, builder),
-    StitcherListener {
+    StitcherParserListener {
     override fun enterDefinition(ctx: StitcherParser.DefinitionContext) = mark()
     override fun exitDefinition(ctx: StitcherParser.DefinitionContext) = release(ctx)
 
@@ -28,7 +28,7 @@ class StitcherTreeConverter(parser: StitcherParser, builder: PsiBuilder) :
     override fun enterCondition(ctx: StitcherParser.ConditionContext) = mark()
     override fun exitCondition(ctx: StitcherParser.ConditionContext) = release(ctx)
 
-    // Avoid boxing the opener
+    // Don't box the opener
     override fun enterScopeOpener(ctx: StitcherParser.ScopeOpenerContext) = Unit
     override fun exitScopeOpener(ctx: StitcherParser.ScopeOpenerContext) = Unit
 
@@ -60,12 +60,25 @@ class StitcherTreeConverter(parser: StitcherParser, builder: PsiBuilder) :
 
     override fun enterString(ctx: StitcherParser.StringContext) = mark()
     override fun exitString(ctx: StitcherParser.StringContext) = release(ctx)
+    
+    override fun enterSemanticVersion(ctx: StitcherParser.SemanticVersionContext) = mark()
+    override fun exitSemanticVersion(ctx: StitcherParser.SemanticVersionContext) = release(ctx)
 
-    override fun enterSemanticComparator(ctx: StitcherParser.SemanticComparatorContext) = mark()
-    override fun exitSemanticComparator(ctx: StitcherParser.SemanticComparatorContext) = release(ctx)
+    override fun enterStringVersion(ctx: StitcherParser.StringVersionContext) = mark()
+    override fun exitStringVersion(ctx: StitcherParser.StringVersionContext) = release(ctx)
 
-    override fun enterStringComparator(ctx: StitcherParser.StringComparatorContext) = mark()
-    override fun exitStringComparator(ctx: StitcherParser.StringComparatorContext) = release(ctx)
+    override fun enterVersionCore(ctx: StitcherParser.VersionCoreContext) = mark()
+    override fun exitVersionCore(ctx: StitcherParser.VersionCoreContext) = release(ctx)
+
+    override fun enterPreRelease(ctx: StitcherParser.PreReleaseContext) = mark()
+    override fun exitPreRelease(ctx: StitcherParser.PreReleaseContext) = release(ctx)
+
+    override fun enterBuildMetadata(ctx: StitcherParser.BuildMetadataContext) = mark()
+    override fun exitBuildMetadata(ctx: StitcherParser.BuildMetadataContext) = release(ctx)
+
+    // Don't box metadata
+    override fun enterMetadata(ctx: StitcherParser.MetadataContext) = Unit
+    override fun exitMetadata(ctx: StitcherParser.MetadataContext) = Unit
 
     private fun mark() = checked { markers.push(builder.mark()) }
     private fun release(ctx: ParserRuleContext) = release(ruleElementTypes[ctx.ruleIndex])

@@ -6,14 +6,39 @@ import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElement
 import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherLocalInspectionTool
-import dev.kikugie.stonecutter.intellij.lang.access.ReferenceType.Companion.referenceType
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 
 class NamingConventionVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
-    override fun visitElement(element: PsiElement) {
-        val type = element.referenceType ?: return
-        if (!element.text.isConventional()) holder.registerProblem(
-            element,
-            StonecutterBundle.message("stonecutter.inspection.naming.${type.id}"),
+    override fun visitConstant(o: PsiExpression.Constant) {
+        if (!o.text.isConventional()) holder.registerProblem(
+            o,
+            StonecutterBundle.message("stonecutter.inspection.naming.constant"),
+            ProblemHighlightType.WEAK_WARNING
+        )
+    }
+
+    override fun visitAssignment(o: PsiExpression.Assignment) {
+        if (o.target?.text?.isConventional() == false) holder.registerProblem(
+            o,
+            StonecutterBundle.message("stonecutter.inspection.naming.dependency"),
+            ProblemHighlightType.WEAK_WARNING
+        )
+    }
+
+    override fun visitSwap(o: PsiSwap) {
+        if (o.identifier?.text?.isConventional() == false) holder.registerProblem(
+            o,
+            StonecutterBundle.message("stonecutter.inspection.naming.swap"),
+            ProblemHighlightType.WEAK_WARNING
+        )
+    }
+
+    override fun visitReplacement(o: PsiReplacement) {
+        if (!o.text.isConventional()) holder.registerProblem(
+            o,
+            StonecutterBundle.message("stonecutter.inspection.naming.replacement"),
             ProblemHighlightType.WEAK_WARNING
         )
     }

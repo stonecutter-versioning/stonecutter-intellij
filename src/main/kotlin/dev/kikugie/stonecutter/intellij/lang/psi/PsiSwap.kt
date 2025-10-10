@@ -8,8 +8,10 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiComponent.Type
 import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
 import dev.kikugie.stonecutter.intellij.lang.util.cached
-import dev.kikugie.stonecutter.intellij.util.childrenSequence
+import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
+
+private val SWAP_ARGS = intArrayOf(StitcherParser.IDENTIFIER, StitcherParser.QUOTED)
 
 class PsiSwap(node: ASTNode) : ANTLRPsiNode(node), PsiComponent {
     val identifier: PsiElement? get() = firstChild?.takeIf { it.antlrType == StitcherParser.IDENTIFIER }
@@ -26,6 +28,7 @@ class PsiSwap(node: ASTNode) : ANTLRPsiNode(node), PsiComponent {
     }
 
     class Args(node: ASTNode) : ANTLRPsiNode(node) {
+        val entries: Sequence<PsiElement> get() = childrenSequence.filter { it.antlrType in SWAP_ARGS }
         fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitSwapArgs(this)
     }
 }

@@ -4,11 +4,12 @@ import com.intellij.lang.BracePair
 import com.intellij.lang.PairedBraceMatcher
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
-import dev.kikugie.stonecutter.intellij.lang.StitcherTokenTypes
+import dev.kikugie.stonecutter.intellij.lang.StitcherLang
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 
 class StitcherBraceMatcher : PairedBraceMatcher {
     private val BRACES: Array<BracePair> = arrayOf(
-        BracePair(StitcherTokenTypes.LEFT_BRACE, StitcherTokenTypes.RIGHT_BRACE, false)
+        BracePair(StitcherLang.tokenTypeOf(StitcherParser.LEFT_BRACE), StitcherLang.tokenTypeOf(StitcherParser.RIGHT_BRACE), false)
     )
 
     override fun getPairs(): Array<out BracePair?> = BRACES
