@@ -55,8 +55,6 @@ private fun StitcherCompletionContributor.registerPatterns() {
 
     psiAntlrToken(StitcherParser.IDENTIFIER).withParent<PsiExpression.Constant>() register { params, result ->
         with(params.stonecutter ?: return@register) {
-            dependencies[""]?.value
-                ?.let { result.addElement(LookupElementBuilder.create(it)) }
             constants.keys
                 .map(LookupElementBuilder::create)
                 .ifNotEmpty(result::addAllElements)
@@ -64,11 +62,6 @@ private fun StitcherCompletionContributor.registerPatterns() {
                 .map { LookupElementBuilder.create("$it:") }
                 .ifNotEmpty(result::addAllElements)
         }
-    }
-
-    psiAntlrToken(StitcherParser.NUMERIC).withParent(psiAntlrRule(StitcherParser.RULE_semanticVersion)) register { params, result ->
-        params.stonecutter?.dependencies?.get("")?.value
-            ?.let { result.addElement(LookupElementBuilder.create(it)) }
     }
 }
 

@@ -26,7 +26,7 @@ private fun PsiElement?.toVersionOperator(): VersionOperator = when(val text = t
     else -> error("Invalid operator $text")
 }
 
-sealed interface PsiPredicate {
+sealed interface PsiPredicate : DefaultScopeNode {
     val operator: VersionOperator
     val version: PsiVersion
     val parsed: VersionPredicate get() = VersionPredicate(operator, version.parsed)

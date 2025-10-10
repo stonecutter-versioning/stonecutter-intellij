@@ -7,7 +7,7 @@ import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
 
-sealed interface PsiComponent : PsiElement {
+sealed interface PsiComponent : DefaultScopeNode {
     val closer: PsiElement? get() = firstChild?.takeIf { it.antlrType == StitcherParser.SCOPE_CLOSE }
     val opener: PsiElement? get() = lastChild?.takeIf { it.antlrType in SCOPE_OPENERS }
     val type: Type

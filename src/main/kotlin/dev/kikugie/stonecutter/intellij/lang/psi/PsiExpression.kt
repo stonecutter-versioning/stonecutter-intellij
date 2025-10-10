@@ -11,7 +11,7 @@ import dev.kikugie.stonecutter.intellij.lang.util.elementOfAnyToken
 import dev.kikugie.stonecutter.intellij.lang.util.elementOfToken
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
 
-sealed interface PsiExpression : PsiElement {
+sealed interface PsiExpression : DefaultScopeNode {
     fun <T> accept(visitor: StitcherVisitor<T>): T
 
     class Binary(node: ASTNode) : ANTLRPsiNode(node), PsiExpression {

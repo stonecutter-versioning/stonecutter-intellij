@@ -23,6 +23,7 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiPredicate
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiVersion
 import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory.defineLanguageIElementTypes
@@ -39,10 +40,6 @@ private val COMMENTS: TokenSet = PSIElementTypeFactory.createTokenSet(StitcherLa
 private val WHITESPACES: TokenSet = PSIElementTypeFactory.createTokenSet(StitcherLang, StitcherLexer.WHITESPACE)
 
 class StitcherParserDef : ParserDefinition {
-    init {
-        defineLanguageIElementTypes(StitcherLang, StitcherParser.VOCABULARY, StitcherParser.ruleNames + StitcherParserExtras.extraRuleNames)
-    }
-
     override fun createLexer(project: Project?): Lexer = ANTLRLexerAdaptor(StitcherLang, StitcherLexer(null))
     override fun createParser(project: Project?): PsiParser = object : ANTLRParserAdaptor(StitcherLang, StitcherParser(null)) {
         override fun createListener(parser: Parser, root: IElementType, builder: PsiBuilder): ANTLRParseTreeToPSIConverter =
@@ -78,6 +75,9 @@ class StitcherParserDef : ParserDefinition {
         StitcherParser.RULE_condition -> PsiCondition(node)
         StitcherParser.RULE_swap -> PsiSwap(node)
         StitcherParser.RULE_swapArguments -> PsiSwap.Args(node)
+
+        StitcherParser.RULE_semanticVersion -> PsiVersion.Semantic(node)
+        StitcherParser.RULE_stringVersion -> PsiVersion.String(node)
 
         else -> ANTLRPsiNode(node)
     }
