@@ -1,5 +1,6 @@
 package dev.kikugie.stonecutter.intellij.lang.psi
 
+import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import dev.kikugie.commons.collections.firstIsInstance
@@ -20,20 +21,20 @@ sealed interface PsiExpression : PsiStitcherNode {
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitBinary(this)
     }
 
-    class Unary(node: ASTNode) : ANTLRPsiNode(node), PsiExpression {
+    class Unary(node: ASTNode) : ASTWrapperPsiElement(node), PsiExpression {
         val target: PsiExpression get() = lastChild as PsiExpression
         val operator: PsiElement get() = firstChild!!
 
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitUnary(this)
     }
 
-    class Group(node: ASTNode) : ANTLRPsiNode(node), PsiExpression {
+    class Group(node: ASTNode) : ASTWrapperPsiElement(node), PsiExpression {
         val body: PsiExpression get() = childrenSequence.firstIsInstance<PsiExpression>()
 
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitGroup(this)
     }
 
-    class Assignment(node: ASTNode) : ANTLRPsiNode(node), PsiExpression {
+    class Assignment(node: ASTNode) : ASTWrapperPsiElement(node), PsiExpression {
         val target: PsiElement? get() = firstChild.takeIf { it.antlrType == StitcherLexer.IDENTIFIER }
         val operator: PsiElement? get() = childrenSequence.elementOfToken(StitcherLexer.OP_ASSIGN)
         val predicates: Sequence<PsiPredicate> get() = childrenSequence.filterIsInstance<PsiPredicate>()
@@ -41,7 +42,7 @@ sealed interface PsiExpression : PsiStitcherNode {
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitAssignment(this)
     }
 
-    class Constant(node: ASTNode) : ANTLRPsiNode(node), PsiExpression {
+    class Constant(node: ASTNode) : ASTWrapperPsiElement(node), PsiExpression {
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitConstant(this)
     }
 }

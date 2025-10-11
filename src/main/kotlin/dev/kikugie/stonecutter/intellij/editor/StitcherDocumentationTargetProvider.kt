@@ -14,8 +14,6 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.util.antlrRule
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
-
 class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
     override fun documentationTargets(file: PsiFile, offset: Int): List<DocumentationTarget> =
         if (file.language != StitcherLang) emptyList()
@@ -30,7 +28,7 @@ class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
     private fun findDocumentationTarget(element: PsiElement): DocumentationTarget? = element.parents(true)
         .firstNotNullOfOrNull(::matchDocumentationTarget)
 
-    private fun matchDocumentationTarget(element: PsiElement): StitcherDocumentationTarget<out ANTLRPsiNode>? = when (element.antlrRule) {
+    private fun matchDocumentationTarget(element: PsiElement): StitcherDocumentationTarget<out PsiElement>? = when (element.antlrRule) {
         StitcherParserExtras.RULE_conditionExpression_assignment ->
             StitcherDocumentationTarget(element as PsiExpression.Assignment, DependencyDocBuilder)
 

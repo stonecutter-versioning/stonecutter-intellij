@@ -1,5 +1,6 @@
 package dev.kikugie.stonecutter.intellij.lang.psi
 
+import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import dev.kikugie.commons.collections.findIsInstance
@@ -9,11 +10,10 @@ import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
 import dev.kikugie.stonecutter.intellij.lang.util.cached
 import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
 
 private val SWAP_ARGS = intArrayOf(StitcherParser.IDENTIFIER, StitcherParser.QUOTED)
 
-class PsiSwap(node: ASTNode) : ANTLRPsiNode(node), PsiComponent {
+class PsiSwap(node: ASTNode) : ASTWrapperPsiElement(node), PsiComponent {
     val identifier: PsiElement? get() = firstChild?.takeIf { it.antlrType == StitcherParser.IDENTIFIER }
     val arguments: Args? get() = childrenSequence.findIsInstance<Args>()
     override val type: Type by cached(PsiComponent.TYPE_KEY, ::determineType)
@@ -27,7 +27,7 @@ class PsiSwap(node: ASTNode) : ANTLRPsiNode(node), PsiComponent {
         else -> Type.LINE_OPENER
     }
 
-    class Args(node: ASTNode) : ANTLRPsiNode(node), PsiStitcherNode {
+    class Args(node: ASTNode) : ASTWrapperPsiElement(node), PsiStitcherNode {
         val entries: Sequence<PsiElement> get() = childrenSequence.filter { it.antlrType in SWAP_ARGS }
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitSwapArgs(this)
     }

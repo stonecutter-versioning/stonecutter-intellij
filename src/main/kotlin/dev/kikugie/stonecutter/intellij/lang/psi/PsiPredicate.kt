@@ -1,5 +1,6 @@
 package dev.kikugie.stonecutter.intellij.lang.psi
 
+import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import dev.kikugie.semver.data.VersionOperator
@@ -9,7 +10,6 @@ import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
 import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
 import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstance
 
 private val SEMVER_OPERATORS = intArrayOf(StitcherLexer.COMMON_COMP, StitcherLexer.SEMVER_COMP)
@@ -32,7 +32,7 @@ sealed interface PsiPredicate : PsiStitcherNode {
     val version: PsiVersion
     val parsed: VersionPredicate get() = VersionPredicate(operator, version.parsed)
 
-    class String(node: ASTNode) : ANTLRPsiNode(node), PsiPredicate {
+    class String(node: ASTNode) : ASTWrapperPsiElement(node), PsiPredicate {
         override val operator: VersionOperator
             get() = firstChild.takeIf { it.antlrType == StitcherParser.COMMON_COMP }.toVersionOperator()
 
@@ -42,7 +42,7 @@ sealed interface PsiPredicate : PsiStitcherNode {
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitStringPredicate(this)
     }
 
-    class Semantic(node: ASTNode) : ANTLRPsiNode(node), PsiPredicate {
+    class Semantic(node: ASTNode) : ASTWrapperPsiElement(node), PsiPredicate {
         override val operator: VersionOperator
             get() = firstChild.takeIf { it.antlrType in SEMVER_OPERATORS }.toVersionOperator()
 

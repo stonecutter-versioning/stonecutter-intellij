@@ -1,5 +1,6 @@
 package dev.kikugie.stonecutter.intellij.lang.psi
 
+import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import dev.kikugie.commons.collections.findIsInstance
@@ -10,11 +11,10 @@ import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
 import dev.kikugie.stonecutter.intellij.lang.util.cached
 import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
 
 private val SUGAR_TOKENS = intArrayOf(StitcherLexer.SUGAR_IF, StitcherLexer.SUGAR_ELIF, StitcherLexer.SUGAR_ELSE)
 
-class PsiCondition(node: ASTNode) : ANTLRPsiNode(node), PsiComponent {
+class PsiCondition(node: ASTNode) : ASTWrapperPsiElement(node), PsiComponent {
     val sugar: Sequence<PsiElement> get() = childrenSequence.filter { it.antlrType in SUGAR_TOKENS }
     val expression: PsiExpression? get() = childrenSequence.findIsInstance<PsiExpression>()
     override val type: Type by cached(PsiComponent.TYPE_KEY, ::determineType)
