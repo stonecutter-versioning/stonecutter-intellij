@@ -60,11 +60,13 @@ class StitcherTreeConverter(parser: StitcherParser, builder: PsiBuilder) :
         release(ruleElementTypes[StitcherParserExtras.RULE_conditionExpression_binary])
 
     override fun enterSemantic(ctx: StitcherParser.SemanticContext) = mark()
-    override fun exitSemantic(ctx: StitcherParser.SemanticContext) = release(ctx)
+    override fun exitSemantic(ctx: StitcherParser.SemanticContext) =
+        release(ruleElementTypes[StitcherParserExtras.RULE_versionPredicate_semantic])
 
     override fun enterString(ctx: StitcherParser.StringContext) = mark()
-    override fun exitString(ctx: StitcherParser.StringContext) = release(ctx)
-    
+    override fun exitString(ctx: StitcherParser.StringContext) =
+        release(ruleElementTypes[StitcherParserExtras.RULE_versionPredicate_string])
+
     override fun enterSemanticVersion(ctx: StitcherParser.SemanticVersionContext) = mark()
     override fun exitSemanticVersion(ctx: StitcherParser.SemanticVersionContext) = release(ctx)
 
