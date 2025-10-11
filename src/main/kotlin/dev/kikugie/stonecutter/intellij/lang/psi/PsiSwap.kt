@@ -27,8 +27,8 @@ class PsiSwap(node: ASTNode) : ANTLRPsiNode(node), PsiComponent {
         else -> Type.LINE_OPENER
     }
 
-    class Args(node: ASTNode) : ANTLRPsiNode(node) {
+    class Args(node: ASTNode) : ANTLRPsiNode(node), PsiStitcherNode {
         val entries: Sequence<PsiElement> get() = childrenSequence.filter { it.antlrType in SWAP_ARGS }
-        fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitSwapArgs(this)
+        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitSwapArgs(this)
     }
 }

@@ -17,16 +17,9 @@ import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParserExtras
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherTreeConverter
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiCondition
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiPredicate
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiVersion
+import dev.kikugie.stonecutter.intellij.lang.psi.*
 import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory
-import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory.defineLanguageIElementTypes
 import org.antlr.intellij.adaptor.lexer.RuleIElementType
 import org.antlr.intellij.adaptor.lexer.TokenIElementType
 import org.antlr.intellij.adaptor.parser.ANTLRParseTreeToPSIConverter

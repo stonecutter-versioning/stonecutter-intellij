@@ -11,9 +11,7 @@ import dev.kikugie.stonecutter.intellij.lang.util.elementOfAnyToken
 import dev.kikugie.stonecutter.intellij.lang.util.elementOfToken
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
 
-sealed interface PsiExpression : DefaultScopeNode {
-    fun <T> accept(visitor: StitcherVisitor<T>): T
-
+sealed interface PsiExpression : PsiStitcherNode {
     class Binary(node: ASTNode) : ANTLRPsiNode(node), PsiExpression {
         val left: PsiExpression get() = firstChild as PsiExpression
         val right: PsiExpression get() = lastChild as PsiExpression
@@ -24,7 +22,7 @@ sealed interface PsiExpression : DefaultScopeNode {
 
     class Unary(node: ASTNode) : ANTLRPsiNode(node), PsiExpression {
         val target: PsiExpression get() = lastChild as PsiExpression
-        val operator: PsiElement get() = firstChild
+        val operator: PsiElement get() = firstChild!!
 
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitUnary(this)
     }

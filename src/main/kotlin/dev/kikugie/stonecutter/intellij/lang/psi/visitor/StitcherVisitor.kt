@@ -6,6 +6,7 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiPredicate
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiVersion
 
 interface StitcherVisitor<T> {
     fun visitDefinition(o: PsiDefinition): T
@@ -18,6 +19,8 @@ interface StitcherVisitor<T> {
     fun visitGroup(o: PsiExpression.Group): T
     fun visitAssignment(o: PsiExpression.Assignment): T
     fun visitConstant(o: PsiExpression.Constant): T
-    fun visitSemantic(o: PsiPredicate.Semantic): T
-    fun visitString(o: PsiPredicate.String): T
+    fun visitSemanticPredicate(o: PsiPredicate.Semantic): T
+    fun visitStringPredicate(o: PsiPredicate.String): T
+    fun visitSemanticVersion(o: PsiVersion.Semantic): T
+    fun visitStringVersion(o: PsiVersion.String): T
 }

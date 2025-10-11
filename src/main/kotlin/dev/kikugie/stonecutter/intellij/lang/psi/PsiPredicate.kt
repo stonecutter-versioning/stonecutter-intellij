@@ -27,22 +27,10 @@ private fun PsiElement?.toVersionOperator(): VersionOperator = when(val text = t
     else -> error("Invalid operator $text")
 }
 
-sealed interface PsiPredicate : DefaultScopeNode {
+sealed interface PsiPredicate : PsiStitcherNode {
     val operator: VersionOperator
     val version: PsiVersion
     val parsed: VersionPredicate get() = VersionPredicate(operator, version.parsed)
-
-    fun <T> accept(visitor: StitcherVisitor<T>): T
-
-    class Semantic(node: ASTNode) : ANTLRPsiNode(node), PsiPredicate {
-        override val operator: VersionOperator
-            get() = firstChild.takeIf { it.antlrType in SEMVER_OPERATORS }.toVersionOperator()
-
-        override val version: PsiVersion
-            get() = childrenSequence.firstIsInstance<PsiVersion.Semantic>()
-
-        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitSemantic(this)
-    }
 
     class String(node: ASTNode) : ANTLRPsiNode(node), PsiPredicate {
         override val operator: VersionOperator
@@ -51,6 +39,16 @@ sealed interface PsiPredicate : DefaultScopeNode {
         override val version: PsiVersion
             get() = childrenSequence.firstIsInstance<PsiVersion.String>()
 
-        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitString(this)
+        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitStringPredicate(this)
+    }
+
+    class Semantic(node: ASTNode) : ANTLRPsiNode(node), PsiPredicate {
+        override val operator: VersionOperator
+            get() = firstChild.takeIf { it.antlrType in SEMVER_OPERATORS }.toVersionOperator()
+
+        override val version: PsiVersion
+            get() = childrenSequence.firstIsInstance<PsiVersion.Semantic>()
+
+        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitSemanticPredicate(this)
     }
 }

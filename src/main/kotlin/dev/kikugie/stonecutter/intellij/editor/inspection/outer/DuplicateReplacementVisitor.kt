@@ -31,8 +31,9 @@ class DuplicateReplacementVisitor(holder: ProblemsHolder, session: LocalInspecti
 
     override fun visitComment(comment: PsiComment) {
         ProgressIndicatorProvider.checkCanceled()
-        val definition = comment.commentDefinition?.element?.component as? PsiReplacement
-            ?: return
+        val definition = comment.commentDefinition?.element ?: return
+        if (definition.component !is PsiReplacement) return
+
         val new = AtomicBoolean()
         session.getAndUpdateUserData(SEEN_KEY) {
             (it ?: mutableSetOf()).apply { new.set(add(definition.text)) }
