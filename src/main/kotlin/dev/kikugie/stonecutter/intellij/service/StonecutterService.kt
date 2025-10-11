@@ -50,6 +50,7 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
         private set
 
     internal suspend fun reset(projects: Map<String, String>) = withBackgroundProgress(project, "Updating Stonecutter models") {
+        runCatching { output }.onFailure { return@withBackgroundProgress }
         output.parent.createDirectories()
         output.writeText("", Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)
         lookup = SCModelLookupImpl().apply {

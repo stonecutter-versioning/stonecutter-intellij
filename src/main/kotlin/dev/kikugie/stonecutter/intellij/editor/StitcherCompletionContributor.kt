@@ -36,33 +36,39 @@ private inline fun <reified T : PsiElement> PsiElementPattern.Capture<out PsiEle
 private inline fun <reified T : PsiElement> PsiElementPattern.Capture<out PsiElement>.inside() =
     inside(T::class.java)
 
+private fun formatSwap(value: String, length: Int): String {
+    val line = value.lineSequence().first()
+    return if (line.length == value.length && line.length <= length) line
+    else line.take(length - 3) + "..."
+}
+
 private fun StitcherCompletionContributor.registerPatterns() {
     psiAntlrToken(StitcherLexer.IDENTIFIER).withParent<PsiReplacement>() register { params, result ->
-        params.stonecutter?.replacements.orEmpty()
-            .mapNotNull { create(it.identifier ?: return@mapNotNull null).withIcon(Reference.REPLACEMENT) }
-            .ifNotEmpty(result::addAllElements)
+        params.stonecutter?.replacements.orEmpty().mapNotNull {
+            create(it.identifier ?: return@mapNotNull null).withIcon(Reference.REPLACEMENT)
+        }.ifNotEmpty(result::addAllElements)
     }
 
     psiAntlrToken(StitcherLexer.IDENTIFIER).withParent<PsiSwap>() register { params, result ->
-        params.stonecutter?.swaps?.keys.orEmpty()
-            .map { create(it).withIcon(Reference.SWAP) }
-            .ifNotEmpty(result::addAllElements)
+        params.stonecutter?.swaps.orEmpty().map { (k, v) ->
+            create(k).withIcon(Reference.SWAP).withTailText(" " + formatSwap(k, 30))
+        }.ifNotEmpty(result::addAllElements)
     }
 
     psiAntlrToken(StitcherLexer.IDENTIFIER).withParent<PsiExpression.Assignment>() register { params, result ->
-        params.stonecutter?.dependencies?.keys.orEmpty()
-            .map { create(it).withIcon(Reference.DEPENDENCY) }
-            .ifNotEmpty(result::addAllElements)
+        params.stonecutter?.dependencies.orEmpty().map { (k, v) ->
+            create(k).withIcon(Reference.DEPENDENCY).withTailText(" " + v.value)
+        }.ifNotEmpty(result::addAllElements)
     }
 
     psiAntlrToken(StitcherLexer.IDENTIFIER).withParent<PsiExpression.Constant>() register { params, result ->
         with(params.stonecutter ?: return@register) {
-            constants.keys
-                .map { create(it).withIcon(Reference.CONSTANT) }
-                .ifNotEmpty(result::addAllElements)
-            dependencies.keys
-                .map { create("$it:").withIcon(Reference.DEPENDENCY) }
-                .ifNotEmpty(result::addAllElements)
+            constants.map { (k, v) ->
+                create(k).withIcon(Reference.CONSTANT).withTailText(" " + v)
+            }.ifNotEmpty(result::addAllElements)
+            dependencies.map { (k, v) ->
+                create("$k:").withIcon(Reference.DEPENDENCY).withTailText(" " + v.value)
+            }.ifNotEmpty(result::addAllElements)
         }
     }
 }
