@@ -72,7 +72,7 @@ class StitcherCompletionContributor : CompletionContributor(), DumbAware {
 
     internal inline infix fun ElementPattern<out PsiElement>.register(
         crossinline action: (params: CompletionParameters, result: CompletionResultSet) -> Unit
-    ): Unit = extend(CompletionType.SMART, this, object : CompletionProvider<CompletionParameters>() {
+    ): Unit = extend(CompletionType.BASIC, this, object : CompletionProvider<CompletionParameters>() {
         override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
             action(parameters, result)
         }
