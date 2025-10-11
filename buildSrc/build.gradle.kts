@@ -1,0 +1,11 @@
+plugins {
+    kotlin("jvm") version "2.2.20"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("net.lingala.zip4j:zip4j:2.11.5")
+}

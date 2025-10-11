@@ -87,6 +87,16 @@ tasks {
     patchPluginXml {
         dependsOn("stonecutterGenerate")
     }
+
+    val sanitize = register<SanitizeDistributionTask>("sanitizeBuild") {
+        group = "build"
+        file = buildPlugin.map { it.archiveFile.get() }
+        patterns.addAll("icu4j", "ST4", "antlr-runtime", "antlr4-4", "org.abego", "kotlin-stdlib")
+    }
+
+    buildPlugin {
+        finalizedBy(sanitize)
+    }
 }
 
 intellijPlatform {
