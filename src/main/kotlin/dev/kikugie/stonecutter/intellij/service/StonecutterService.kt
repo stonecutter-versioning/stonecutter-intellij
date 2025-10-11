@@ -44,8 +44,8 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
     }
 
     private val json = Json { ignoreUnknownKeys = true }
-    private val output = Path(PathManager.getLogPath()).resolve("stonecutter-log/latest.log")
-    private val logger = SCLogger("StonecutterService", output)
+    private val output by lazy { Path(PathManager.getLogPath()).resolve("stonecutter-log/latest.log") }
+    private val logger by lazy { SCLogger("StonecutterService", output) }
     var lookup: SCModelLookup = SCModelLookupImpl()
         private set
 

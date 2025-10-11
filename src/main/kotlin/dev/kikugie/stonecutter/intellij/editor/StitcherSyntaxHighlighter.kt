@@ -53,35 +53,35 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
 
     object Attribute : (IElementType?) -> TextAttributesKey? {
         override fun invoke(type: IElementType?): TextAttributesKey? = when (type.antlrType) {
-            StitcherParser.COND_MARK -> AttributeKeys.COND_MARKER
-            StitcherParser.SWAP_MARK -> AttributeKeys.SWAP_MARKER
-            StitcherParser.REPL_MARK -> AttributeKeys.REPL_MARKER
+            StitcherLexer.COND_MARK -> AttributeKeys.COND_MARKER
+            StitcherLexer.SWAP_MARK -> AttributeKeys.SWAP_MARKER
+            StitcherLexer.REPL_MARK -> AttributeKeys.REPL_MARKER
 
-            StitcherParser.COMMON_COMP,
-            StitcherParser.SEMVER_COMP,
-            StitcherParser.OP_NOT,
-            StitcherParser.OP_AND,
-            StitcherParser.OP_OR,
-            StitcherParser.OP_ASSIGN -> AttributeKeys.OPERATOR
+            StitcherLexer.COMMON_COMP,
+            StitcherLexer.SEMVER_COMP,
+            StitcherLexer.OP_NOT,
+            StitcherLexer.OP_AND,
+            StitcherLexer.OP_OR,
+            StitcherLexer.OP_ASSIGN -> AttributeKeys.OPERATOR
 
-            StitcherParser.NUMERIC,
-            StitcherParser.DOT,
-            StitcherParser.DASH,
-            StitcherParser.PLUS -> AttributeKeys.VERSION
+            StitcherLexer.NUMERIC,
+            StitcherLexer.DOT,
+            StitcherLexer.DASH,
+            StitcherLexer.PLUS -> AttributeKeys.VERSION
 
-            StitcherParser.SUGAR_IF,
-            StitcherParser.SUGAR_ELIF,
-            StitcherParser.SUGAR_ELSE -> AttributeKeys.KEYWORD
+            StitcherLexer.SUGAR_IF,
+            StitcherLexer.SUGAR_ELIF,
+            StitcherLexer.SUGAR_ELSE -> AttributeKeys.KEYWORD
 
-            StitcherParser.LEFT_BRACE,
-            StitcherParser.RIGHT_BRACE,
-            StitcherParser.SCOPE_OPEN,
-            StitcherParser.SCOPE_WORD,
-            StitcherParser.SCOPE_CLOSE -> AttributeKeys.BRACES
+            StitcherLexer.LEFT_BRACE,
+            StitcherLexer.RIGHT_BRACE,
+            StitcherLexer.SCOPE_OPEN,
+            StitcherLexer.SCOPE_WORD,
+            StitcherLexer.SCOPE_CLOSE -> AttributeKeys.BRACES
 
-            StitcherParser.IDENTIFIER -> AttributeKeys.IDENTIFIER
-            StitcherParser.QUOTED -> AttributeKeys.LITERAL
-            StitcherParser.COMMENT -> AttributeKeys.COMMENT
+            StitcherLexer.IDENTIFIER -> AttributeKeys.IDENTIFIER
+            StitcherLexer.QUOTED -> AttributeKeys.LITERAL
+            StitcherLexer.COMMENT -> AttributeKeys.COMMENT
 
             else -> null
         }

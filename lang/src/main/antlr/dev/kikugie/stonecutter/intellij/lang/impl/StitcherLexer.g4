@@ -16,6 +16,8 @@ COND_MARK: '?' -> mode(IN_DEFINITION);
 SWAP_MARK: '$' -> mode(IN_DEFINITION);
 REPL_MARK: '~' -> mode(IN_DEFINITION);
 
+G_BAD_CHAR: . -> type(BAD_CHAR), channel(HIDDEN);
+
 mode IN_DEFINITION;
 DOT: '.';
 DASH: '-';
@@ -45,3 +47,4 @@ IDENTIFIER: IDENTIFIER_START IDENTIFIER_PART*;
 QUOTED: '\'' (ESC_SLASH | ESC_TICK | ~[\\'] )* '\'';
 COMMENT: '*' (ESC_SLASH | ESC_STAR | ~[\\*])* '*' -> channel(HIDDEN);
 WHITESPACE: [ \t]+ -> channel(HIDDEN);
+BAD_CHAR: . -> channel(HIDDEN);

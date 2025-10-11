@@ -3,6 +3,7 @@ package dev.kikugie.stonecutter.intellij.lang
 import com.intellij.lang.InjectableLanguage
 import com.intellij.lang.Language
 import com.intellij.psi.templateLanguages.TemplateLanguage
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParserExtras
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory.*
@@ -14,7 +15,7 @@ object StitcherLang : Language("Stitcher"), InjectableLanguage, TemplateLanguage
     private val ruleIElementTypes: Map<Int, RuleIElementType>
 
     init {
-        defineLanguageIElementTypes(this, StitcherParser.VOCABULARY, StitcherParser.ruleNames + StitcherParserExtras.extraRuleNames)
+        defineLanguageIElementTypes(this, StitcherLexer.VOCABULARY, StitcherParser.ruleNames + StitcherParserExtras.extraRuleNames)
         tokenIElementTypes = getTokenIElementTypes(this).associateBy(TokenIElementType::getANTLRTokenType)
         ruleIElementTypes = getRuleIElementTypes(this).associateBy(RuleIElementType::getRuleIndex)
     }

@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import dev.kikugie.semver.data.VersionOperator
 import dev.kikugie.semver.data.VersionPredicate
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
@@ -11,7 +12,7 @@ import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
 import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstance
 
-private val SEMVER_OPERATORS = intArrayOf(StitcherParser.COMMON_COMP, StitcherParser.SEMVER_COMP)
+private val SEMVER_OPERATORS = intArrayOf(StitcherLexer.COMMON_COMP, StitcherLexer.SEMVER_COMP)
 
 private fun PsiElement?.toVersionOperator(): VersionOperator = when(val text = this?.text) {
     null -> VersionOperator.IMPLICIT_EQUAL

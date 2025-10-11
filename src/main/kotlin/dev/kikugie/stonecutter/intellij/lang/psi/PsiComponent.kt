@@ -3,12 +3,12 @@ package dev.kikugie.stonecutter.intellij.lang.psi
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.CachedValue
-import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
 
 sealed interface PsiComponent : DefaultScopeNode {
-    val closer: PsiElement? get() = firstChild?.takeIf { it.antlrType == StitcherParser.SCOPE_CLOSE }
+    val closer: PsiElement? get() = firstChild?.takeIf { it.antlrType == StitcherLexer.SCOPE_CLOSE }
     val opener: PsiElement? get() = lastChild?.takeIf { it.antlrType in SCOPE_OPENERS }
     val type: Type
 
@@ -42,6 +42,6 @@ sealed interface PsiComponent : DefaultScopeNode {
 
     companion object {
         val TYPE_KEY: Key<CachedValue<Type>> = Key("PsiComponent.type")
-        val SCOPE_OPENERS = intArrayOf(StitcherParser.SCOPE_OPEN, StitcherParser.SCOPE_WORD)
+        val SCOPE_OPENERS = intArrayOf(StitcherLexer.SCOPE_OPEN, StitcherLexer.SCOPE_WORD)
     }
 }

@@ -6,6 +6,7 @@ import com.intellij.psi.util.CachedValue
 import dev.kikugie.semver.data.SemanticVersion
 import dev.kikugie.semver.data.StringVersion
 import dev.kikugie.semver.data.Version
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.util.*
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
@@ -25,7 +26,7 @@ sealed interface PsiVersion : DefaultScopeNode {
         private fun buildSemver(): SemanticVersion {
             check(firstChild.antlrRule == StitcherParser.RULE_versionCore) { "No version core component" }
             val components = firstChild.childrenSequence
-                .filter { it.antlrType == StitcherParser.NUMERIC }
+                .filter { it.antlrType == StitcherLexer.NUMERIC }
                 .map { it.text.toInt() }
                 .toList().toIntArray()
             val preRelease = childrenSequence.elementOfRule(StitcherParser.RULE_preRelease)
