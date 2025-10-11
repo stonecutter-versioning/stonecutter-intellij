@@ -16,6 +16,10 @@ private inline fun checked(action: () -> Unit) {
 class StitcherTreeConverter(parser: StitcherParser, builder: PsiBuilder) :
     ANTLRParseTreeToPSIConverter(StitcherLang, parser, builder),
     StitcherParserListener {
+    // Prevent duplicates
+    override fun enterEveryRule(ctx: ParserRuleContext?) = Unit
+    override fun exitEveryRule(ctx: ParserRuleContext?) = Unit
+
     override fun enterDefinition(ctx: StitcherParser.DefinitionContext) = mark()
     override fun exitDefinition(ctx: StitcherParser.DefinitionContext) = release(ctx)
 
