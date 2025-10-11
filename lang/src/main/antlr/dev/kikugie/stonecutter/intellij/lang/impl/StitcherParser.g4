@@ -18,11 +18,11 @@ scopeOpener: SCOPE_OPEN | SCOPE_WORD;
 replacement: IDENTIFIER;
 
 swap
-    : IDENTIFIER swapArguments scopeOpener?
+    : IDENTIFIER swapArguments? scopeOpener?
     | SCOPE_CLOSE
     ;
 
-swapArguments: (IDENTIFIER | QUOTED)*;
+swapArguments: (IDENTIFIER | QUOTED)+;
 
 condition
     : SUGAR_IF? conditionExpression scopeOpener?

@@ -26,8 +26,8 @@ class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Sto
     }
 
     class EditorOptions : PropertyConfigurable(message("stonecutter.settings.editor"), {
-        checkbox(message("stonecutter.settings.editor.imports"), STATE::useImportOptimizer)
-            .tooltip(message("stonecutter.settings.editor.imports.tooltip"))
+//        checkbox(message("stonecutter.settings.editor.imports"), STATE::useImportOptimizer)
+//            .tooltip(message("stonecutter.settings.editor.imports.tooltip"))
         checkbox(message("stonecutter.settings.editor.lock"), STATE::lockGeneratedFiles)
         checkbox(message("stonecutter.settings.editor.sync"), STATE::refreshAfterSwitch)
 
@@ -41,7 +41,7 @@ class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Sto
 
     override fun createConfigurables(): List<PropertyConfigurable> = listOf(
         EditorOptions(),
-        FoldingOptions(message("stonecutter.settings.folding"))
+//        FoldingOptions(message("stonecutter.settings.folding"))
     )
 
     override fun createPanel(): DialogPanel = panel {
