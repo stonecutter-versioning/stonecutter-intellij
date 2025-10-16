@@ -10,7 +10,7 @@ plugins {
     alias(common.plugins.kotlin.serialization)
 }
 
-version = "0.8+${property("intellij.suffix")}"
+version = "0.8.1+${property("intellij.suffix")}"
 
 buildscript {
     repositories {
@@ -91,7 +91,7 @@ tasks {
     val sanitize = register<SanitizeDistributionTask>("sanitizeBuild") {
         group = "build"
         file = buildPlugin.map { it.archiveFile.get() }
-        patterns.addAll("icu4j", "ST4", "antlr-runtime", "antlr4-4", "org.abego", "kotlin-stdlib")
+        patterns.addAll("icu4j", "ST4", "antlr-runtime", "antlr4-4", "org.abego")
     }
 
     buildPlugin {

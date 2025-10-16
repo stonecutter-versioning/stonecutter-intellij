@@ -11,7 +11,7 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        create("common") { from("dev.kikugie:stonecutter-versions:1.2.0") }
+        register("common") { from("dev.kikugie:stonecutter-versions:1.3.0") }
     }
 }
 
@@ -27,5 +27,4 @@ stonecutter {
 }
 
 include("lang")
-rootProject.name = "stonecutter-intellij"
-
+rootProject.name = "Stonecutter IntelliJ Plugin"
