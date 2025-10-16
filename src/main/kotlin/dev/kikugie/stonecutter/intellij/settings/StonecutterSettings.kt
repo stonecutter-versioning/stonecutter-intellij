@@ -29,6 +29,7 @@ class StonecutterSettings : SerializablePersistentStateComponent<StonecutterSett
         var lockGeneratedFiles by property(true)
 
         var refreshAfterSwitch by property(true)
+        var checkedLangInject by property(false)
     }
 
     init {

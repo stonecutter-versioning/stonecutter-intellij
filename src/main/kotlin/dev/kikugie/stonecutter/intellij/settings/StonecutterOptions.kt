@@ -30,6 +30,8 @@ class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Sto
 //            .tooltip(message("stonecutter.settings.editor.imports.tooltip"))
         checkbox(message("stonecutter.settings.editor.lock"), STATE::lockGeneratedFiles)
         checkbox(message("stonecutter.settings.editor.sync"), STATE::refreshAfterSwitch)
+        checkbox(message("stonecutter.settings.editor.inject"), STATE::checkedLangInject)
+            .tooltip(message("stonecutter.settings.editor.inject.tooltip"))
 
         link(message("stonecutter.settings.editor.colours")) {
             ShowSettingsUtil.getInstance().showSettingsDialog(

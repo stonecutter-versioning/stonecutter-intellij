@@ -10,7 +10,7 @@ plugins {
     alias(common.plugins.kotlin.serialization)
 }
 
-version = "0.8.1+${property("intellij.suffix")}"
+version = "0.8.2+${property("intellij.suffix")}"
 
 buildscript {
     repositories {
