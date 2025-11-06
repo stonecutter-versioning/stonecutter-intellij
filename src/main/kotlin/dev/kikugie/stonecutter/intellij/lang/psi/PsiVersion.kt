@@ -6,24 +6,24 @@ import com.intellij.psi.util.CachedValue
 import dev.kikugie.semver.data.SemanticVersion
 import dev.kikugie.semver.data.StringVersion
 import dev.kikugie.semver.data.Version
+import dev.kikugie.stonecutter.intellij.lang.impl.PsiStitcherNodeImpl
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
 import dev.kikugie.stonecutter.intellij.lang.util.*
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
 
 private val PARSED_SEMVER_KEY: Key<CachedValue<SemanticVersion>> = Key("PsiVersion.Semantic.parsed")
 
 sealed interface PsiVersion : PsiStitcherNode {
     val parsed: Version
 
-    class String(node: ASTNode) : ANTLRPsiNode(node), PsiVersion {
+    class String(node: ASTNode) : PsiStitcherNodeImpl(node), PsiVersion {
         override val parsed: StringVersion get() = StringVersion(text)
 
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitStringVersion(this)
     }
 
-    class Semantic(node: ASTNode) : ANTLRPsiNode(node), PsiVersion {
+    class Semantic(node: ASTNode) : PsiStitcherNodeImpl(node), PsiVersion {
         override val parsed: SemanticVersion by cached(PARSED_SEMVER_KEY, ::buildSemver)
         override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitSemanticVersion(this)
 
