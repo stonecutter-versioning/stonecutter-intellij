@@ -13,6 +13,7 @@ import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 import dev.kikugie.commons.takeAs
+import dev.kikugie.stonecutter.intellij.lang.impl.PsiStitcherNodeImpl
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParserExtras
@@ -53,7 +54,7 @@ class StitcherParserDef : ParserDefinition {
         else -> mapRule(type, node)
     }
 
-    private fun mapRule(type: RuleIElementType, node: ASTNode): PsiElement = when (type.ruleIndex) {
+    private fun mapRule(type: RuleIElementType, node: ASTNode): PsiStitcherNode = when (type.ruleIndex) {
         StitcherParserExtras.RULE_binaryExpression -> PsiExpression.Binary(node)
         StitcherParserExtras.RULE_unaryExpression -> PsiExpression.Unary(node)
         StitcherParserExtras.RULE_groupExpression -> PsiExpression.Group(node)
@@ -75,6 +76,6 @@ class StitcherParserDef : ParserDefinition {
         StitcherParser.RULE_semanticVersion -> PsiVersion.Semantic(node)
         StitcherParser.RULE_stringVersion -> PsiVersion.String(node)
 
-        else -> ANTLRPsiNode(node)
+        else -> PsiStitcherNodeImpl(node)
     }
 }

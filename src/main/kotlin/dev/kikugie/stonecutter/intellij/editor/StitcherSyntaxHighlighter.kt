@@ -68,7 +68,8 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
             StitcherLexer.OP_NOT,
             StitcherLexer.OP_AND,
             StitcherLexer.OP_OR,
-            StitcherLexer.OP_ASSIGN -> AttributeKeys.OPERATOR
+            StitcherLexer.OP_ASSIGN,
+            StitcherLexer.SCOPE_WORD, -> AttributeKeys.OPERATOR
 
             StitcherLexer.NUMERIC,
             StitcherLexer.DOT,
@@ -82,7 +83,6 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
             StitcherLexer.LEFT_BRACE,
             StitcherLexer.RIGHT_BRACE,
             StitcherLexer.SCOPE_OPEN,
-            StitcherLexer.SCOPE_WORD,
             StitcherLexer.SCOPE_CLOSE -> AttributeKeys.BRACES
 
             StitcherLexer.IDENTIFIER -> AttributeKeys.IDENTIFIER

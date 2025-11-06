@@ -6,6 +6,7 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiPredicate
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiScopeMarker
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiStitcherNode
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiVersion
 
@@ -26,4 +27,5 @@ interface StitcherSelectiveVisitor<T> : StitcherVisitor<T> {
     override fun visitStringVersion(o: PsiVersion.String): T = throw UnsupportedOperationException()
     override fun visitClosedScope(o: PsiScopeMarker.Closed): T = throw UnsupportedOperationException()
     override fun visitWordScope(o: PsiScopeMarker.Word): T = throw UnsupportedOperationException()
+    override fun visitBaseNode(o: PsiStitcherNode): T = throw UnsupportedOperationException()
 }
