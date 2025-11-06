@@ -31,10 +31,10 @@ class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
         .firstNotNullOfOrNull(::matchDocumentationTarget)
 
     private fun matchDocumentationTarget(element: PsiElement): StitcherDocumentationTarget<out ANTLRPsiNode>? = when (element.antlrRule) {
-        StitcherParserExtras.RULE_conditionExpression_assignment ->
+        StitcherParserExtras.RULE_assignmentExpression ->
             StitcherDocumentationTarget(element as PsiExpression.Assignment, DependencyDocBuilder)
 
-        StitcherParserExtras.RULE_conditionExpression_constant ->
+        StitcherParserExtras.RULE_constantExpression ->
             StitcherDocumentationTarget(element as PsiExpression.Constant, ConstantDocBuilder)
 
         StitcherParser.RULE_replacement ->

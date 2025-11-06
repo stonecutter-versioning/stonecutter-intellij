@@ -29,10 +29,15 @@ class StitcherAnnotator : Annotator, DumbAware {
         StitcherLexer.IDENTIFIER -> when (element.parent.antlrRule) {
             StitcherParser.RULE_swap -> holder.applyAttributes(element, AttributeKeys.SWAP)
             StitcherParser.RULE_replacement -> holder.applyAttributes(element, AttributeKeys.REPLACEMENT)
-            StitcherParserExtras.RULE_conditionExpression_constant -> holder.applyAttributes(element, AttributeKeys.CONSTANT)
-            StitcherParserExtras.RULE_conditionExpression_assignment -> holder.applyAttributes(element, AttributeKeys.DEPENDENCY)
+            StitcherParserExtras.RULE_constantExpression -> holder.applyAttributes(element, AttributeKeys.CONSTANT)
+            StitcherParserExtras.RULE_assignmentExpression -> holder.applyAttributes(element, AttributeKeys.DEPENDENCY)
+            StitcherParserExtras.RULE_wordScopeOpener -> holder.applyAttributes(element, AttributeKeys.LITERAL)
             else -> Unit
         }
+
+        StitcherLexer.PLUS ->
+            if (element.parent.antlrRule != StitcherParserExtras.RULE_wordScopeOpener) Unit
+            else holder.applyAttributes(element, AttributeKeys.OPERATOR)
         else -> Unit
     }
 

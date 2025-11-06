@@ -34,8 +34,14 @@ SUGAR_IF: 'if';
 SUGAR_ELSE: 'else';
 SUGAR_ELIF: 'elif';
 
-COMMON_COMP: '='|'!='|'>'|'>='|'<'|'<=';
-SEMVER_COMP: '~'|'^';
+COMP_MAJOR: '^';
+COMP_MINOR: '~';
+COMP_EQUAL: '=';
+COMP_NEQUAL: '!=';
+COMP_MORE: '>';
+COMP_GMORE: '>=';
+COMP_LESS: '<';
+COMP_GLESS: '<=';
 
 OP_ASSIGN: ':';
 OP_NOT: '!';
@@ -44,7 +50,7 @@ OP_OR: '||';
 
 NUMERIC: NUMBER;
 IDENTIFIER: IDENTIFIER_START IDENTIFIER_PART*;
-QUOTED: '\'' (ESC_SLASH | ESC_TICK | ~[\\'] )* '\'';
+QUOTED: '\'' (ESC_SLASH | ESC_TICK | ~[\\'])* '\'';
 COMMENT: '*' (ESC_SLASH | ESC_STAR | ~[\\*])* '*' -> channel(HIDDEN);
 WHITESPACE: [ \t]+ -> channel(HIDDEN);
 BAD_CHAR: . -> channel(HIDDEN);

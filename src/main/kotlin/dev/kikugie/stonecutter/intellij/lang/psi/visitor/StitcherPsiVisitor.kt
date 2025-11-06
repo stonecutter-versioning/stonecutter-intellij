@@ -20,6 +20,8 @@ open class StitcherPsiVisitor : PsiElementVisitor(), StitcherVisitor<Unit> {
     override fun visitStringPredicate(o: PsiPredicate.String): Unit = Unit
     override fun visitSemanticVersion(o: PsiVersion.Semantic): Unit = Unit
     override fun visitStringVersion(o: PsiVersion.String): Unit = Unit
+    override fun visitClosedScope(o: PsiScopeMarker.Closed): Unit = Unit
+    override fun visitWordScope(o: PsiScopeMarker.Word): Unit = Unit
 
     override fun visitElement(element: PsiElement) {
         ProgressIndicatorProvider.checkCanceled()

@@ -12,19 +12,16 @@ import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode
 import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstance
 
-private val SEMVER_OPERATORS = intArrayOf(StitcherLexer.COMMON_COMP, StitcherLexer.SEMVER_COMP)
-
-private fun PsiElement?.toVersionOperator(): VersionOperator = when(val text = this?.text) {
-    null -> VersionOperator.IMPLICIT_EQUAL
-    "!=" -> VersionOperator.NOT_EQUAL
-    "=" -> VersionOperator.EQUAL
-    ">=" -> VersionOperator.GREATER_EQUAL
-    ">" -> VersionOperator.GREATER
-    "<=" -> VersionOperator.LESS_EQUAL
-    "<" -> VersionOperator.LESS
-    "^" -> VersionOperator.SAME_MAJOR
-    "~" -> VersionOperator.SAME_MINOR
-    else -> error("Invalid operator $text")
+private fun PsiElement?.toVersionOperator(): VersionOperator = when(this?.antlrType ?: -1) {
+    StitcherLexer.COMP_NEQUAL -> VersionOperator.NOT_EQUAL
+    StitcherLexer.COMP_EQUAL -> VersionOperator.EQUAL
+    StitcherLexer.COMP_GMORE -> VersionOperator.GREATER_EQUAL
+    StitcherLexer.COMP_MORE -> VersionOperator.GREATER
+    StitcherLexer.COMP_GLESS -> VersionOperator.LESS_EQUAL
+    StitcherLexer.COMP_LESS -> VersionOperator.LESS
+    StitcherLexer.COMP_MAJOR -> VersionOperator.SAME_MAJOR
+    StitcherLexer.COMP_MINOR -> VersionOperator.SAME_MINOR
+    else -> VersionOperator.IMPLICIT_EQUAL
 }
 
 sealed interface PsiPredicate : PsiStitcherNode {
@@ -34,7 +31,7 @@ sealed interface PsiPredicate : PsiStitcherNode {
 
     class String(node: ASTNode) : ANTLRPsiNode(node), PsiPredicate {
         override val operator: VersionOperator
-            get() = firstChild.takeIf { it.antlrType == StitcherParser.COMMON_COMP }.toVersionOperator()
+            get() = firstChild.toVersionOperator()
 
         override val version: PsiVersion
             get() = childrenSequence.firstIsInstance<PsiVersion.String>()
@@ -44,7 +41,7 @@ sealed interface PsiPredicate : PsiStitcherNode {
 
     class Semantic(node: ASTNode) : ANTLRPsiNode(node), PsiPredicate {
         override val operator: VersionOperator
-            get() = firstChild.takeIf { it.antlrType in SEMVER_OPERATORS }.toVersionOperator()
+            get() = firstChild.toVersionOperator()
 
         override val version: PsiVersion
             get() = childrenSequence.firstIsInstance<PsiVersion.Semantic>()

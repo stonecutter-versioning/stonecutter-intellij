@@ -57,8 +57,14 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
             StitcherLexer.SWAP_MARK -> AttributeKeys.SWAP_MARKER
             StitcherLexer.REPL_MARK -> AttributeKeys.REPL_MARKER
 
-            StitcherLexer.COMMON_COMP,
-            StitcherLexer.SEMVER_COMP,
+            StitcherLexer.COMP_EQUAL,
+            StitcherLexer.COMP_NEQUAL,
+            StitcherLexer.COMP_MORE,
+            StitcherLexer.COMP_GMORE,
+            StitcherLexer.COMP_LESS,
+            StitcherLexer.COMP_GLESS,
+            StitcherLexer.COMP_MAJOR,
+            StitcherLexer.COMP_MINOR,
             StitcherLexer.OP_NOT,
             StitcherLexer.OP_AND,
             StitcherLexer.OP_OR,

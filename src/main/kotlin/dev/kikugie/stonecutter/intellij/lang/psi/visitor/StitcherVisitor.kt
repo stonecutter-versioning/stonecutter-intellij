@@ -6,6 +6,7 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiPredicate
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiScopeMarker
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiVersion
 
 interface StitcherVisitor<T> {
@@ -23,4 +24,6 @@ interface StitcherVisitor<T> {
     fun visitStringPredicate(o: PsiPredicate.String): T
     fun visitSemanticVersion(o: PsiVersion.Semantic): T
     fun visitStringVersion(o: PsiVersion.String): T
+    fun visitClosedScope(o: PsiScopeMarker.Closed): T
+    fun visitWordScope(o: PsiScopeMarker.Word): T
 }

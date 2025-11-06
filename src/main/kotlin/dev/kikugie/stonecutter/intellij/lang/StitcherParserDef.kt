@@ -54,14 +54,17 @@ class StitcherParserDef : ParserDefinition {
     }
 
     private fun mapRule(type: RuleIElementType, node: ASTNode): PsiElement = when (type.ruleIndex) {
-        StitcherParserExtras.RULE_conditionExpression_binary -> PsiExpression.Binary(node)
-        StitcherParserExtras.RULE_conditionExpression_unary -> PsiExpression.Unary(node)
-        StitcherParserExtras.RULE_conditionExpression_group -> PsiExpression.Group(node)
-        StitcherParserExtras.RULE_conditionExpression_assignment -> PsiExpression.Assignment(node)
-        StitcherParserExtras.RULE_conditionExpression_constant -> PsiExpression.Constant(node)
+        StitcherParserExtras.RULE_binaryExpression -> PsiExpression.Binary(node)
+        StitcherParserExtras.RULE_unaryExpression -> PsiExpression.Unary(node)
+        StitcherParserExtras.RULE_groupExpression -> PsiExpression.Group(node)
+        StitcherParserExtras.RULE_assignmentExpression -> PsiExpression.Assignment(node)
+        StitcherParserExtras.RULE_constantExpression -> PsiExpression.Constant(node)
 
-        StitcherParserExtras.RULE_versionPredicate_semantic -> PsiPredicate.Semantic(node)
-        StitcherParserExtras.RULE_versionPredicate_string -> PsiPredicate.String(node)
+        StitcherParserExtras.RULE_semanticPredicate -> PsiPredicate.Semantic(node)
+        StitcherParserExtras.RULE_stringPredicate -> PsiPredicate.String(node)
+
+        StitcherParserExtras.RULE_closedScopeOpener -> PsiScopeMarker.Closed(node)
+        StitcherParserExtras.RULE_wordScopeOpener -> PsiScopeMarker.Word(node)
 
         StitcherParser.RULE_definition -> PsiDefinition(node)
         StitcherParser.RULE_replacement -> PsiReplacement(node)

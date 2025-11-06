@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="intellij-plugin [:2024.3:runIde]" type="GradleRunConfiguration" factoryName="Gradle" folderName="Runs" nameIsGenerated="true">
+  <configuration default="false" name="Run 2024.3" type="GradleRunConfiguration" factoryName="Gradle" folderName="SC IntelliJ" nameIsGenerated="false">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$/versions/2024.3" />
