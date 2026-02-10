@@ -17,12 +17,12 @@ class MissingValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSe
     }
 
     override fun visitSwapOpener(swap: PsiSwap.Opener) {
-        swap.identifier.registerInconsistency("swap") { it in swaps }
+        swap.identifier?.registerInconsistency("swap") { it in swaps }
     }
 
     override fun visitReplacementToggle(replacement: PsiReplacement.Toggle) {
         for (entry in replacement.entries)
-            entry.identifier.registerInconsistency("replacement") { name -> replacements.any { it.identifier == name } }
+            entry.identifier?.registerInconsistency("replacement") { name -> replacements.any { it.identifier == name } }
     }
 
     override fun visitAssignment(assignment: PsiExpression.Assignment) {

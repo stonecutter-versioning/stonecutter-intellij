@@ -12,6 +12,7 @@ import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import dev.kikugie.stonecutter.intellij.lang.impl.CompositeIElementType
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiCode
 import org.antlr.intellij.adaptor.lexer.TokenIElementType
 import kotlin.properties.ReadOnlyProperty
@@ -55,6 +56,11 @@ val PsiComment.commentCode: SmartPsiElementPointer<PsiCode>?
             ?: return@nullableLazyValueUnsafe null
         SmartPointerManager.getInstance(project).createSmartPsiElementPointer(def, file)
     }
+
+fun PsiElement.unquote(): String = when (antlrType) {
+    StitcherLexer.QUOTED -> text.removeSurrounding("'")
+    else -> text
+}
 
 internal fun <T : PsiElement> element(key: Key<SmartPsiElementPointer<T>>, getter: () -> T?) : ReadOnlyProperty<PsiElement, T?> =
     SmartElementPointerProperty(key, getter)

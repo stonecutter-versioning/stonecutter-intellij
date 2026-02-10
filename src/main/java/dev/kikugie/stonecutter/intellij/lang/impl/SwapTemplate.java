@@ -90,10 +90,10 @@ public class SwapTemplate implements FlexLexer {
   private static final int [] ZZ_ACTION = zzUnpackAction();
 
   private static final String ZZ_ACTION_PACKED_0 =
-    "\1\0\2\1\2\2";
+    "\1\0\2\1\1\2";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[5];
+    int [] result = new int[4];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -118,10 +118,10 @@ public class SwapTemplate implements FlexLexer {
   private static final int [] ZZ_ROWMAP = zzUnpackRowMap();
 
   private static final String ZZ_ROWMAP_PACKED_0 =
-    "\0\0\0\4\0\10\0\4\0\14";
+    "\0\0\0\4\0\10\0\14";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[5];
+    int [] result = new int[4];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -144,7 +144,7 @@ public class SwapTemplate implements FlexLexer {
   private static final int [] ZZ_TRANS = zzUnpacktrans();
 
   private static final String ZZ_TRANS_PACKED_0 =
-    "\1\2\1\3\2\2\6\0\1\4\1\5\2\0\2\5";
+    "\1\2\1\3\2\2\7\0\1\4\2\0\2\4";
 
   private static int [] zzUnpacktrans() {
     int [] result = new int[16];
@@ -185,10 +185,10 @@ public class SwapTemplate implements FlexLexer {
   private static final int [] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
-    "\1\0\1\11\1\1\1\11\1\1";
+    "\1\0\1\11\2\1";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[5];
+    int [] result = new int[4];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -498,7 +498,7 @@ public class SwapTemplate implements FlexLexer {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { 
+            { /* skip */
             }
           // fall through
           case 3: break;

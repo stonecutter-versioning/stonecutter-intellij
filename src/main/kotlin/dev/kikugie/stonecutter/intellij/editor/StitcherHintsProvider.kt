@@ -21,7 +21,7 @@ private class StitcherHintsCollector : SharedBypassCollector {
     override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
         val definition = element.takeAsOrNull<PsiComment>()?.commentCode?.element
             ?: return
-        val component = definition.definition.takeAsOrNull<PsiCondition>()
+        val component = definition.definition?.takeAsOrNull<PsiCondition>()
             ?: return
 
         val offset = element.startOffset + ElementManipulators.getOffsetInElement(element)

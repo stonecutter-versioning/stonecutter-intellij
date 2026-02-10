@@ -25,5 +25,5 @@ private fun PsiElement?.toVersionOperator(): VersionOperator = when(this?.antlrT
 class PsiPredicate(node: ASTNode) : PsiStitcherNodeImpl(node) {
     val operator: VersionOperator get() = firstChild.toVersionOperator()
     val version: PsiVersion? get() = childrenSequence.findIsInstance<PsiVersion>()
-    val parsed: VersionPredicate? get() = version?.let { VersionPredicate(operator, it.parsed) }
+    val parsed: VersionPredicate? get() = version?.let { VersionPredicate(operator, it.parsed ?: return@let null) }
 }

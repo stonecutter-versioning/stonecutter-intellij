@@ -27,7 +27,7 @@ class NamingConventionVisitor(holder: ProblemsHolder, session: LocalInspectionTo
     }
 
     override fun visitSwapOpener(swap: PsiSwap.Opener) {
-        if (swap.identifier.text?.isConventional() == false) holder.registerProblem(
+        if (swap.identifier?.text?.isConventional() == false) holder.registerProblem(
             swap,
             StonecutterBundle.message("stonecutter.inspection.naming.swap"),
             ProblemHighlightType.WEAK_WARNING
@@ -35,8 +35,8 @@ class NamingConventionVisitor(holder: ProblemsHolder, session: LocalInspectionTo
     }
 
     override fun visitReplacementToggle(replacement: PsiReplacement.Toggle) {
-        for (entry in replacement.entries) if (!entry.identifier.text.isConventional()) holder.registerProblem(
-            entry.identifier,
+        for (entry in replacement.entries) if (entry.identifier?.text?.isConventional() == false) holder.registerProblem(
+            entry.identifier!!,
             StonecutterBundle.message("stonecutter.inspection.naming.replacement"),
             ProblemHighlightType.WEAK_WARNING
         )

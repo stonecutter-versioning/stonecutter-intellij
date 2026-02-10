@@ -100,7 +100,7 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
 
         if (tree.branches.isEmpty()) return true
         val result = tree.branches.fold(false) { acc, branch -> buildBranchModel(branch, hierarchy, tree.current) || acc }
-        val stonecutter = SemanticVersion.parse(tree.stonecutter).getOrThrow()
+        val stonecutter = SemanticVersion.parse(tree.stonecutter)
         trees[hierarchy] = SCProjectTree(hierarchy, dir, tree.vcs, tree.current, stonecutter, tree.branches.map { hierarchy + it.id })
         return result
     }

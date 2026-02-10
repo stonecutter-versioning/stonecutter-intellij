@@ -9,6 +9,7 @@ import dev.kikugie.semver.data.VersionPredicate
 import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherLocalInspectionTool
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiPredicate
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
@@ -24,35 +25,34 @@ In that case there are a couple steps to be done:
 **Don't do this until the framework for manipulating code fragments is designed.**
  */
 class InvariantValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
-    override fun visitConstant(o: PsiExpression.Constant) {
-        if (o.variance { constants[it] } != 1) return
-        val value = o.stonecutterNode!!.params.constants[o.text].toString()
+    override fun visitConstant(constant: PsiExpression.Constant) {
+        if (constant.variance { constants[it] } != 1) return
+        val value = constant.stonecutterNode!!.params.constants[constant.text].toString()
         holder.registerProblem(
-            o,
+            constant,
             StonecutterBundle.message("stonecutter.inspection.invariant_value.constant", value),
             ProblemHighlightType.WEAK_WARNING
         )
     }
 
-    override fun visitAssignment(o: PsiExpression.Assignment) {
-        o.target?.let(::visitDependency)
+    override fun visitAssignment(assignment: PsiExpression.Assignment) {
+        assignment.target?.let(::visitDependency)
 
-        val lookup = o.stonecutterService.lookup
-        val node = lookup.node(o) ?: return
+        val lookup = assignment.stonecutterService.lookup
+        val node = lookup.node(assignment) ?: return
 
-        val dependency = o.target?.text.orEmpty()
+        val dependency = assignment.target?.text.orEmpty()
         val versions = node.siblings(lookup)
             .mapNotNull { it.params.dependencies[dependency] }
 
-        val predicates = o.predicates.map { it.parsed }
+        val predicates = assignment.predicates.mapNotNull(PsiPredicate::parsed)
             .toList()
 
         val variants = versions.map { it.check(predicates) }
             .toSet()
 
-        if (variants.size != 1) return
-        holder.registerProblem(
-            o,
+        if (variants.size == 1) holder.registerProblem(
+            assignment,
             StonecutterBundle.message("stonecutter.inspection.invariant_value.assignment", variants.first()),
             ProblemHighlightType.WEAK_WARNING
         )

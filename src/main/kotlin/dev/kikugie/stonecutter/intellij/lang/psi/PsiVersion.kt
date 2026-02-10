@@ -31,7 +31,7 @@ sealed interface PsiVersion : PsiStitcherNode {
             val components = (firstChild ?: return null).childrenSequence
                 .filter { it.antlrType == StitcherLexer.NUMERIC }
                 .map { it.text.toInt() }
-                .toList().toIntArray()
+                .toList()
             val preRelease = childrenSequence.elementOfType(SEM_PRE.asIElementType())
                 ?.text.orEmpty()
             val buildMetadata = childrenSequence.elementOfType(SEM_BUILD.asIElementType())

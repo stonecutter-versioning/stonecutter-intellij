@@ -11,12 +11,14 @@ internal val RED = TextAttributes().apply {
     effectColor = JBColor.RED
 }
 
-internal fun HtmlBuilder.signature(title: String, section: String, name: String, style: TextAttributesKey, marker: Any?) =
+internal fun HtmlBuilder.signature(title: String, section: String, name: String?, style: TextAttributesKey, marker: Any?) =
     header(5) {
         link("https://stonecutter.kikugie.dev/wiki/config/params#$section", title)
         nbsp()
-        tag("code", { text(name, style) })
-        nbsp()
+        if (name != null) {
+            tag("code", { text(name, style) })
+            nbsp()
+        }
         if (marker == null) {
             text("is", AttributeKeys.KEYWORD)
             nbsp()

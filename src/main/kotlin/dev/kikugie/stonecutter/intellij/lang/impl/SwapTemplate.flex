@@ -12,10 +12,10 @@ import com.intellij.psi.tree.IElementType;
 %function advance
 %type IElementType
 
-NUMERIC = 0|[1-9][0-9]*
+ID = [1-9][0-9]*
 %%
 
 <YYINITIAL> {
-    "$" {NUMERIC} { return TokenType.DUMMY_HOLDER; }
-    "\\" | "\$" | [^] { }
+  "$"{ID} { return TokenType.DUMMY_HOLDER; }
+  [^] { /* skip */ }
 }
