@@ -2,7 +2,7 @@ package dev.kikugie.stonecutter.intellij.lang.psi
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import dev.kikugie.commons.collections.firstIsInstance
+import dev.kikugie.commons.collections.findIsInstance
 import dev.kikugie.stonecutter.intellij.lang.impl.PsiStitcherNodeImpl
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
@@ -12,36 +12,43 @@ import dev.kikugie.stonecutter.intellij.lang.util.elementOfAnyToken
 import dev.kikugie.stonecutter.intellij.lang.util.elementOfToken
 
 sealed interface PsiExpression : PsiStitcherNode {
-    class Binary(node: ASTNode) : PsiStitcherNodeImpl(node), PsiExpression {
-        val left: PsiExpression get() = firstChild as PsiExpression
-        val right: PsiExpression get() = lastChild as PsiExpression
-        val operator: PsiElement get() = checkNotNull(childrenSequence.elementOfAnyToken(StitcherLexer.OP_AND, StitcherLexer.OP_NOT))
+    fun <T> accept(visitor: Visitor<T>): T
+    override fun <T> accept(visitor: StitcherVisitor<T>): T = accept(visitor as Visitor<T>)
 
-        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitBinary(this)
-    }
-
-    class Unary(node: ASTNode) : PsiStitcherNodeImpl(node), PsiExpression {
-        val target: PsiExpression get() = lastChild as PsiExpression
-        val operator: PsiElement get() = firstChild!!
-
-        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitUnary(this)
+    interface Visitor<T> {
+        fun visitGroup(group: Group): T
+        fun visitUnary(unary: Unary): T
+        fun visitBinary(binary: Binary): T
+        fun visitConstant(constant: Constant): T
+        fun visitAssignment(assignment: Assignment): T
     }
 
     class Group(node: ASTNode) : PsiStitcherNodeImpl(node), PsiExpression {
-        val body: PsiExpression get() = childrenSequence.firstIsInstance<PsiExpression>()
+        val body: PsiExpression? get() = childrenSequence.findIsInstance<PsiExpression>()
+        override fun <T> accept(visitor: Visitor<T>): T = visitor.visitGroup(this)
+    }
 
-        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitGroup(this)
+    class Unary(node: ASTNode) : PsiStitcherNodeImpl(node), PsiExpression {
+        val target: PsiExpression? get() = lastChild as? PsiExpression
+        val operator: PsiElement? get() = firstChild
+        override fun <T> accept(visitor: Visitor<T>): T = visitor.visitUnary(this)
+    }
+
+    class Binary(node: ASTNode) : PsiStitcherNodeImpl(node), PsiExpression {
+        val left: PsiExpression? get() = firstChild as? PsiExpression
+        val right: PsiExpression? get() = lastChild as? PsiExpression
+        val operator: PsiElement? get() = childrenSequence.elementOfAnyToken(StitcherLexer.OP_AND, StitcherLexer.OP_NOT)
+        override fun <T> accept(visitor: Visitor<T>): T = visitor.visitBinary(this)
+    }
+
+    class Constant(node: ASTNode) : PsiStitcherNodeImpl(node), PsiExpression {
+        override fun <T> accept(visitor: Visitor<T>): T = visitor.visitConstant(this)
     }
 
     class Assignment(node: ASTNode) : PsiStitcherNodeImpl(node), PsiExpression {
         val target: PsiElement? get() = firstChild.takeIf { it.antlrType == StitcherLexer.IDENTIFIER }
         val operator: PsiElement? get() = childrenSequence.elementOfToken(StitcherLexer.OP_ASSIGN)
         val predicates: Sequence<PsiPredicate> get() = childrenSequence.filterIsInstance<PsiPredicate>()
-
-        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitAssignment(this)
-    }
-
-    class Constant(node: ASTNode) : PsiStitcherNodeImpl(node), PsiExpression {
-        override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitConstant(this)
+        override fun <T> accept(visitor: Visitor<T>): T = visitor.visitAssignment(this)
     }
 }

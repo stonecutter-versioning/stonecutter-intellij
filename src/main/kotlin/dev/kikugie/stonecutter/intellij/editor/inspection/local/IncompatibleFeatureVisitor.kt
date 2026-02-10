@@ -25,9 +25,9 @@ class IncompatibleFeatureVisitor(holder: ProblemsHolder, session: LocalInspectio
         comment.check(SC8A1, "stonecutter.inspection.feature.0.8.comments")
     }
 
-    override fun visitSwapArgs(args: PsiSwap.Args) {
-        args.check(SC8A1, "stonecutter.inspection.feature.0.8.swap_args")
-    }
+//    override fun visitSwapArgs(args: PsiSwap.Args) {
+//        args.check(SC8A1, "stonecutter.inspection.feature.0.8.swap_args")
+//    }
 
     private fun PsiElement.check(version: SemanticVersion, @PropertyKey(resourceBundle = BUNDLE) key: String) {
         if ((stonecutter ?: return) < version) holder.error(this, key)

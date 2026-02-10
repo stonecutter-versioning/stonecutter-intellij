@@ -12,20 +12,21 @@ import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
 class MissingValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
-    override fun visitConstant(o: PsiExpression.Constant) {
-        o.registerInconsistency("constant") { it in constants }
+    override fun visitConstant(constant: PsiExpression.Constant) {
+        constant.registerInconsistency("constant") { it in constants }
     }
 
-    override fun visitSwap(o: PsiSwap) {
-        o.identifier?.registerInconsistency("swap") { it in swaps }
+    override fun visitSwapOpener(swap: PsiSwap.Opener) {
+        swap.identifier.registerInconsistency("swap") { it in swaps }
     }
 
-    override fun visitReplacement(o: PsiReplacement) {
-        o.registerInconsistency("replacement") { name -> replacements.any { it.identifier == name } }
+    override fun visitReplacementToggle(replacement: PsiReplacement.Toggle) {
+        for (entry in replacement.entries)
+            entry.identifier.registerInconsistency("replacement") { name -> replacements.any { it.identifier == name } }
     }
 
-    override fun visitAssignment(o: PsiExpression.Assignment) {
-        o.target?.registerInconsistency("dependency") { it in dependencies }
+    override fun visitAssignment(assignment: PsiExpression.Assignment) {
+        assignment.target?.registerInconsistency("dependency") { it in dependencies }
     }
 
     private fun PsiElement.registerInconsistency(type: String, selector: SCProcessProperties.(String) -> Boolean) = missingValues(selector = selector)

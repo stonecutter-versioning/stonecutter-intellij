@@ -8,5 +8,4 @@ import org.antlr.intellij.adaptor.psi.ScopeNode
 
 open class PsiStitcherNodeImpl(node: ASTNode) : ANTLRPsiNode(node), PsiStitcherNode {
     override fun getContext(): ScopeNode? = parent as? ScopeNode
-    override fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitBaseNode(this)
 }

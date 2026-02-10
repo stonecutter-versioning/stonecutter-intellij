@@ -1,9 +1,13 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package dev.kikugie.stonecutter.intellij.lang.util
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.elementType
+
+typealias AntlrTokenType = Int
 
 internal val PsiElement.childrenSequence: Sequence<PsiElement>
     get() = sequence {
@@ -38,11 +42,8 @@ internal fun Sequence<PsiElement>.elementOfType(type: IElementType): PsiElement?
 internal fun Sequence<PsiElement>.elementOfAnyType(vararg types: IElementType): PsiElement? =
     find { it.elementType in types }
 
-internal fun Sequence<PsiElement>.elementOfToken(type: Int): PsiElement? =
+internal fun Sequence<PsiElement>.elementOfToken(type: AntlrTokenType): PsiElement? =
     find { it.antlrType == type }
 
-internal fun Sequence<PsiElement>.elementOfAnyToken(vararg types: Int): PsiElement? =
+internal fun Sequence<PsiElement>.elementOfAnyToken(vararg types: AntlrTokenType): PsiElement? =
     find { it.antlrType in types }
-
-internal fun Sequence<PsiElement>.elementOfRule(index: Int): PsiElement? =
-    find { it.antlrRule == index }

@@ -11,14 +11,14 @@ import org.jetbrains.plugins.gradle.service.project.ProjectResolverContext
 import kotlin.io.path.Path
 
 private typealias GradleSync =
-    /*? if <2025 {*/org.jetbrains.plugins.gradle.service.syncAction.GradleSyncContributor
-    /*?} else*//*org.jetbrains.plugins.gradle.service.syncAction.GradleSyncListener*/
+    /*? if <2025 {*//*org.jetbrains.plugins.gradle.service.syncAction.GradleSyncContributor
+    *//*?} else*/org.jetbrains.plugins.gradle.service.syncAction.GradleSyncListener
 
 object GradleReloadListener : GradleSync {
     //? if <2025 {
-    override suspend fun onModelFetchCompleted(context: ProjectResolverContext, storage: MutableEntityStorage) = updateStonecutterService(context)
-    //?} else
-    /*override fun onModelFetchCompleted(context: ProjectResolverContext) = kotlinx.coroutines.runBlocking { updateStonecutterService(context) }*/
+    /*override suspend fun onModelFetchCompleted(context: ProjectResolverContext, storage: MutableEntityStorage) = updateStonecutterService(context)
+    *///?} else
+    override fun onModelFetchCompleted(context: ProjectResolverContext) = kotlinx.coroutines.runBlocking { updateStonecutterService(context) }
 
     private suspend fun updateStonecutterService(context: ProjectResolverContext) {
         val project = ProjectUtil.findProject(context.projectPath.let(::Path)) ?: return

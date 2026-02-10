@@ -15,7 +15,7 @@ import dev.kikugie.stonecutter.intellij.lang.util.isInjected
  *
  * Visitors should be implemented in the `outer` subpackage and usually
  * override [PsiElementVisitor.visitComment] and access Stitcher files
- * with [PsiComment.commentDefinition][dev.kikugie.stonecutter.intellij.lang.util.commentDefinition].
+ * with [PsiComment.commentDefinition][dev.kikugie.stonecutter.intellij.lang.util.commentCode].
  * **It must not be recursive and should be stateless.**
  *
  * Elements may be visited concurrently and in an arbitrary order,

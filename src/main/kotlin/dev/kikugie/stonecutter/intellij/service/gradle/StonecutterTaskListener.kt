@@ -10,28 +10,29 @@ import org.jetbrains.plugins.gradle.util.GradleConstants
 class StonecutterTaskListener : ExternalSystemTaskNotificationListener {
     private val switches: MutableSet<ExternalSystemTaskId> = mutableSetOf()
 
-    /*? if <2025 {*/override fun onTaskOutput(id: ExternalSystemTaskId, text: String, stdOut: Boolean)
-    /*?} else*//*override fun onTaskOutput(id: ExternalSystemTaskId, text: String, outputType: com.intellij.execution.process.ProcessOutputType)*/
+    /*? if <2025 {*//*override fun onTaskOutput(id: ExternalSystemTaskId, text: String, stdOut: Boolean)
+    *//*?} else*/override fun onTaskOutput(id: ExternalSystemTaskId, text: String, outputType: com.intellij.execution.process.ProcessOutputType)
     {
         if (!StonecutterSettings.STATE.refreshAfterSwitch) return
         if (!text.startsWith("> Task :stonecutterSwitchTo")) return
         switches += id
     }
 
-    /*? if <2025 {*/override fun onSuccess(id: ExternalSystemTaskId)
-    /*?} else*//*override fun onSuccess(projectPath: String, id: ExternalSystemTaskId)*/
+    /*? if <2025 {*//*override fun onSuccess(id: ExternalSystemTaskId)
+    *//*?} else*/override fun onSuccess(projectPath: String, id: ExternalSystemTaskId)
     {
         if (id !in switches) return
         val project = id.findProject() ?: return
         val directory = project.basePath ?: return
         val tracker = ExternalSystemProjectTracker.getInstance(project)
 
+        println("Marked project $directory for refresh")
         tracker.markDirty(ExternalSystemProjectId(GradleConstants.SYSTEM_ID, directory))
         tracker.scheduleProjectRefresh()
     }
 
-    /*? if <2025 {*/override fun onEnd(id: ExternalSystemTaskId)
-    /*?} else*//*override fun onEnd(projectPath: String, id: ExternalSystemTaskId)*/
+    /*? if <2025 {*//*override fun onEnd(id: ExternalSystemTaskId)
+    *//*?} else*/override fun onEnd(projectPath: String, id: ExternalSystemTaskId)
     {
         switches -= id
     }

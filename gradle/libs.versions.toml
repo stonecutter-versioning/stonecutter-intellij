@@ -1,6 +1,6 @@
 [versions]
 antlr = "4.13.2"
-intellij = "2.7.1"
+intellij = "2.11.0"
 grammarkit = "2022.3.2.2"
 commonmark = "0.24.0"
 adaptor = "0.2+latest" # https://maven.kikugie.dev/#/third-party/org/antlr/antlr4-intellij-adaptor because it's not on maven central :/

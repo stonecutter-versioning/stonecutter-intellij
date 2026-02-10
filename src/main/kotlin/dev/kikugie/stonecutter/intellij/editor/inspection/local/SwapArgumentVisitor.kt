@@ -15,15 +15,16 @@ private fun String.templates(): Sequence<IntRange> {
 }
 
 class SwapArgumentVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
-    override fun visitSwap(o: PsiSwap) {
-        val identifier = o.identifier?.text ?: return
-        val replacement = o.stonecutterNode?.params?.swaps?.get(identifier) ?: return
-        val arguments = o.arguments?.entries.orEmpty().toList()
-        val tokens = replacement.templates()
-            .mapNotNull { replacement.substring(it).removePrefix("$").toIntOrNull() }
-            .maxOrNull() ?: 0
-        if (arguments.size < tokens) holder.error(o.lastLeaf(), "stonecutter.inspection.swap_args.too_few", tokens)
-        else if (arguments.size > tokens) for (arg in arguments.drop(tokens))
-            holder.error(arg, "stonecutter.inspection.swap_args.too_many")
-    }
+//    override fun visitSwap(o: PsiSwap) {
+//        if (o !is PsiSwap.Identified) return
+//        val identifier = o.identifier?.text ?: return
+//        val replacement = o.stonecutterNode?.params?.swaps?.get(identifier) ?: return
+//        val arguments = o.arguments?.entries.orEmpty().toList()
+//        val tokens = replacement.templates()
+//            .mapNotNull { replacement.substring(it).removePrefix("$").toIntOrNull() }
+//            .maxOrNull() ?: 0
+//        if (arguments.size < tokens) holder.error(o.lastLeaf(), "stonecutter.inspection.swap_args.too_few", tokens)
+//        else if (arguments.size > tokens) for (arg in arguments.drop(tokens))
+//            holder.error(arg, "stonecutter.inspection.swap_args.too_many")
+//    }
 }

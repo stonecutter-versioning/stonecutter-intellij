@@ -7,6 +7,5 @@ import org.antlr.intellij.adaptor.psi.ScopeNode
 
 interface PsiStitcherNode : ScopeNode {
     override fun resolve(element: PsiNamedElement?): PsiElement? = null
-
-    fun <T> accept(visitor: StitcherVisitor<T>): T
+    fun <T> accept(visitor: StitcherVisitor<T>): T = visitor.visitGeneric(this)
 }

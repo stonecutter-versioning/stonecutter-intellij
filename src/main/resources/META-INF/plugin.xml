@@ -47,12 +47,6 @@
                                    implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.outer.CommentInspectionSuppressor"/>
 
         <localInspection language="" enabledByDefault="true"
-                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.late_replacement"
-                         implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.LateReplacementInspection"/>
-        <localInspection language="" enabledByDefault="true"
-                         bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.duplicate_replacement"
-                         implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.DuplicateReplacementInspection"/>
-        <localInspection language="" enabledByDefault="true"
                          bundle="messages.StonecutterBundle" groupKey="stonecutter.inspection" key="stonecutter.inspection.naming"
                          implementationClass="dev.kikugie.stonecutter.intellij.editor.inspection.NamingConventionInspection"/>
 

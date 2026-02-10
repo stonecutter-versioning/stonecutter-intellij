@@ -3,6 +3,7 @@ package dev.kikugie.stonecutter.intellij.editor.documentation
 import com.intellij.lang.Language
 
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElement
 import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.AttributeKeys
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.*
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
@@ -44,9 +45,9 @@ private fun RowHtmlBuilder.regexReplacement(project: Project, replacement: Regex
     cell { text(replacement.target, DefaultColors.STRING) }
 }
 
-object ReplacementDocBuilder : DocumentationBuilder<PsiReplacement> {
-    override fun applyTo(builder: StringBuilder, element: PsiReplacement) = html(builder) {
-        val name = element.text
+object ReplacementDocBuilder : DocumentationBuilder<PsiElement> {
+    override fun applyTo(builder: StringBuilder, element: PsiElement) = html(builder) {
+        val name = element.lastChild.text
         val node = element.stonecutterNode
         signature("Replacement", "replacements", name, AttributeKeys.REPLACEMENT, node)
 

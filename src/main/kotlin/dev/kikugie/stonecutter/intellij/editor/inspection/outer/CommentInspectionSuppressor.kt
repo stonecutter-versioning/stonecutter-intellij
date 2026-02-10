@@ -4,7 +4,7 @@ import com.intellij.codeInspection.InspectionSuppressor
 import com.intellij.codeInspection.SuppressQuickFix
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
-import dev.kikugie.stonecutter.intellij.lang.util.commentDefinition
+import dev.kikugie.stonecutter.intellij.lang.util.commentCode
 import dev.kikugie.stonecutter.intellij.lang.util.filterNotWhitespace
 import dev.kikugie.stonecutter.intellij.lang.util.prevSiblings
 
@@ -13,7 +13,7 @@ class CommentInspectionSuppressor : InspectionSuppressor {
         && element is PsiComment
         && element.prevSiblings.filterNotWhitespace().firstOrNull()
         .let {
-            val type = (it as? PsiComment)?.commentDefinition?.element?.component?.type
+            val type = (it as? PsiComment)?.commentCode?.element?.definition?.kind
             type != null && type.isScoped
         }
 

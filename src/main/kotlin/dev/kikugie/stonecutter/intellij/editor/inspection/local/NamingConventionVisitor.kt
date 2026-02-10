@@ -3,7 +3,6 @@ package dev.kikugie.stonecutter.intellij.editor.inspection.local
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
-import com.intellij.psi.PsiElement
 import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherLocalInspectionTool
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
@@ -11,33 +10,33 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 
 class NamingConventionVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
-    override fun visitConstant(o: PsiExpression.Constant) {
-        if (!o.text.isConventional()) holder.registerProblem(
-            o,
+    override fun visitConstant(constant: PsiExpression.Constant) {
+        if (!constant.text.isConventional()) holder.registerProblem(
+            constant,
             StonecutterBundle.message("stonecutter.inspection.naming.constant"),
             ProblemHighlightType.WEAK_WARNING
         )
     }
 
-    override fun visitAssignment(o: PsiExpression.Assignment) {
-        if (o.target?.text?.isConventional() == false) holder.registerProblem(
-            o,
+    override fun visitAssignment(assignment: PsiExpression.Assignment) {
+        if (assignment.target?.text?.isConventional() == false) holder.registerProblem(
+            assignment,
             StonecutterBundle.message("stonecutter.inspection.naming.dependency"),
             ProblemHighlightType.WEAK_WARNING
         )
     }
 
-    override fun visitSwap(o: PsiSwap) {
-        if (o.identifier?.text?.isConventional() == false) holder.registerProblem(
-            o,
+    override fun visitSwapOpener(swap: PsiSwap.Opener) {
+        if (swap.identifier.text?.isConventional() == false) holder.registerProblem(
+            swap,
             StonecutterBundle.message("stonecutter.inspection.naming.swap"),
             ProblemHighlightType.WEAK_WARNING
         )
     }
 
-    override fun visitReplacement(o: PsiReplacement) {
-        if (!o.text.isConventional()) holder.registerProblem(
-            o,
+    override fun visitReplacementToggle(replacement: PsiReplacement.Toggle) {
+        for (entry in replacement.entries) if (!entry.identifier.text.isConventional()) holder.registerProblem(
+            entry.identifier,
             StonecutterBundle.message("stonecutter.inspection.naming.replacement"),
             ProblemHighlightType.WEAK_WARNING
         )
