@@ -62,8 +62,8 @@ class StitcherParserDef : ParserDefinition {
         COND_CLOSE -> PsiCondition.Closer(node)
         SWAP_OPEN -> PsiSwap.Opener(node)
         SWAP_CLOSE -> PsiSwap.Closer(node)
-        SWAP_LOCAL -> PsiSwap.Closer(node)
-        SWAP_EXPR -> PsiStitcherNodeImpl(node) // TODO
+        SWAP_LOCAL -> PsiSwap.Local(node)
+        SWAP_EXPR -> PsiSwap.Entry(node)
         REPL_TOGGLE -> PsiReplacement.Toggle(node)
         REPL_OPEN -> PsiReplacement.Local(node)
         REPL_CLOSE -> PsiReplacement.Closer(node)

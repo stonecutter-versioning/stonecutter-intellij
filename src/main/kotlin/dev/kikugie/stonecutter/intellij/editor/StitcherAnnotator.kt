@@ -39,6 +39,7 @@ class StitcherAnnotator : Annotator, DumbAware {
         StitcherLexer.IDENTIFIER -> when (val parent = element.parent) {
             is PsiSwap.Opener if element == parent.identifier -> holder.applyAttributes(element, AttributeKeys.SWAP)
             is PsiSwap.Opener -> holder.applyAttributes(element, AttributeKeys.LITERAL)
+            is PsiSwap.Entry -> holder.applyAttributes(element, AttributeKeys.LITERAL)
 
             is PsiReplacement.Entry -> holder.applyAttributes(element, AttributeKeys.REPLACEMENT)
 

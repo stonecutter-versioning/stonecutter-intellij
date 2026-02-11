@@ -13,6 +13,7 @@ import dev.kikugie.stonecutter.intellij.editor.documentation.ReplacementLocalDoc
 import dev.kikugie.stonecutter.intellij.editor.documentation.ReplacementToggleDocBuilder
 import dev.kikugie.stonecutter.intellij.editor.documentation.StitcherDocumentationTarget
 import dev.kikugie.stonecutter.intellij.editor.documentation.SwapIdDocBuilder
+import dev.kikugie.stonecutter.intellij.editor.documentation.SwapLocalDocBuilder
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
@@ -33,6 +34,7 @@ class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
         .firstNotNullOfOrNull(::matchDocumentationTarget)
 
     private fun matchDocumentationTarget(element: PsiElement): StitcherDocumentationTarget<out PsiElement>? = when (element) {
+        is PsiSwap.Local -> StitcherDocumentationTarget(element, SwapLocalDocBuilder)
         is PsiSwap.Opener -> StitcherDocumentationTarget(element, SwapIdDocBuilder)
         is PsiReplacement.Local -> StitcherDocumentationTarget(element, ReplacementLocalDocBuild)
         is PsiReplacement.Entry -> StitcherDocumentationTarget(element, ReplacementToggleDocBuilder)

@@ -49,7 +49,7 @@ private fun StitcherCompletionContributor.registerPatterns() {
         }.ifNotEmpty(result::addAllElements)
     }
 
-    psiAntlrToken(StitcherLexer.IDENTIFIER).withParent<PsiSwap>() register { params, result ->
+    psiAntlrToken(StitcherLexer.IDENTIFIER).withParent<PsiSwap.Opener>().andNot(psiElement().afterSibling(psiElement())) register { params, result ->
         params.stonecutter?.swaps.orEmpty().map { (k, v) ->
             create(k).withIcon(Reference.SWAP).withTailText(" " + formatSwap(k, 30))
         }.ifNotEmpty(result::addAllElements)

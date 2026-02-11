@@ -79,6 +79,7 @@ sealed interface PsiDefinition : PsiStitcherNode {
 
 sealed interface PsiSwap : PsiDefinition {
     class Local(node: ASTNode) : PsiStitcherNodeImpl(node), PsiSwap {
+        val entries: Sequence<Entry> get() = childrenSequence.filterIsInstance<Entry>()
         override val kind: PsiDefinition.Kind by cached(PsiDefinition.KIND_KEY, opener::openerKind)
         override fun <T> accept(visitor: PsiDefinition.Visitor<T>): T = visitor.visitSwapLocal(this)
     }
@@ -94,6 +95,11 @@ sealed interface PsiSwap : PsiDefinition {
     class Closer(node: ASTNode) : PsiStitcherNodeImpl(node), PsiSwap {
         override val kind: PsiDefinition.Kind get() = PsiDefinition.Kind.CLOSER
         override fun <T> accept(visitor: PsiDefinition.Visitor<T>): T = visitor.visitSwapCloser(this)
+    }
+
+    class Entry(node: ASTNode) : PsiStitcherNodeImpl(node) {
+        val condition: PsiExpression? get() = childrenSequence.findIsInstance<PsiExpression>()
+        val literal: PsiElement? get() = lastChild
     }
 }
 

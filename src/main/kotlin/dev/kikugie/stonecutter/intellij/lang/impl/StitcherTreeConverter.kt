@@ -60,9 +60,15 @@ class StitcherTreeConverter(parser: StitcherParser, builder: PsiBuilder) :
 
     override fun enterSwapArguments(ctx: StitcherParser.SwapArgumentsContext?): Unit = Unit
     override fun exitSwapArguments(ctx: StitcherParser.SwapArgumentsContext?): Unit = Unit
-    
+
+    override fun enterSwapPrimary(ctx: StitcherParser.SwapPrimaryContext?) = mark()
+    override fun exitSwapPrimary(ctx: StitcherParser.SwapPrimaryContext?) = release(StitcherCompositeType.SWAP_EXPR)
+
     override fun enterSwapExtension(ctx: StitcherParser.SwapExtensionContext?) = mark()
     override fun exitSwapExtension(ctx: StitcherParser.SwapExtensionContext?) = release(StitcherCompositeType.SWAP_EXPR)
+
+    override fun enterSwapFinal(ctx: StitcherParser.SwapFinalContext?) = mark()
+    override fun exitSwapFinal(ctx: StitcherParser.SwapFinalContext?) = release(StitcherCompositeType.SWAP_EXPR)
 
     override fun enterOpenerCondition(ctx: StitcherParser.OpenerConditionContext?) = mark()
     override fun exitOpenerCondition(ctx: StitcherParser.OpenerConditionContext?) = release(StitcherCompositeType.COND_OPEN)

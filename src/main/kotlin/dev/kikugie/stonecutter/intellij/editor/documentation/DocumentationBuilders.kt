@@ -18,6 +18,7 @@ import dev.kikugie.stonecutter.intellij.model.serialized.Replacement
 import dev.kikugie.stonecutter.intellij.model.serialized.StringReplacement
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
+import kotlin.text.trimIndent
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as DefaultColors
 import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet as appendHighlighted
 
@@ -74,8 +75,26 @@ object SwapIdDocBuilder : DocumentationBuilder<PsiSwap.Opener> {
 }
 
 object SwapLocalDocBuilder : DocumentationBuilder<PsiSwap.Local> {
-    override fun applyTo(builder: StringBuilder, element: PsiSwap.Local) {
-        TODO("Not yet implemented")
+    override fun applyTo(builder: StringBuilder, element: PsiSwap.Local) = html(builder) {
+        val node = element.stonecutterNode
+        signature("Local swap", "local-swaps", null, AttributeKeys.DEPENDENCY, node)
+
+        if (node == null) return@html
+        val variants = node.siblings(element.stonecutterService.lookup)
+            .groupBy { it.eval(element) }
+        if (variants.isNotEmpty()) variants(node, variants) {
+            cell {
+                if (it == null) text("UNDEFINED", RED)
+                else text(it, DefaultColors.STRING)
+            }
+        }
+    }
+
+    private fun SCProjectNode.eval(element: PsiSwap.Local): String? {
+        val visitor = ExpressionEvaluationVisitor(this)
+        val variant = element.entries.find { it.condition?.accept(visitor) ?: true }
+            ?: return null
+        return variant.literal?.unquote()
     }
 }
 
@@ -85,7 +104,7 @@ object DependencyDocBuilder : DocumentationBuilder<PsiExpression.Assignment> {
         val node = element.stonecutterNode
         signature("Dependency", "condition-dependencies", name.ifEmpty { "minecraft" }, AttributeKeys.DEPENDENCY, node)
 
-        if (node == null || name.isEmpty()) return@html
+        if (node == null) return@html
         val variants = node.siblings(element.stonecutterService.lookup)
             .groupBy { it.params.dependencies[name] }
         if (variants.isNotEmpty()) variants(node, variants) {

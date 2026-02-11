@@ -21,9 +21,9 @@ condition
     ;
 
 swap
-    : IDENTIFIER swapArguments? scopeOpener?                                              # identifierSwap
-    | SUGAR_IF conditionExpression literal swapExtension* SUGAR_ELSE literal scopeOpener? # localSwap
-    | SCOPE_CLOSE                                                                         # closerSwap
+    : IDENTIFIER swapArguments? scopeOpener?            # identifierSwap
+    | swapPrimary swapExtension* swapFinal scopeOpener? # localSwap
+    | SCOPE_CLOSE                                       # closerSwap
     ;
 
 replacement
@@ -41,7 +41,9 @@ elseSugar: SUGAR_ELSE SUGAR_IF | SUGAR_ELIF | SUGAR_ELSE;
 
 swapArguments: literal+;
 
+swapPrimary: SUGAR_IF conditionExpression literal;
 swapExtension: elseSugar conditionExpression literal;
+swapFinal: SUGAR_ELSE literal;
 
 replacementEntry: OP_NOT? IDENTIFIER;
 
