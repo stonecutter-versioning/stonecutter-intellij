@@ -16,8 +16,8 @@ import com.intellij.psi.templateLanguages.TemplateDataLanguageMappings
 import com.intellij.psi.tree.IElementType
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
-import dev.kikugie.stonecutter.intellij.lang.impl.StitcherParser
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
 import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor
 
@@ -27,7 +27,11 @@ private fun StitcherSyntaxHighlighter.TemplateHighlighter.configure(project: Pro
         ?.associatedFileType ?: StitcherFile.StitcherFileType.INSTANCE
     val outer = SyntaxHighlighterFactory.getSyntaxHighlighter(type, project, file)
         ?.let { LayerDescriptor(it, "", TextAttributesKey.createTempTextAttributesKey("EMPTY", TextAttributes.ERASE_MARKER)) }
-    if (outer != null) registerLayer(StitcherLang.ruleTypeOf(StitcherParser.RULE_definition), outer)
+    if (outer != null) {
+        registerLayer(StitcherCompositeType.COND.asIElementType(), outer)
+        registerLayer(StitcherCompositeType.SWAP.asIElementType(), outer)
+        registerLayer(StitcherCompositeType.REPL.asIElementType(), outer)
+    }
 }
 
 class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {

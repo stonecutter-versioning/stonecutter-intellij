@@ -24,9 +24,6 @@ private val CompletionParameters.stonecutter: SCProcessProperties?
 private fun psiAntlrToken(type: Int): PsiElementPattern.Capture<PsiElement> =
     psiElement(StitcherLang.tokenTypeOf(type))
 
-private fun psiAntlrRule(type: Int): PsiElementPattern.Capture<PsiElement> =
-    psiElement(StitcherLang.ruleTypeOf(type))
-
 private inline fun <reified T : PsiElement> psiElement(): PsiElementPattern.Capture<T> =
     psiElement(T::class.java)
 

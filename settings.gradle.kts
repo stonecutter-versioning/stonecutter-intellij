@@ -16,13 +16,13 @@ dependencyResolutionManagement {
 }
 
 plugins {
-    id("dev.kikugie.stonecutter") version "0.8.3"
+    id("dev.kikugie.stonecutter") version "0.9"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 stonecutter {
     create(rootProject) {
-        versions("2024.3", "2025.3")
+        versions("2024.3", "2025.3", "2026.1")
     }
 }
 

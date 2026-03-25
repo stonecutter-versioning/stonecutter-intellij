@@ -20,7 +20,6 @@ object StitcherLang : Language("Stitcher"), InjectableLanguage, TemplateLanguage
     }
 
     fun tokenTypeOf(type: Int) = checkNotNull(tokenIElementTypes[type])
-    fun ruleTypeOf(index: Int) = checkNotNull(ruleIElementTypes[index])
 
     private fun readResolve(): Any = StitcherLang
 }
