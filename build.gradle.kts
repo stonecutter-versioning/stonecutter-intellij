@@ -45,6 +45,7 @@ dependencies {
     intellijPlatform {
         intellijIdeaUltimate(property("intellij.version") as String)
         bundledPlugin("com.intellij.java")
+        bundledPlugin("com.intellij.gradle")
         bundledPlugin("org.jetbrains.kotlin")
         bundledPlugin("org.jetbrains.plugins.gradle")
         plugin("PsiViewer:${property("deps.psiviewer")}")

@@ -10,6 +10,7 @@ import com.intellij.openapi.editor.ex.util.LayeredLexerEditorHighlighter
 import com.intellij.openapi.editor.highlighter.EditorHighlighter
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileTypes.*
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.templateLanguages.TemplateDataLanguageMappings
@@ -105,7 +106,7 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
         }
     }
 
-    class Provider : SyntaxHighlighterFactory(), EditorHighlighterProvider {
+    class Provider : SyntaxHighlighterFactory(), EditorHighlighterProvider, DumbAware {
         override fun getSyntaxHighlighter(project: Project?, file: VirtualFile?): SyntaxHighlighter =
             StitcherSyntaxHighlighter()
 

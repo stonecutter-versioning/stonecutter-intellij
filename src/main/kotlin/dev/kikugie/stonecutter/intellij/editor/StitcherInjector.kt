@@ -3,12 +3,14 @@ package dev.kikugie.stonecutter.intellij.editor
 import com.intellij.lang.injection.MultiHostInjector
 import com.intellij.lang.injection.MultiHostRegistrar
 import com.intellij.openapi.project.DumbAware
-import com.intellij.psi.*
+import com.intellij.psi.ElementManipulators
+import com.intellij.psi.PsiComment
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import dev.kikugie.commons.text.getOrDefault
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
-import dev.kikugie.stonecutter.intellij.settings.StonecutterOptions
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
 
 private val PREFIXES = charArrayOf('?', '$', '~')

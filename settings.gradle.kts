@@ -22,7 +22,10 @@ plugins {
 
 stonecutter {
     create(rootProject) {
-        versions("2024.3", "2025.3", "2026.1")
+        versions(
+            "2025.3",
+            "2026.1"
+        )
     }
 }
 

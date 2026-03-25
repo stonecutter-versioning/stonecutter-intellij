@@ -1,4 +1,4 @@
 plugins {
     id("dev.kikugie.stonecutter")
 }
-stonecutter active "2025.3"
+stonecutter active "2026.1"

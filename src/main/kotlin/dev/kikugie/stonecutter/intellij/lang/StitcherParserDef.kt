@@ -6,6 +6,7 @@ import com.intellij.lang.PsiBuilder
 import com.intellij.lang.PsiParser
 import com.intellij.lexer.Lexer
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.PsiElement
@@ -31,7 +32,7 @@ private val COMMENTS: TokenSet = PSIElementTypeFactory.createTokenSet(StitcherLa
 private val WHITESPACES: TokenSet = PSIElementTypeFactory.createTokenSet(StitcherLang, StitcherLexer.WHITESPACE)
 private val LOGGER = Logger.getInstance(StitcherParserDef::class.java)
 
-class StitcherParserDef : ParserDefinition {
+class StitcherParserDef : ParserDefinition, DumbAware {
     override fun createLexer(project: Project?): Lexer = ANTLRLexerAdaptor(StitcherLang, StitcherLexer(null))
     override fun createParser(project: Project?): PsiParser = object : ANTLRParserAdaptor(StitcherLang, StitcherParser(null)) {
         override fun createListener(parser: Parser, root: IElementType, builder: PsiBuilder): ANTLRParseTreeToPSIConverter =

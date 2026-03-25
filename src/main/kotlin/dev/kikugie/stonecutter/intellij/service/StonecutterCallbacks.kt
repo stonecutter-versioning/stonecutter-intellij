@@ -1,6 +1,5 @@
 package dev.kikugie.stonecutter.intellij.service
 
-import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
@@ -11,21 +10,17 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
 import com.intellij.openapi.vfs.toNioPathOrNull
-import dev.kikugie.stonecutter.intellij.action.VersionSelectorAction
 import dev.kikugie.stonecutter.intellij.editor.StitcherFoldingBuilder.Constants.STITCHER_SCOPE
+import dev.kikugie.stonecutter.intellij.service.gradle.GradleReloadListener
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
 import dev.kikugie.stonecutter.intellij.settings.variants.FoldingMode.AGGRESSIVE
+import org.jetbrains.plugins.gradle.service.syncAction.GradleSyncListener
 import java.awt.event.FocusEvent
 
 object StonecutterCallbacks {
     internal fun invokeAppLoad(settings: StonecutterSettings) {
-        //? if >=2025 {
         val bus = ApplicationManager.getApplication().messageBus.connect(settings)
-        @Suppress("UnstableApiUsage") bus.subscribe(
-            org.jetbrains.plugins.gradle.service.syncAction.GradleSyncListener.TOPIC,
-            dev.kikugie.stonecutter.intellij.service.gradle.GradleReloadListener
-        )
-        //?}
+        @Suppress("UnstableApiUsage") bus.subscribe(GradleSyncListener.TOPIC, GradleReloadListener)
         (EditorFactory.getInstance().eventMulticaster as? EditorEventMulticasterEx)
             ?.addFocusChangeListener(createFocusListener(), settings)
     }
@@ -36,9 +31,6 @@ object StonecutterCallbacks {
     }
 
     internal fun invokeProjectReload(service: StonecutterService) {
-        (ActionManager.getInstance().getAction("dev.kikugie.stonecutter.intellij.select_version") as VersionSelectorAction)
-            .isAvailable = true
-
         if (StonecutterSettings.STATE.foldDisabledBlocks == AGGRESSIVE) runWheneverIntelliJWantsIt {
             FileEditorManager.getInstance(service.project).focusedEditor?.file
                 ?.findDocument()
