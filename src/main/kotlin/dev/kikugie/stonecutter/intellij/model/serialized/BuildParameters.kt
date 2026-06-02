@@ -10,14 +10,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
-@Serializable
-enum class ReplacementPhase {
-    FIRST, LAST
-}
-
 @Serializable(with = ReplacementJsonSerializer::class)
 sealed interface Replacement {
-    val phase: ReplacementPhase
     val identifier: String?
 }
 
@@ -25,7 +19,6 @@ sealed interface Replacement {
 data class StringReplacement(
     val sources: Set<String>,
     val target: String,
-    override val phase: ReplacementPhase = ReplacementPhase.LAST,
     override val identifier: String? = null
 ) : Replacement
 
@@ -33,8 +26,7 @@ data class StringReplacement(
 data class RegexReplacement(
     val pattern: String,
     val target: String,
-    override val phase: ReplacementPhase,
-    override val identifier: String?
+    override val identifier: String? = null
 ) : Replacement
 
 @Serializable
@@ -45,7 +37,7 @@ data class BuildParameters(
     val replacements: List<Replacement> = emptyList(),
 )
 
-private object ReplacementJsonSerializer : JsonContentPolymorphicSerializer<Replacement>(Replacement::class) {
+object ReplacementJsonSerializer : JsonContentPolymorphicSerializer<Replacement>(Replacement::class) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<Replacement> = when (element) {
         is JsonObject -> matchObjectType(element)
         else -> throw SerializationException("Unable to deserialize ${element::class.qualifiedName}")

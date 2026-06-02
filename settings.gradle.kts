@@ -11,12 +11,12 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        register("common") { from("dev.kikugie:stonecutter-versions:1.8.0") }
+        register("common") { from("dev.kikugie:stonecutter-versions:1.11.0") }
     }
 }
 
 plugins {
-    id("dev.kikugie.stonecutter") version "0.9"
+    id("dev.kikugie.stonecutter") version "0.9.4"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
