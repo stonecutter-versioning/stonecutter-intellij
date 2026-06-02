@@ -18,7 +18,7 @@ import dev.kikugie.stonecutter.intellij.lang.util.elementOfAnyToken
 import dev.kikugie.stonecutter.intellij.lang.util.elementOfToken
 import dev.kikugie.stonecutter.intellij.lang.util.reverseChildrenSequence
 
-private val SCOPE_OPENERS = arrayOf(LOOKUP_SCOPE.asIElementType(), CLOSED_SCOPE.asIElementType())
+private val SCOPE_OPENERS = arrayOf(LOOKUP_SCOPE.asIElementType(), CLOSED_SCOPE.asIElementType(), NAMED_SCOPE.asIElementType())
 private val LITERALS = intArrayOf(StitcherLexer.IDENTIFIER, StitcherLexer.QUOTED)
 
 sealed interface PsiDefinition : PsiStitcherNode {
@@ -125,25 +125,29 @@ sealed interface PsiReplacement : PsiDefinition {
         val entries: Sequence<Entry> get() = childrenSequence.filterIsInstance<Entry>()
         override val kind: PsiDefinition.Kind get() = PsiDefinition.Kind.INDEPENDENT
         override fun <T> accept(visitor: PsiDefinition.Visitor<T>): T = visitor.visitReplacementToggle(this)
+
+        class Entry(node: ASTNode) : PsiStitcherNodeImpl(node) {
+            val op: PsiElement? get() = firstChild?.takeIf { it.antlrType == StitcherLexer.OP_NOT }
+            val identifier: PsiElement? get() = lastChild
+        }
     }
 
     class Local(node: ASTNode) : PsiStitcherNodeImpl(node), PsiReplacement {
         val condition: PsiExpression? get() = childrenSequence.findIsInstance<PsiExpression>()
-        val source: PsiElement? get() = childrenSequence.elementOfAnyToken(*LITERALS)
-        val target: PsiElement? get() = reverseChildrenSequence.elementOfAnyToken(*LITERALS)
+        val entries: Sequence<Entry> get() = childrenSequence.filterIsInstance<Entry>()
 
         override val kind: PsiDefinition.Kind by cached(PsiDefinition.KIND_KEY, opener::openerKind)
         override fun <T> accept(visitor: PsiDefinition.Visitor<T>): T = visitor.visitReplacementLocal(this)
+
+        class Entry(node: ASTNode) : PsiStitcherNodeImpl(node) {
+            val source: PsiElement? get() = childrenSequence.elementOfAnyToken(*LITERALS)
+            val target: PsiElement? get() = reverseChildrenSequence.elementOfAnyToken(*LITERALS)
+        }
     }
 
     class Closer(node: ASTNode) : PsiStitcherNodeImpl(node), PsiReplacement {
         override val kind: PsiDefinition.Kind get() = PsiDefinition.Kind.CLOSER
         override fun <T> accept(visitor: PsiDefinition.Visitor<T>): T = visitor.visitReplacementCloser(this)
-    }
-
-    class Entry(node: ASTNode) : PsiStitcherNodeImpl(node) {
-        val op: PsiElement? get() = firstChild?.takeIf { it.antlrType == StitcherLexer.OP_NOT }
-        val identifier: PsiElement? get() = lastChild
     }
 }
 

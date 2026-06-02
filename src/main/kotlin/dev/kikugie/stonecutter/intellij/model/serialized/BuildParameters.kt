@@ -17,17 +17,22 @@ sealed interface Replacement {
 
 @Serializable
 data class StringReplacement(
-    val sources: Set<String>,
+    val sources: Set<String> = emptySet(),
+    val pattern: String? = null,
     val target: String,
     override val identifier: String? = null
 ) : Replacement
 
 @Serializable
 data class RegexReplacement(
-    val pattern: String,
+    val pattern: String? = null,
+    val regex: RegexModel? = null,
     val target: String,
     override val identifier: String? = null
-) : Replacement
+) : Replacement {
+    @Serializable
+    data class RegexModel(val pattern: String, val flags: Int = 0)
+}
 
 @Serializable
 data class BuildParameters(

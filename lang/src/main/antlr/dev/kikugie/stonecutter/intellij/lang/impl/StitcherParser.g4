@@ -27,14 +27,18 @@ swap
     ;
 
 replacement
-    : replacementEntry+                                                # toggleReplacement
-    | SUGAR_IF conditionExpression literal OP_DIR literal scopeOpener? # localReplacement
-    | SCOPE_CLOSE                                                      # closerReplacement
+    : replacementToggle+                                                         # toggleReplacement
+    | SUGAR_IF conditionExpression replacementEntry+ (scopeOpener | scopeNamed)? # localReplacement
+    | SCOPE_CLOSE                                                                # closerReplacement
     ;
 
 scopeOpener
     : SCOPE_OPEN                  # closedScopeOpener
     | SCOPE_WORD (PLUS? literal)? # wordScopeOpener
+    ;
+
+scopeNamed
+    : SCOPE_AS IDENTIFIER
     ;
 
 elseSugar: SUGAR_ELSE SUGAR_IF | SUGAR_ELIF | SUGAR_ELSE;
@@ -45,7 +49,9 @@ swapPrimary: SUGAR_IF conditionExpression literal;
 swapExtension: elseSugar conditionExpression literal;
 swapFinal: SUGAR_ELSE literal;
 
-replacementEntry: OP_NOT? IDENTIFIER;
+replacementToggle: OP_NOT? IDENTIFIER COMMA?;
+
+replacementEntry: literal OP_DIR literal COMMA?;
 
 conditionExpression
     : conditionExpression op=(OP_AND | OP_OR) conditionExpression # binaryExpression

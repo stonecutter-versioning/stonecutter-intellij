@@ -34,6 +34,9 @@ class StitcherTreeConverter(parser: StitcherParser, builder: PsiBuilder) :
     override fun enterWordScopeOpener(ctx: StitcherParser.WordScopeOpenerContext?) = mark()
     override fun exitWordScopeOpener(ctx: StitcherParser.WordScopeOpenerContext?) = release(StitcherCompositeType.LOOKUP_SCOPE)
 
+    override fun enterScopeNamed(ctx: StitcherParser.ScopeNamedContext?) = mark()
+    override fun exitScopeNamed(ctx: StitcherParser.ScopeNamedContext?) = release(StitcherCompositeType.NAMED_SCOPE)
+
     override fun enterElseSugar(ctx: StitcherParser.ElseSugarContext?) = Unit
     override fun exitElseSugar(ctx: StitcherParser.ElseSugarContext?) = Unit
 
@@ -46,8 +49,11 @@ class StitcherTreeConverter(parser: StitcherParser, builder: PsiBuilder) :
     override fun enterCloserReplacement(ctx: StitcherParser.CloserReplacementContext?) = mark()
     override fun exitCloserReplacement(ctx: StitcherParser.CloserReplacementContext?) = release(StitcherCompositeType.REPL_CLOSE)
 
+    override fun enterReplacementToggle(ctx: StitcherParser.ReplacementToggleContext?) = mark()
+    override fun exitReplacementToggle(ctx: StitcherParser.ReplacementToggleContext?) = release(StitcherCompositeType.TOGGLE_ENTRY)
+
     override fun enterReplacementEntry(ctx: StitcherParser.ReplacementEntryContext?) = mark()
-    override fun exitReplacementEntry(ctx: StitcherParser.ReplacementEntryContext?) = release(StitcherCompositeType.REPL_ENTRY)
+    override fun exitReplacementEntry(ctx: StitcherParser.ReplacementEntryContext?) = release(StitcherCompositeType.LOCAL_ENTRY)
 
     override fun enterCloserSwap(ctx: StitcherParser.CloserSwapContext?) = mark()
     override fun exitCloserSwap(ctx: StitcherParser.CloserSwapContext?) = release(StitcherCompositeType.SWAP_CLOSE)

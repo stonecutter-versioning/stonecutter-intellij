@@ -36,8 +36,8 @@ class StitcherDocumentationTargetProvider : DocumentationTargetProvider {
     private fun matchDocumentationTarget(element: PsiElement): StitcherDocumentationTarget<out PsiElement>? = when (element) {
         is PsiSwap.Local -> StitcherDocumentationTarget(element, SwapLocalDocBuilder)
         is PsiSwap.Opener -> StitcherDocumentationTarget(element, SwapIdDocBuilder)
-        is PsiReplacement.Local -> StitcherDocumentationTarget(element, ReplacementLocalDocBuild)
-        is PsiReplacement.Entry -> StitcherDocumentationTarget(element, ReplacementToggleDocBuilder)
+        is PsiReplacement.Local.Entry -> StitcherDocumentationTarget(element, ReplacementLocalDocBuild)
+        is PsiReplacement.Toggle.Entry -> StitcherDocumentationTarget(element, ReplacementToggleDocBuilder)
         is PsiExpression.Constant -> StitcherDocumentationTarget(element, ConstantDocBuilder)
         is PsiExpression.Assignment -> StitcherDocumentationTarget(element, DependencyDocBuilder)
         else -> null

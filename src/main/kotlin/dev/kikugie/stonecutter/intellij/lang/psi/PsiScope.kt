@@ -7,4 +7,6 @@ sealed interface PsiScope : PsiStitcherNode {
     class Closed(node: ASTNode) : PsiStitcherNodeImpl(node), PsiScope
 
     class Lookup(node: ASTNode) : PsiStitcherNodeImpl(node), PsiScope
+
+    class Named(node: ASTNode) : PsiStitcherNodeImpl(node), PsiScope
 }

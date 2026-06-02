@@ -41,7 +41,8 @@ class StitcherAnnotator : Annotator, DumbAware {
             is PsiSwap.Opener -> holder.applyAttributes(element, AttributeKeys.LITERAL)
             is PsiSwap.Entry -> holder.applyAttributes(element, AttributeKeys.LITERAL)
 
-            is PsiReplacement.Entry -> holder.applyAttributes(element, AttributeKeys.REPLACEMENT)
+            is PsiReplacement.Local.Entry -> holder.applyAttributes(element, AttributeKeys.LITERAL)
+            is PsiReplacement.Toggle.Entry -> holder.applyAttributes(element, AttributeKeys.REPLACEMENT)
 
             is PsiExpression.Constant -> holder.applyAttributes(element, AttributeKeys.CONSTANT)
             is PsiExpression.Assignment -> holder.applyAttributes(element, AttributeKeys.DEPENDENCY)

@@ -3,6 +3,7 @@ package dev.kikugie.stonecutter.intellij.editor.documentation
 import com.intellij.lang.Language
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import dev.kikugie.commons.takeAsOrNull
 import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.AttributeKeys
 import dev.kikugie.stonecutter.intellij.editor.documentation.ReplacementToggleDocBuilder.replacement
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.*
@@ -116,8 +117,8 @@ object DependencyDocBuilder : DocumentationBuilder<PsiExpression.Assignment> {
     }
 }
 
-object ReplacementToggleDocBuilder : DocumentationBuilder<PsiReplacement.Entry> {
-    override fun applyTo(builder: StringBuilder, element: PsiReplacement.Entry) = html(builder) {
+object ReplacementToggleDocBuilder : DocumentationBuilder<PsiReplacement.Toggle.Entry> {
+    override fun applyTo(builder: StringBuilder, element: PsiReplacement.Toggle.Entry) = html(builder) {
         val name = element.lastChild.text
         val node = element.stonecutterNode
         signature("Replacement", "replacements", name, AttributeKeys.REPLACEMENT, node)
@@ -137,8 +138,11 @@ object ReplacementToggleDocBuilder : DocumentationBuilder<PsiReplacement.Entry> 
     }
 
     private fun RowHtmlBuilder.stringReplacement(replacement: StringReplacement) {
+        val patterns = replacement.sources.toMutableList()
+        if (replacement.pattern != null) patterns += replacement.pattern
+
         cell {
-            for (it in replacement.sources) {
+            for (it in patterns) {
                 text("•")
                 nbsp()
                 text(it, DefaultColors.STRING)
@@ -150,18 +154,19 @@ object ReplacementToggleDocBuilder : DocumentationBuilder<PsiReplacement.Entry> 
     }
 
     private fun RowHtmlBuilder.regexReplacement(project: Project, replacement: RegexReplacement) {
+        val pattern = replacement.regex?.pattern ?: replacement.pattern ?: "<unknown>"
         cell {
             val language = Language.findLanguageByID("RegExp")
-            if (language == null) text(replacement.pattern, DefaultColors.STRING)
-            else raw { appendHighlighted(this, project, language, replacement.pattern, 1F) }
+            if (language == null) text(pattern, DefaultColors.STRING)
+            else raw { appendHighlighted(this, project, language, pattern, 1F) }
         }
         cell { text("→", AttributeKeys.KEYWORD) }
         cell { text(replacement.target, DefaultColors.STRING) }
     }
 }
 
-object ReplacementLocalDocBuild : DocumentationBuilder<PsiReplacement.Local> {
-    override fun applyTo(builder: StringBuilder, element: PsiReplacement.Local) = html(builder) {
+object ReplacementLocalDocBuild : DocumentationBuilder<PsiReplacement.Local.Entry> {
+    override fun applyTo(builder: StringBuilder, element: PsiReplacement.Local.Entry) = html(builder) {
         val node = element.stonecutterNode
         signature("Local replacement", "local-replacements", null, AttributeKeys.REPLACEMENT, node)
 
@@ -174,14 +179,14 @@ object ReplacementLocalDocBuild : DocumentationBuilder<PsiReplacement.Local> {
         }
     }
 
-    private fun SCProjectNode.eval(element: PsiReplacement.Local): StringReplacement? {
-        val direction = element.condition?.accept(ExpressionEvaluationVisitor(this))
+    private fun SCProjectNode.eval(element: PsiReplacement.Local.Entry): StringReplacement? {
+        val direction = element.parent.takeAsOrNull<PsiReplacement.Local>()?.condition?.accept(ExpressionEvaluationVisitor(this))
             ?: return null
         val source = element.source?.unquote().orEmpty()
         val target = element.target?.unquote().orEmpty()
 
-        return if (direction) StringReplacement(setOf(source), target)
-        else StringReplacement(setOf(target), source)
+        return if (direction) StringReplacement(pattern = source, target = target)
+        else StringReplacement(pattern = target, target = source)
     }
 }
 

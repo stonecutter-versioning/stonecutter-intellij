@@ -22,6 +22,7 @@ mode IN_DEFINITION;
 DOT: '.';
 DASH: '-';
 PLUS: '+';
+COMMA: ',';
 
 LEFT_BRACE: '(';
 RIGHT_BRACE: ')';
@@ -29,6 +30,7 @@ RIGHT_BRACE: ')';
 SCOPE_CLOSE: '}';
 SCOPE_OPEN: '{';
 SCOPE_WORD: '>>';
+SCOPE_AS: 'as';
 
 SUGAR_IF: 'if';
 SUGAR_ELSE: 'else';
@@ -53,5 +55,5 @@ NUMERIC: NUMBER;
 IDENTIFIER: IDENTIFIER_START IDENTIFIER_PART*;
 QUOTED: '\'' (ESC_SLASH | ESC_TICK | ~[\\'])* '\'';
 COMMENT: '*' (ESC_SLASH | ESC_STAR | ~[\\*])* '*' -> channel(HIDDEN);
-WHITESPACE: [ \t]+ -> channel(HIDDEN);
+WHITESPACE: [ \t\n\r]+ -> channel(HIDDEN);
 BAD_CHAR: . -> channel(HIDDEN);

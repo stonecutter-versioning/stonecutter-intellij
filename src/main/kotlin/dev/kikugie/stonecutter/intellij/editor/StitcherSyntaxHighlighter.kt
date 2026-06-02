@@ -75,7 +75,8 @@ class StitcherSyntaxHighlighter : SyntaxHighlighterBase() {
             StitcherLexer.OP_OR,
             StitcherLexer.OP_DIR,
             StitcherLexer.OP_ASSIGN,
-            StitcherLexer.SCOPE_WORD, -> AttributeKeys.OPERATOR
+            StitcherLexer.SCOPE_WORD,
+            StitcherLexer.SCOPE_AS, -> AttributeKeys.OPERATOR
 
             StitcherLexer.NUMERIC,
             StitcherLexer.DOT,

@@ -11,17 +11,18 @@ import org.jetbrains.plugins.gradle.service.syncAction.GradleSyncListener
 import kotlin.io.path.Path
 
 object GradleReloadListener : GradleSyncListener {
-    override fun onSyncPhaseCompleted(context: ProjectResolverContext, phase: org.jetbrains.plugins.gradle.service.syncAction.GradleSyncPhase) =
-        kotlinx.coroutines.runBlocking { updateStonecutterService(context) }
+    override fun onSyncPhaseCompleted(context: ProjectResolverContext, phase: org.jetbrains.plugins.gradle.service.syncAction.GradleSyncPhase) {
+        if (phase == org.jetbrains.plugins.gradle.service.syncAction.GradleSyncPhase.PROJECT_MODEL_PHASE)
+            kotlinx.coroutines.runBlocking { updateStonecutterService(context) }
+    }
 
     private suspend fun updateStonecutterService(context: ProjectResolverContext) {
         val project = ProjectUtil.findProject(context.projectPath.let(::Path)) ?: return
-        val candidates = context.rootBuild.projects.mapNotNull { build ->
-            context.getProjectModel(build, ExternalProject::class.java)
-                ?.takeIf { it.buildFile?.name?.startsWith("stonecutter.gradle") == true }
-        }.associate {
-            it.projectDir.invariantSeparatorsPath to it.identityPath
-        }
+        val candidates = context.allBuilds.asSequence()
+            .flatMap { it.projects }
+            .mapNotNull { context.getProjectModel(it, ExternalProject::class.java) }
+            .filter { it.buildFile?.name?.startsWith("stonecutter.gradle") == true }
+            .associate { it.projectDir.invariantSeparatorsPath to it.identityPath }
 
         project.stonecutterService.reset(candidates)
         PropertiesComponent.getInstance(project).setList("dev.kikugie.stonecutter.projects", candidates.map { (k, v) -> "$k#$v" })
