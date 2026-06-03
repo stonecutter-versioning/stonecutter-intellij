@@ -35,6 +35,13 @@ data class RegexReplacement(
 }
 
 @Serializable
+data class PerlReplacement(
+    val pattern: String,
+    val target: String,
+    override val identifier: String? = null
+) : Replacement
+
+@Serializable
 data class BuildParameters(
     val constants: Map<String, Boolean> = emptyMap(),
     val dependencies: Map<String, Version> = emptyMap(),
@@ -52,6 +59,7 @@ object ReplacementJsonSerializer : JsonContentPolymorphicSerializer<Replacement>
         val type = element["type"]?.jsonPrimitive?.contentOrNull ?: throw SerializationException("Unable to determine replacement type")
         if ("StringReplacement" in type) return StringReplacement.serializer()
         if ("RegexReplacement" in type) return RegexReplacement.serializer()
+        if ("PerlReplacement" in type) return PerlReplacement.serializer()
         throw SerializationException("Unable to determine replacement type")
     }
 }

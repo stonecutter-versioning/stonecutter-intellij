@@ -14,6 +14,7 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.util.unquote
 import dev.kikugie.stonecutter.intellij.model.SCProjectNode
+import dev.kikugie.stonecutter.intellij.model.serialized.PerlReplacement
 import dev.kikugie.stonecutter.intellij.model.serialized.RegexReplacement
 import dev.kikugie.stonecutter.intellij.model.serialized.Replacement
 import dev.kikugie.stonecutter.intellij.model.serialized.StringReplacement
@@ -135,6 +136,7 @@ object ReplacementToggleDocBuilder : DocumentationBuilder<PsiReplacement.Toggle.
     internal fun RowHtmlBuilder.replacement(project: Project, replacement: Replacement): Unit = when (replacement) {
         is StringReplacement -> stringReplacement(replacement)
         is RegexReplacement -> regexReplacement(project, replacement)
+        is PerlReplacement -> perlReplacement(replacement)
     }
 
     private fun RowHtmlBuilder.stringReplacement(replacement: StringReplacement) {
@@ -159,6 +161,14 @@ object ReplacementToggleDocBuilder : DocumentationBuilder<PsiReplacement.Toggle.
             val language = Language.findLanguageByID("RegExp")
             if (language == null) text(pattern, DefaultColors.STRING)
             else raw { appendHighlighted(this, project, language, pattern, 1F) }
+        }
+        cell { text("→", AttributeKeys.KEYWORD) }
+        cell { text(replacement.target, DefaultColors.STRING) }
+    }
+
+    private fun RowHtmlBuilder.perlReplacement(replacement: PerlReplacement) {
+        cell {
+            text(replacement.pattern, DefaultColors.STRING)
         }
         cell { text("→", AttributeKeys.KEYWORD) }
         cell { text(replacement.target, DefaultColors.STRING) }
