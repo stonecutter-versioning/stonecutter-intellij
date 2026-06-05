@@ -1,27 +1,40 @@
 package dev.kikugie.stonecutter.intellij.lang.psi
 
+import com.intellij.extapi.psi.ASTWrapperPsiElement
+import com.intellij.lang.ASTNode
+import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiComment
-import com.intellij.psi.util.endOffset
-import com.intellij.psi.util.startOffset
+import com.intellij.psi.PsiElement
+import com.intellij.psi.SmartPsiElementPointer
+import dev.kikugie.stonecutter.intellij.lang.navigation.UserDataHolderAccessor
 
-sealed interface PsiBlock {
-    val startOffset: Int
-    val endOffset: Int
 
-    class Content(override val startOffset: Int, override val endOffset: Int) : PsiBlock
+sealed interface PsiBlock : PsiElement, UserDataHolderAccessor {
+    class Content(node: ASTNode) : ASTWrapperPsiElement(node), PsiBlock {
+        var firstLeaf: SmartPsiElementPointer<PsiElement>? by PSI_CONTENT_FIRST
+        var lastLeaf: SmartPsiElementPointer<PsiElement>? by PSI_CONTENT_LAST
 
-    class Comment(val element: PsiComment, val localStart: Int, val localEnd: Int): PsiBlock {
-        override val startOffset: Int get() = element.startOffset + localStart
-        override val endOffset: Int get() = element.startOffset + localEnd
+        var localStart: Int? by PSI_BLOCK_START
+        var localEnd: Int? by PSI_BLOCK_END
     }
+    class Comment(node: ASTNode) : ASTWrapperPsiElement(node), PsiBlock {
+        var hostComment: SmartPsiElementPointer<PsiComment>? by PSI_COMMENT_HOST
 
-    class Code(val host: PsiComment, val entries: List<PsiBlock>) : PsiBlock {
-        override val startOffset: Int get() = host.startOffset
-        override val endOffset: Int get() = entries.lastOrNull()?.endOffset ?: host.endOffset
+        var localStart: Int? by PSI_BLOCK_START
+        var localEnd: Int? by PSI_BLOCK_END
     }
+    class Code(node: ASTNode) : ASTWrapperPsiElement(node), PsiBlock {
+        var hostComment: SmartPsiElementPointer<PsiComment>? by PSI_COMMENT_HOST
+    }
+    class Root(node: ASTNode) : ASTWrapperPsiElement(node), PsiBlock
 
-    class Root(val entries: List<PsiBlock>) : PsiBlock {
-        override val startOffset: Int get() = entries.firstOrNull()?.startOffset ?: 0
-        override val endOffset: Int get() = entries.lastOrNull()?.endOffset ?: 0
+    companion object {
+        val PSI_CONTENT_FIRST: Key<SmartPsiElementPointer<PsiElement>> = Key.create("PSI_CONTENT_FIRST")
+        val PSI_CONTENT_LAST: Key<SmartPsiElementPointer<PsiElement>> = Key.create("PSI_CONTENT_LAST")
+
+        val PSI_COMMENT_HOST: Key<SmartPsiElementPointer<PsiComment>> = Key.create("PSI_COMMENT_HOST")
+
+        val PSI_BLOCK_START: Key<Int> = Key.create("PSI_BLOCK_START")
+        val PSI_BLOCK_END: Key<Int> = Key.create("PSI_BLOCK_END")
     }
 }

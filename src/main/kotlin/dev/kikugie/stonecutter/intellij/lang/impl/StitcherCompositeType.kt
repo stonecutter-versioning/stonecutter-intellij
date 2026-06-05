@@ -15,10 +15,10 @@ enum class StitcherCompositeType {
     SEM_CORE, SEM_PRE, SEM_BUILD
     ;
 
-    fun asIElementType(): CompositeIElementType = itypes[ordinal]
+    fun asIElementType(): CompositeIElementType = TYPES[ordinal]
 
     companion object {
-        private val itypes: List<CompositeIElementType> = entries.map(::CompositeIElementType)
+        private val TYPES: List<CompositeIElementType> = entries.map(::CompositeIElementType)
     }
 }
 
@@ -28,4 +28,4 @@ enum class StitcherCompositeType {
  * This type is used instead of [RuleIElementType][org.antlr.intellij.adaptor.lexer.RuleIElementType]
  * because the parser relies on the named rule branches, which don't have unique IDs.
  */
-class CompositeIElementType(val value: StitcherCompositeType) : IElementType(value.name, StitcherLang)
+class CompositeIElementType internal constructor(val value: StitcherCompositeType) : IElementType(value.name, StitcherLang)

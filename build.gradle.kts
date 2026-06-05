@@ -2,6 +2,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     `java-library`
@@ -64,17 +65,19 @@ java {
     }
 }
 
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        apiVersion = KotlinVersion.KOTLIN_2_4
+        languageVersion = KotlinVersion.KOTLIN_2_4
+
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
+}
+
 tasks {
     runIde {
         jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-XX:ReservedCodeCacheSize=1G")
-    }
-
-    compileKotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-            freeCompilerArgs.add("-Xjvm-default=all")
-            freeCompilerArgs.add("-Xnested-type-aliases")
-        }
     }
 
     processResources {

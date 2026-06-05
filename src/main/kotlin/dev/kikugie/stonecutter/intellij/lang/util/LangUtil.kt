@@ -14,6 +14,8 @@ import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import dev.kikugie.stonecutter.intellij.lang.impl.CompositeIElementType
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
+import dev.kikugie.stonecutter.intellij.lang.layout.buildStitcherAst
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiBlock
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiCode
 import org.antlr.intellij.adaptor.lexer.TokenIElementType
 import kotlin.properties.ReadOnlyProperty
@@ -21,6 +23,7 @@ import kotlin.reflect.KProperty
 
 private val CODE_PREFIXES = charArrayOf('?', '$', '~')
 private val SCOPE_DEF: Key<SmartPsiElementPointer<PsiCode>> = Key.create("STITCHER_DEFINITION")
+private val AST_KEY: Key<CachedValue<PsiBlock.Root>> = Key.create("STITCHER_AST")
 
 val LITERALS = intArrayOf(StitcherLexer.IDENTIFIER, StitcherLexer.QUOTED)
 
@@ -51,6 +54,14 @@ val PsiComment.stitcherFile: StitcherFile?
 /**The host [PsiComment] for the injected file.*/
 val StitcherFile.containingComment: PsiComment
     get() = FileContextUtil.getFileContext(this) as PsiComment
+
+val PsiFile.stitcherAst: PsiBlock.Root
+    get() {
+        val topLevel = InjectedLanguageManager.getInstance(project).getTopLevelFile(this) ?: this
+        return CachedValuesManager.getCachedValue(topLevel, AST_KEY) {
+            CachedValueProvider.Result.create(topLevel.buildStitcherAst(), topLevel)
+        }
+    }
 
 /**Cached injected [ScopeDefinition] for this comment.*/
 val PsiComment.stitcherCode: SmartPsiElementPointer<PsiCode>?

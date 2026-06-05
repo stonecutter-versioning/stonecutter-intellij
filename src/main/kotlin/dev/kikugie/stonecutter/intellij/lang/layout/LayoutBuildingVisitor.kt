@@ -1,15 +1,12 @@
 package dev.kikugie.stonecutter.intellij.lang.layout
 
-import com.intellij.psi.ElementManipulators
-import com.intellij.psi.PsiComment
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiRecursiveElementVisitor
+import com.intellij.openapi.progress.ProgressIndicatorProvider
+import com.intellij.psi.*
+import com.intellij.psi.impl.source.tree.CompositeElement
+import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.util.elementType
 import com.intellij.psi.util.endOffset
 import com.intellij.psi.util.startOffset
-import dev.kikugie.commons.collections.lastNotNull
-import dev.kikugie.commons.text.countMatching
-import dev.kikugie.commons.text.countWhile
-import dev.kikugie.commons.text.getOrDefault
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiBlock
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition.Kind
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiScope
@@ -17,8 +14,6 @@ import dev.kikugie.stonecutter.intellij.lang.util.canHasStitcherCode
 import dev.kikugie.stonecutter.intellij.lang.util.stitcherCode
 import dev.kikugie.stonecutter.intellij.lang.util.unquote
 import java.util.*
-import kotlin.math.max
-import kotlin.math.min
 
 private val LINE_BREAKS: CharArray = charArrayOf('\r', '\n')
 private val WORD_BREAKS: CharArray = charArrayOf(' ', '\t')
@@ -32,8 +27,7 @@ fun PsiFile.buildStitcherAst(): PsiBlock.Root {
 
 private class LayoutBuildingVisitor : PsiRecursiveElementVisitor() {
     private val stack: Deque<PsiBlockBuilder.Scoped> = ArrayDeque()
-    private var checkpoint: Int = 0
-    private lateinit var contents: CharSequence
+    private val elements: MutableList<PsiElement> = mutableListOf()
     private var built: PsiBlock.Root? = null
 
     val root: PsiBlock.Root
@@ -42,20 +36,27 @@ private class LayoutBuildingVisitor : PsiRecursiveElementVisitor() {
     override fun visitFile(psiFile: PsiFile) {
         stack.clear()
         stack.addLast(RootBuilder())
+        elements.clear()
         built = null
-        checkpoint = psiFile.startOffset
-        contents = psiFile.viewProvider.contents
-        super.visitFile(psiFile)
 
-        handleContent(contents.length, -1)
+        super.visitFile(psiFile)
+        handleContent()
+
         while (stack.isNotEmpty()) when (val it = stack.peekLast()) {
             is RootBuilder -> built = it.build()
             is CodeBuilder -> it.finalize(true)
         }
     }
 
+    override fun visitElement(element: PsiElement) {
+        ProgressIndicatorProvider.checkCanceled()
+        if (element.firstChild == null) elements += element
+        else element.acceptChildren(this)
+    }
+
     override fun visitComment(comment: PsiComment) {
-        handleContent(comment.startOffset, comment.endOffset)
+        ProgressIndicatorProvider.checkCanceled()
+        handleContent()
         handleComment(comment)
     }
 
@@ -72,11 +73,9 @@ private class LayoutBuildingVisitor : PsiRecursiveElementVisitor() {
         }
     }
 
-    private fun handleContent(end: Int, next: Int) {
-        if (checkpoint in 0..<end) acceptBlock(ContentBuilder(
-            checkpoint, end, contents.substring(checkpoint, end)
-        ))
-        checkpoint = next
+    private fun handleContent() {
+        if (elements.isNotEmpty()) acceptBlock(ContentBuilder(elements))
+        this.elements.clear()
     }
 
     private fun handleComment(comment: PsiComment) {
@@ -125,22 +124,46 @@ private sealed interface PsiBlockBuilder {
     }
 }
 
-private data class ContentBuilder(val start: Int, val end: Int, val text: String) : PsiBlockBuilder {
+private data class ContentBuilder(
+    val elements: List<PsiElement>,
+    val start: Int = 0,
+    val end: Int = elements.last().endOffset - elements.first().startOffset
+) : PsiBlockBuilder {
+    val text by lazy { elements.joinToString("", transform = PsiElement::getText) }
     val length: Int inline get() = end - start
 
-    override fun build(): PsiBlock = PsiBlock.Content(start, end)
+    override fun build(): PsiBlock.Content = PsiBlock.Content(LeafPsiElement(StitcherBlockType.CONTENT.asIElementType(), text)).apply {
+        firstLeaf = SmartPointerManager.createPointer(elements.first())
+        lastLeaf = SmartPointerManager.createPointer(elements.last())
+
+        if (start > 0) localStart = start
+        if (end < this@ContentBuilder.text.length)
+            localEnd = end
+    }
 }
 
-private data class CommentBuilder(val comment: PsiComment, val start: Int = 0, val end: Int = comment.textLength) : PsiBlockBuilder {
-    val text: String = ElementManipulators.getValueText(comment)
+private data class CommentBuilder(
+    val comment: PsiComment,
+    val start: Int = 0,
+    val end: Int = comment.textLength
+) : PsiBlockBuilder {
+    val text: String by lazy { ElementManipulators.getValueText(comment) }
     val length: Int inline get() = end - start
 
-    override fun build(): PsiBlock = PsiBlock.Comment(comment, start, end)
+    override fun build(): PsiBlock.Comment = PsiBlock.Comment(LeafPsiElement(StitcherBlockType.COMMENT.asIElementType(), comment.text)).apply {
+        hostComment = SmartPointerManager.createPointer(comment)
+
+        if (start > 0) localStart = start
+        if (end < comment.textLength)
+            localEnd = end
+    }
 }
 
 private class RootBuilder(override val entries: MutableList<PsiBlockBuilder> = mutableListOf()) : PsiBlockBuilder.Scoped {
-    override fun accept(block: PsiBlockBuilder): BlockAcceptResult = entries.merge(block)
-    override fun build(): PsiBlock.Root = PsiBlock.Root(entries.map(PsiBlockBuilder::build))
+    override fun accept(block: PsiBlockBuilder): BlockAcceptResult = BlockAcceptResult.ConsumedOpen.also { entries += block }
+    override fun build(): PsiBlock.Root = PsiBlock.Root(CompositeElement(StitcherBlockType.ROOT.asIElementType())).apply {
+        for (it in entries) add(it.build())
+    }
 }
 
 private class CodeBuilder(val host: PsiComment, override val entries: MutableList<PsiBlockBuilder> = mutableListOf()) : PsiBlockBuilder.Scoped {
@@ -150,20 +173,26 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
         private set
 
     override fun accept(block: PsiBlockBuilder): BlockAcceptResult = when(kind) {
-        Kind.SCOPED_OPENER, Kind.SCOPED_EXTENSION -> entries.merge(block)
+        Kind.SCOPED_OPENER, Kind.SCOPED_EXTENSION -> BlockAcceptResult.ConsumedOpen.also { entries += block }
         Kind.LINE_OPENER, Kind.LINE_EXTENSION -> if (satisfied) BlockAcceptResult.Rejected else acceptLine(block)
         Kind.LOOKUP_OPENER, Kind.LOOKUP_EXTENSION -> if (satisfied) BlockAcceptResult.Rejected else acceptLookup(block)
         else -> BlockAcceptResult.Rejected
     }
 
-    override fun build(): PsiBlock = PsiBlock.Code(host, entries.map(PsiBlockBuilder::build))
+    override fun build(): PsiBlock.Code = PsiBlock.Code(CompositeElement(StitcherBlockType.CODE.asIElementType())).apply {
+        for (it in entries) add(it.build())
+
+        hostComment = SmartPointerManager.createPointer(host)
+    }
 
     private fun acceptLine(block: PsiBlockBuilder): BlockAcceptResult = when (block) {
-        is ContentBuilder -> consumeContentSplit(block, consumeLine(block.text, entries.lastNotNull().isNotBlank()))
-        is CommentBuilder -> consumeCommentSplit(block, consumeLine(block.text, entries.lastOrNull().isNotBlank())).let {
-            if (it != BlockAcceptResult.ConsumedOpen) it
-            else if (!block.isNotBlank() || block.text.getOrDefault(block.end - 1) !in LINE_BREAKS) it
-            else BlockAcceptResult.ConsumedFinal
+        is ContentBuilder -> {
+            val split = findLineSplit(block.text)
+            consumeContentSplit(block, split)
+        }
+        is CommentBuilder -> {
+            val split = findLineSplit(block.text)
+            consumeCommentSplit(block, split)
         }
         else -> consumeFinal(block)
     }
@@ -171,21 +200,22 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
     private fun acceptLookup(block: PsiBlockBuilder): BlockAcceptResult {
         if (block is PsiBlockBuilder.Scoped) return consumeFinal(block)
 
-        val opener = code.definition?.opener as? PsiScope.Lookup ?: return BlockAcceptResult.Rejected
+        val opener = code.definition?.opener as? PsiScope.Lookup
+            ?: return BlockAcceptResult.Rejected
         return acceptLookup(block, opener)
     }
 
     private fun acceptLookup(block: PsiBlockBuilder, scope: PsiScope.Lookup): BlockAcceptResult = when (block) {
         is ContentBuilder -> {
             val lookup = scope.lookup
-            val split = if (lookup == null) consumeWordDefault(block.text)
-            else consumeWordCustom(block.text, lookup.unquote(), scope.plus != null)
+            val split = if (lookup == null) findDefaultLookupSplit(block.text)
+            else findCustomLookupSplit(block.text, lookup.unquote(), scope.plus != null)
             consumeContentSplit(block, split)
         }
         is CommentBuilder -> {
             val lookup = scope.lookup
-            val split = if (lookup == null) consumeWordDefault(block.text)
-            else consumeWordCustom(block.text, lookup.unquote(), scope.plus != null)
+            val split = if (lookup == null) findDefaultLookupSplit(block.text)
+            else findCustomLookupSplit(block.text, lookup.unquote(), scope.plus != null)
             consumeCommentSplit(block, split)
         }
         else -> BlockAcceptResult.Rejected
@@ -193,87 +223,59 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
 
     private fun consumeFinal(block: PsiBlockBuilder): BlockAcceptResult {
         satisfied = true
-        entries.merge(block)
+        entries += block
         return BlockAcceptResult.ConsumedFinal
     }
 
     private fun consumeContentSplit(block: ContentBuilder, split: Int) : BlockAcceptResult = when(split) {
-        -1 -> entries.merge(block)
+        -1 -> BlockAcceptResult.ConsumedOpen.also { entries += block }
         0 -> BlockAcceptResult.Rejected.also { satisfied = true }
-        block.length  -> consumeFinal(block)
+        block.length -> consumeFinal(block)
         else -> {
             satisfied = true
-            entries.merge(block.copy(end = split, text = block.text.substring(0, split)))
-            BlockAcceptResult.ConsumedPartial(block.copy(start = split, text = block.text.substring(split)))
+            val first = block.elements.takeWhile { it.endOffset <= split }
+            val second = block.elements.dropWhile { it.startOffset < split }
+            entries += ContentBuilder(first, end = split)
+            BlockAcceptResult.ConsumedPartial(ContentBuilder(second, start = split))
         }
     }
 
     private fun consumeCommentSplit(block: CommentBuilder, split: Int) : BlockAcceptResult = when(split) {
-        -1 -> entries.merge(block)
+        -1 -> BlockAcceptResult.ConsumedOpen.also { entries += block }
+        0 -> BlockAcceptResult.Rejected.also { satisfied = true }
         block.length -> consumeFinal(block)
         else -> {
             satisfied = true
-            entries += block.copy(end = split)
-            BlockAcceptResult.ConsumedPartial(block.copy(start = split))
+            val range = ElementManipulators.getValueTextRange(block.comment)
+            entries += block.copy(end = split + range.startOffset)
+            BlockAcceptResult.ConsumedPartial(block.copy(start = split + range.startOffset))
         }
     }
 }
 
-private fun MutableList<PsiBlockBuilder>.merge(block: PsiBlockBuilder): BlockAcceptResult = when (val it = lastOrNull()) {
-    is ContentBuilder if (block is ContentBuilder) -> this[lastIndex] = ContentBuilder(
-        min(it.start, block.start),
-        max(it.end, block.end),
-        it.text + block.text
-    )
-    else -> this += block
-}.let {
-    BlockAcceptResult.ConsumedOpen
-}
-
-private fun consumeLine(str: String, immediate: Boolean): Int {
-    var state = 0
-    val index = str.countWhile { ch ->
-        matchLineChar(ch, state, immediate).also { if (it >= 0) state = it } >= 0
+private fun findLineSplit(str: String): Int {
+    var start = 0
+    while (true) when (val index = str.indexOfAny(LINE_BREAKS, start)) {
+        -1 -> return if (start == 0) -1 else start + 1
+        else -> {
+            start = index + 1
+            for (i in start..<index) if (str[i] !in WORD_BREAKS)
+                return start
+        }
     }
-    // -1 indicates we didn't reach a newline
-    return if (index == str.length && state == 0) -1 else index
 }
 
-private fun matchLineChar(ch: Char, state: Int, immediate: Boolean): Int = when (state) {
-    0 -> when (ch) {
-        in WORD_BREAKS -> 0
-        in LINE_BREAKS -> if (immediate) 1 else 0
-        else -> 1
-    }
+private fun findDefaultLookupSplit(str: String): Int {
+    val offset = str.indexOfFirst { it !in WHITESPACES }
+    if (offset == -1) return -1
 
-    1 -> when (ch) {
-        '\n' -> 2
-        '\r' -> 3
-        else -> 1
-    }
-
-    2 -> when (ch) {
-        '\r' -> 3
-        else -> -1
-    }
-
-    else -> -1
+    val result = str.indexOfAny(WHITESPACES, offset)
+    return if (result == -1) str.length else result
 }
 
-private fun consumeWordDefault(str: String): Int = when (val idx = str.countMatching(*WHITESPACES)) {
-    str.length -> -1
-    else -> idx + str.countWhile(idx) { it !in WHITESPACES }
-}
-
-private fun consumeWordCustom(str: String, match: String, capturing: Boolean): Int = when (val idx = str.indexOf(match)) {
-    -1 -> -1
-    else if capturing -> idx + match.length
-    else -> idx
-}
-
-private fun PsiBlockBuilder?.isNotBlank(): Boolean = when (this) {
-    is ContentBuilder -> text.isNotBlank()
-    is CommentBuilder -> text.isNotBlank()
-    null -> false
-    else -> true
+private fun findCustomLookupSplit(str: String, pattern: String, capturing: Boolean): Int {
+    val result = str.indexOf(pattern)
+    return if (result == -1) str.length
+    else if (capturing) result + pattern.length
+    else result
 }
