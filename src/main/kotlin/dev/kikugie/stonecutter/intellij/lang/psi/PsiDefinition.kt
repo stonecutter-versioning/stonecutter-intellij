@@ -4,28 +4,17 @@ import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.CachedValue
-import com.intellij.psi.util.elementType
 import dev.kikugie.commons.collections.findIsInstance
 import dev.kikugie.stonecutter.intellij.lang.impl.PsiStitcherNodeImpl
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType.*
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
-import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
-import dev.kikugie.stonecutter.intellij.lang.util.antlrType
-import dev.kikugie.stonecutter.intellij.lang.util.cached
-import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
-import dev.kikugie.stonecutter.intellij.lang.util.compositeType
-import dev.kikugie.stonecutter.intellij.lang.util.elementOfAnyToken
-import dev.kikugie.stonecutter.intellij.lang.util.elementOfToken
-import dev.kikugie.stonecutter.intellij.lang.util.reverseChildrenSequence
-
-private val SCOPE_OPENERS = arrayOf(LOOKUP_SCOPE.asIElementType(), CLOSED_SCOPE.asIElementType(), NAMED_SCOPE.asIElementType())
-private val LITERALS = intArrayOf(StitcherLexer.IDENTIFIER, StitcherLexer.QUOTED)
+import dev.kikugie.stonecutter.intellij.lang.util.*
 
 sealed interface PsiDefinition : PsiStitcherNode {
     val kind: Kind
 
     val closer: PsiElement? get() = firstChild?.takeIf { it.antlrType == StitcherLexer.SCOPE_CLOSE }
-    val opener: PsiElement? get() = lastChild?.takeIf { it.elementType in SCOPE_OPENERS }
+    val opener: PsiScope? get() = lastChild as? PsiScope
 
     fun <T> accept(visitor: Visitor<T>): T
     override fun <T> accept(visitor: StitcherVisitor<T>): T = accept(visitor as Visitor<T>)

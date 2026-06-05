@@ -1,18 +1,8 @@
-package dev.kikugie.stonecutter.intellij.lang.psi.visitor
+package dev.kikugie.stonecutter.intellij.lang.psi
 
 import com.intellij.openapi.progress.ProgressIndicatorProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiCode
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiCondition
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiPredicate
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiScope
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiStitcherNode
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiVersion
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract

@@ -8,6 +8,7 @@ import com.intellij.psi.impl.source.resolve.FileContextUtil
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.*
 import dev.kikugie.commons.takeAsOrNull
+import dev.kikugie.commons.text.getOrDefault
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 import dev.kikugie.stonecutter.intellij.lang.impl.CompositeIElementType
@@ -18,7 +19,10 @@ import org.antlr.intellij.adaptor.lexer.TokenIElementType
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+private val CODE_PREFIXES = charArrayOf('?', '$', '~')
 private val SCOPE_DEF: Key<SmartPsiElementPointer<PsiCode>> = Key.create("STITCHER_DEFINITION")
+
+val LITERALS = intArrayOf(StitcherLexer.IDENTIFIER, StitcherLexer.QUOTED)
 
 val PsiElement?.antlrType: AntlrTokenType
     inline get() = elementType?.antlrType ?: -1
@@ -49,13 +53,16 @@ val StitcherFile.containingComment: PsiComment
     get() = FileContextUtil.getFileContext(this) as PsiComment
 
 /**Cached injected [ScopeDefinition] for this comment.*/
-val PsiComment.commentCode: SmartPsiElementPointer<PsiCode>?
+val PsiComment.stitcherCode: SmartPsiElementPointer<PsiCode>?
     get() = nullableLazyValueUnsafe(SCOPE_DEF) {
         val file = stitcherFile ?: return@nullableLazyValueUnsafe null
         val def = file.descendantsOfType<PsiCode>().firstOrNull()
             ?: return@nullableLazyValueUnsafe null
         SmartPointerManager.getInstance(project).createSmartPsiElementPointer(def, file)
     }
+
+val PsiComment.canHasStitcherCode: Boolean
+    get() = ElementManipulators.getValueText(this).getOrDefault(0) in CODE_PREFIXES
 
 fun PsiElement.unquote(): String = when (antlrType) {
     StitcherLexer.QUOTED -> text.removeSurrounding("'")

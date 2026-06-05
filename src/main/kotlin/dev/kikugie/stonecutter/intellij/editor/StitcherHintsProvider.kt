@@ -13,13 +13,13 @@ import com.intellij.psi.util.startOffset
 import dev.kikugie.commons.takeAsOrNull
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiCondition
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
-import dev.kikugie.stonecutter.intellij.lang.util.commentCode
+import dev.kikugie.stonecutter.intellij.lang.util.stitcherCode
 import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
 private class StitcherHintsCollector : SharedBypassCollector {
     override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
-        val definition = element.takeAsOrNull<PsiComment>()?.commentCode?.element
+        val definition = element.takeAsOrNull<PsiComment>()?.stitcherCode?.element
             ?: return
         val component = definition.definition?.takeAsOrNull<PsiCondition>()
             ?: return

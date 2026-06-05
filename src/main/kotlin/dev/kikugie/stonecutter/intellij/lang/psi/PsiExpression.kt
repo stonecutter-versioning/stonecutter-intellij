@@ -5,7 +5,6 @@ import com.intellij.psi.PsiElement
 import dev.kikugie.commons.collections.findIsInstance
 import dev.kikugie.stonecutter.intellij.lang.impl.PsiStitcherNodeImpl
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
-import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherVisitor
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
 import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
 import dev.kikugie.stonecutter.intellij.lang.util.elementOfAnyToken

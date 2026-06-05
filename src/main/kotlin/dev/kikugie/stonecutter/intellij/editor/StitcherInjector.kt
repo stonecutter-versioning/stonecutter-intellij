@@ -8,21 +8,17 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
-import dev.kikugie.commons.text.getOrDefault
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
+import dev.kikugie.stonecutter.intellij.lang.util.canHasStitcherCode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
 
-private val PREFIXES = charArrayOf('?', '$', '~')
-
 class StitcherInjector : MultiHostInjector, DumbAware {
     private val comments: List<Class<out PsiElement>> = listOf(PsiCommentImpl::class.java)
-    private val PsiElement.isStitcherComment: Boolean get() = when {
-        this !is PsiComment -> false
-        StonecutterSettings.STATE.checkedLangInject
-            && stonecutterService.lookup.nodes.isEmpty() -> false
-        else -> ElementManipulators.getValueText(this).getOrDefault(0) in PREFIXES
-    }
+    private val PsiElement.isStitcherComment: Boolean
+        get() = this is PsiComment
+            && (!StonecutterSettings.STATE.checkedLangInject || stonecutterService.lookup.nodes.isNotEmpty())
+            && canHasStitcherCode
 
     override fun getLanguagesToInject(registrar: MultiHostRegistrar, context: PsiElement) {
         if (context is PsiLanguageInjectionHost && context.isStitcherComment) registrar
