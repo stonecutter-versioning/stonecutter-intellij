@@ -5,7 +5,7 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.psi.PsiElementVisitor
-import dev.kikugie.stonecutter.intellij.lang.psi.visitor.StitcherPsiVisitor
+import dev.kikugie.stonecutter.intellij.lang.psi.StitcherPsiVisitor
 
 /**
  * Implements a local inspection using a problem collecting [Visitor].

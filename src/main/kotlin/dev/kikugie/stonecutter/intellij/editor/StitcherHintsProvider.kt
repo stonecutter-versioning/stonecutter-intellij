@@ -45,7 +45,7 @@ private class StitcherHintsCollector : SharedBypassCollector {
         })
 
     private fun collectFromAssignment(assignment: PsiExpression.Assignment, sink: InlayTreeSink, offset: Int): Unit =
-        collectFromResolved(assignment, sink, offset, assignment.value { dependencies[it]?.value })
+        collectFromResolved(assignment, sink, offset, assignment.value { dependencies[it]?.toString() })
 
     private fun collectFromResolved(parameter: PsiElement, sink: InlayTreeSink, offset: Int, value: String?) {
         if (value == null) return

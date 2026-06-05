@@ -4,7 +4,7 @@ import com.intellij.openapi.progress.ProgressIndicatorProvider
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.CompositeElement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
-import com.intellij.psi.util.elementType
+import com.intellij.psi.impl.source.tree.TreeElement
 import com.intellij.psi.util.endOffset
 import com.intellij.psi.util.startOffset
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiBlock
@@ -42,7 +42,7 @@ private class LayoutBuildingVisitor : PsiRecursiveElementVisitor() {
         super.visitFile(psiFile)
         handleContent()
 
-        while (stack.isNotEmpty()) when (val it = stack.peekLast()) {
+        while (stack.isNotEmpty()) when (val it = stack.removeLast()) {
             is RootBuilder -> built = it.build()
             is CodeBuilder -> it.finalize(true)
         }
@@ -74,7 +74,8 @@ private class LayoutBuildingVisitor : PsiRecursiveElementVisitor() {
     }
 
     private fun handleContent() {
-        if (elements.isNotEmpty()) acceptBlock(ContentBuilder(elements))
+        if (elements.isNotEmpty())
+            acceptBlock(ContentBuilder(elements.toList()))
         this.elements.clear()
     }
 
@@ -161,8 +162,10 @@ private data class CommentBuilder(
 
 private class RootBuilder(override val entries: MutableList<PsiBlockBuilder> = mutableListOf()) : PsiBlockBuilder.Scoped {
     override fun accept(block: PsiBlockBuilder): BlockAcceptResult = BlockAcceptResult.ConsumedOpen.also { entries += block }
-    override fun build(): PsiBlock.Root = PsiBlock.Root(CompositeElement(StitcherBlockType.ROOT.asIElementType())).apply {
-        for (it in entries) add(it.build())
+    override fun build(): PsiBlock.Root {
+        val node = CompositeElement(StitcherBlockType.ROOT.asIElementType())
+        for (it in entries) node.rawAddChildren(it.build().node as TreeElement)
+        return PsiBlock.Root(node)
     }
 }
 
@@ -179,10 +182,12 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
         else -> BlockAcceptResult.Rejected
     }
 
-    override fun build(): PsiBlock.Code = PsiBlock.Code(CompositeElement(StitcherBlockType.CODE.asIElementType())).apply {
-        for (it in entries) add(it.build())
-
-        hostComment = SmartPointerManager.createPointer(host)
+    override fun build(): PsiBlock.Code {
+        val node = CompositeElement(StitcherBlockType.CODE.asIElementType())
+        for (it in entries) node.rawAddChildren(it.build().node as TreeElement)
+        return PsiBlock.Code(node).apply {
+            hostComment = SmartPointerManager.createPointer(host)
+        }
     }
 
     private fun acceptLine(block: PsiBlockBuilder): BlockAcceptResult = when (block) {
@@ -233,10 +238,12 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
         block.length -> consumeFinal(block)
         else -> {
             satisfied = true
-            val first = block.elements.takeWhile { it.endOffset <= split }
-            val second = block.elements.dropWhile { it.startOffset < split }
-            entries += ContentBuilder(first, end = split)
-            BlockAcceptResult.ConsumedPartial(ContentBuilder(second, start = split))
+            val absoluteSplit = block.elements.first().startOffset + split
+            val first = block.elements.takeWhile { it.startOffset < absoluteSplit }
+            val second = block.elements.dropWhile { it.endOffset < absoluteSplit }
+            if (first.isNotEmpty()) entries += ContentBuilder(first, end = absoluteSplit)
+            if (second.isNotEmpty()) BlockAcceptResult.ConsumedPartial(ContentBuilder(second, start = absoluteSplit))
+            else BlockAcceptResult.Rejected
         }
     }
 
@@ -254,15 +261,16 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
 }
 
 private fun findLineSplit(str: String): Int {
-    var start = 0
-    while (true) when (val index = str.indexOfAny(LINE_BREAKS, start)) {
-        -1 -> return if (start == 0) -1 else start + 1
-        else -> {
-            start = index + 1
-            for (i in start..<index) if (str[i] !in WORD_BREAKS)
-                return start
-        }
+    val lineBreak = str.indexOfAny(LINE_BREAKS)
+    if (lineBreak == -1) return -1
+
+    var index = lineBreak + 1
+    while (index < str.length) {
+        val ch = str[index]
+        if (ch in LINE_BREAKS || ch in WORD_BREAKS) index++
+        else return index
     }
+    return str.length
 }
 
 private fun findDefaultLookupSplit(str: String): Int {
