@@ -17,6 +17,9 @@ import com.intellij.psi.tree.TokenSet
 import dev.kikugie.commons.takeAs
 import dev.kikugie.stonecutter.intellij.lang.impl.*
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType.*
+import dev.kikugie.stonecutter.intellij.lang.layout.BlockIElementType
+import dev.kikugie.stonecutter.intellij.lang.layout.StitcherBlockType
+import dev.kikugie.stonecutter.intellij.lang.layout.StitcherBlockType.*
 import dev.kikugie.stonecutter.intellij.lang.psi.*
 import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory
@@ -50,6 +53,7 @@ class StitcherParserDef : ParserDefinition, DumbAware {
     override fun createElement(node: ASTNode): PsiElement = when (val type = node.elementType) {
         is TokenIElementType -> ANTLRPsiNode(node)
         is CompositeIElementType -> mapRule(type.value, node)
+        is BlockIElementType -> mapBlock(type.value, node)
         else -> {
             LOGGER.debug("Unknown Stitcher token type: $type")
             PsiStitcherNodeImpl(node)
@@ -82,5 +86,12 @@ class StitcherParserDef : ParserDefinition, DumbAware {
         SEM_VER -> PsiVersion.Semantic(node)
         STR_VER -> PsiVersion.String(node)
         SEM_CORE, SEM_PRE, SEM_BUILD -> PsiStitcherNodeImpl(node)
+    }
+
+    private fun mapBlock(type: StitcherBlockType, node: ASTNode): PsiBlock = when(type) {
+        CONTENT -> PsiBlock.Content(node)
+        COMMENT -> PsiBlock.Comment(node)
+        CODE -> PsiBlock.Code(node)
+        ROOT -> PsiBlock.Root(node)
     }
 }

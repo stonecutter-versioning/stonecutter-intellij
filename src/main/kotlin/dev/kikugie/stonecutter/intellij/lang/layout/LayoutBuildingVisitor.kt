@@ -3,10 +3,12 @@ package dev.kikugie.stonecutter.intellij.lang.layout
 import com.intellij.openapi.progress.ProgressIndicatorProvider
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.CompositeElement
-import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.impl.source.tree.LeafElement
 import com.intellij.psi.impl.source.tree.TreeElement
+import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.endOffset
 import com.intellij.psi.util.startOffset
+import dev.kikugie.commons.takeAs
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiBlock
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition.Kind
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiScope
@@ -133,7 +135,8 @@ private data class ContentBuilder(
     val text by lazy { elements.joinToString("", transform = PsiElement::getText) }
     val length: Int inline get() = end - start
 
-    override fun build(): PsiBlock.Content = PsiBlock.Content(LeafPsiElement(StitcherBlockType.CONTENT.asIElementType(), text)).apply {
+    override fun build(): PsiBlock.Content = PsiBlock.Content(BlockLeafElement(StitcherBlockType.CONTENT.asIElementType(), text)).apply {
+        node.takeAs<BlockLeafElement>().element = this
         firstLeaf = SmartPointerManager.createPointer(elements.first())
         lastLeaf = SmartPointerManager.createPointer(elements.last())
 
@@ -151,7 +154,8 @@ private data class CommentBuilder(
     val text: String by lazy { ElementManipulators.getValueText(comment) }
     val length: Int inline get() = end - start
 
-    override fun build(): PsiBlock.Comment = PsiBlock.Comment(LeafPsiElement(StitcherBlockType.COMMENT.asIElementType(), comment.text)).apply {
+    override fun build(): PsiBlock.Comment = PsiBlock.Comment(BlockLeafElement(StitcherBlockType.COMMENT.asIElementType(), comment.text)).apply {
+        node.takeAs<BlockLeafElement>().element = this
         hostComment = SmartPointerManager.createPointer(comment)
 
         if (start > 0) localStart = start
@@ -162,10 +166,12 @@ private data class CommentBuilder(
 
 private class RootBuilder(override val entries: MutableList<PsiBlockBuilder> = mutableListOf()) : PsiBlockBuilder.Scoped {
     override fun accept(block: PsiBlockBuilder): BlockAcceptResult = BlockAcceptResult.ConsumedOpen.also { entries += block }
-    override fun build(): PsiBlock.Root {
-        val node = CompositeElement(StitcherBlockType.ROOT.asIElementType())
-        for (it in entries) node.rawAddChildren(it.build().node as TreeElement)
-        return PsiBlock.Root(node)
+    override fun build(): PsiBlock.Root = with(CompositeElement(StitcherBlockType.ROOT.asIElementType())) {
+        for (it in entries) rawAddChildrenWithoutNotifications(it.build().node as TreeElement)
+        subtreeChanged()
+        return PsiBlock.Root(this).apply {
+            psi = this
+        }
     }
 }
 
@@ -182,10 +188,11 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
         else -> BlockAcceptResult.Rejected
     }
 
-    override fun build(): PsiBlock.Code {
-        val node = CompositeElement(StitcherBlockType.CODE.asIElementType())
-        for (it in entries) node.rawAddChildren(it.build().node as TreeElement)
-        return PsiBlock.Code(node).apply {
+    override fun build(): PsiBlock.Code = with(CompositeElement(StitcherBlockType.CODE.asIElementType())) {
+        for (it in entries) rawAddChildrenWithoutNotifications(it.build().node as TreeElement)
+        subtreeChanged()
+        return PsiBlock.Code(this).apply {
+            psi = this
             hostComment = SmartPointerManager.createPointer(host)
         }
     }
@@ -258,6 +265,12 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
             BlockAcceptResult.ConsumedPartial(block.copy(start = split + range.startOffset))
         }
     }
+}
+
+private class BlockLeafElement(type: IElementType, text: CharSequence) : LeafElement(type, text) {
+    var element: PsiElement? = null
+
+    override fun getPsi(): PsiElement? = element
 }
 
 private fun findLineSplit(str: String): Int {

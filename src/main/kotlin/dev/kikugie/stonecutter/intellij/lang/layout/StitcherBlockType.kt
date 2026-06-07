@@ -6,11 +6,11 @@ import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 enum class StitcherBlockType {
     CONTENT, COMMENT, CODE, ROOT;
 
-    fun asIElementType(): BlockElementType = TYPES[ordinal]
+    fun asIElementType(): BlockIElementType = TYPES[ordinal]
 
     companion object {
-        private val TYPES: List<BlockElementType> = entries.map(::BlockElementType)
+        private val TYPES: List<BlockIElementType> = entries.map(::BlockIElementType)
     }
 }
 
-class BlockElementType internal constructor(val value: StitcherBlockType) : IElementType(value.name, StitcherLang)
+class BlockIElementType internal constructor(val value: StitcherBlockType) : IElementType(value.name, StitcherLang)
