@@ -1,6 +1,7 @@
 package dev.kikugie.stonecutter.intellij.lang.layout
 
 import com.intellij.openapi.progress.ProgressIndicatorProvider
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.CompositeElement
 import com.intellij.psi.impl.source.tree.LeafElement
@@ -135,7 +136,9 @@ private data class ContentBuilder(
     val text by lazy { elements.joinToString("", transform = PsiElement::getText) }
     val length: Int inline get() = end - start
 
-    override fun build(): PsiBlock.Content = PsiBlock.Content(BlockLeafElement(StitcherBlockType.CONTENT.asIElementType(), text)).apply {
+    override fun build(): PsiBlock.Content = PsiBlock.Content(
+        BlockLeafElement(StitcherBlockType.CONTENT, text, elements.first().startOffset)
+    ).apply {
         node.takeAs<BlockLeafElement>().element = this
         firstLeaf = SmartPointerManager.createPointer(elements.first())
         lastLeaf = SmartPointerManager.createPointer(elements.last())
@@ -154,7 +157,9 @@ private data class CommentBuilder(
     val text: String by lazy { ElementManipulators.getValueText(comment) }
     val length: Int inline get() = end - start
 
-    override fun build(): PsiBlock.Comment = PsiBlock.Comment(BlockLeafElement(StitcherBlockType.COMMENT.asIElementType(), comment.text)).apply {
+    override fun build(): PsiBlock.Comment = PsiBlock.Comment(
+        BlockLeafElement(StitcherBlockType.COMMENT, comment.text, comment.startOffset)
+    ).apply {
         node.takeAs<BlockLeafElement>().element = this
         hostComment = SmartPointerManager.createPointer(comment)
 
@@ -166,8 +171,11 @@ private data class CommentBuilder(
 
 private class RootBuilder(override val entries: MutableList<PsiBlockBuilder> = mutableListOf()) : PsiBlockBuilder.Scoped {
     override fun accept(block: PsiBlockBuilder): BlockAcceptResult = BlockAcceptResult.ConsumedOpen.also { entries += block }
-    override fun build(): PsiBlock.Root = with(CompositeElement(StitcherBlockType.ROOT.asIElementType())) {
+    override fun build(): PsiBlock.Root = with(BlockCompElement(StitcherBlockType.ROOT)) {
         for (it in entries) rawAddChildrenWithoutNotifications(it.build().node as TreeElement)
+        start = firstChildNode?.startOffset ?: 0
+        end = lastChildNode?.endOffset ?: 0
+
         subtreeChanged()
         return PsiBlock.Root(this).apply {
             psi = this
@@ -188,8 +196,11 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
         else -> BlockAcceptResult.Rejected
     }
 
-    override fun build(): PsiBlock.Code = with(CompositeElement(StitcherBlockType.CODE.asIElementType())) {
+    override fun build(): PsiBlock.Code = with(BlockCompElement(StitcherBlockType.CODE)) {
         for (it in entries) rawAddChildrenWithoutNotifications(it.build().node as TreeElement)
+        start = host.startOffset
+        end = host.endOffset
+
         subtreeChanged()
         return PsiBlock.Code(this).apply {
             psi = this
@@ -199,11 +210,11 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
 
     private fun acceptLine(block: PsiBlockBuilder): BlockAcceptResult = when (block) {
         is ContentBuilder -> {
-            val split = findLineSplit(block.text)
+            val split = findLineSplit(block.text, entries.any(PsiBlockBuilder::isNotBlank))
             consumeContentSplit(block, split)
         }
         is CommentBuilder -> {
-            val split = findLineSplit(block.text)
+            val split = findLineSplit(block.text, entries.any(PsiBlockBuilder::isNotBlank))
             consumeCommentSplit(block, split)
         }
         else -> consumeFinal(block)
@@ -267,23 +278,34 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
     }
 }
 
-private class BlockLeafElement(type: IElementType, text: CharSequence) : LeafElement(type, text) {
+private class BlockLeafElement(type: StitcherBlockType, text: CharSequence, private val start: Int) : LeafElement(type.asIElementType(), text) {
     var element: PsiElement? = null
 
     override fun getPsi(): PsiElement? = element
+    override fun getStartOffset(): Int = start
 }
 
-private fun findLineSplit(str: String): Int {
-    val lineBreak = str.indexOfAny(LINE_BREAKS)
-    if (lineBreak == -1) return -1
+private class BlockCompElement(type: StitcherBlockType) : CompositeElement(type.asIElementType()) {
+    var start: Int = 0
+    var end: Int = 0
 
-    var index = lineBreak + 1
-    while (index < str.length) {
-        val ch = str[index]
-        if (ch in LINE_BREAKS || ch in WORD_BREAKS) index++
-        else return index
+    override fun getCachedLength(): Int = end - start
+    override fun getTextLength(): Int = end - start
+    override fun getStartOffset(): Int = start
+    override fun getEndOffset(): Int = end
+}
+
+private fun findLineSplit(str: String, immediate: Boolean): Int {
+    var start = 0
+    while (true) {
+        val index = str.indexOfAny(LINE_BREAKS, start)
+        if (index == -1) return -1
+        if (immediate) return index
+
+        for (i in start until index) if (str[i] !in WHITESPACES)
+            return index
+        start = index + 1
     }
-    return str.length
 }
 
 private fun findDefaultLookupSplit(str: String): Int {
@@ -299,4 +321,11 @@ private fun findCustomLookupSplit(str: String, pattern: String, capturing: Boole
     return if (result == -1) str.length
     else if (capturing) result + pattern.length
     else result
+}
+
+private fun PsiBlockBuilder.isNotBlank(): Boolean = when (this) {
+    is CommentBuilder -> text.isNotBlank()
+    is ContentBuilder -> text.isNotBlank()
+    is CodeBuilder -> false
+    is RootBuilder -> entries.all(PsiBlockBuilder::isNotBlank)
 }
