@@ -2,7 +2,7 @@ package dev.kikugie.stonecutter.intellij.settings.variants
 
 import dev.kikugie.stonecutter.intellij.settings.naming.Translated
 
-enum class FoldingMode() : Translated {
+enum class FoldingMode : Translated {
     DISABLED,
     LENIENT,
     AGGRESSIVE;

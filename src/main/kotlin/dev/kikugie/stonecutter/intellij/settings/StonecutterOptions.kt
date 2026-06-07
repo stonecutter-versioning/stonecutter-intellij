@@ -43,7 +43,7 @@ class StonecutterOptions : BoundCompositeConfigurable<PropertyConfigurable>("Sto
 
     override fun createConfigurables(): List<PropertyConfigurable> = listOf(
         EditorOptions(),
-//        FoldingOptions(message("stonecutter.settings.folding"))
+        FoldingOptions(message("stonecutter.settings.folding"))
     )
 
     override fun createPanel(): DialogPanel = panel {
