@@ -46,3 +46,4 @@ bin/
 /.idea/
 /.intellijPlatform/
 /.env
+/lang/src/main/gen/

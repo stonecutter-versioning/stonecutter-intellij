@@ -1,4 +1,4 @@
-package dev.kikugie.stonecutter.intellij.editor.documentation
+package dev.kikugie.stonecutter.intellij.debug
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -6,6 +6,7 @@ import com.intellij.psi.PsiRecursiveElementVisitor
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.util.elementType
+import dev.kikugie.stonecutter.intellij.editor.documentation.DocumentationBuilder
 
 object ASTInspectionBuilder : DocumentationBuilder<PsiFile> {
     override fun applyTo(builder: StringBuilder, element: PsiFile) = with(builder) {

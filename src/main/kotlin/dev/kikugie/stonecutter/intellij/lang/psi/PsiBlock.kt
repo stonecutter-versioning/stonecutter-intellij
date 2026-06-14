@@ -89,9 +89,18 @@ sealed interface PsiBlock : PsiElement, UserDataHolderAccessor {
     }
 }
 
+/**
+ * Returns `true` if all children are either [PsiBlock.Comment] or blank [PsiBlock.Content].
+ */
 val PsiBlock.Code.isCommentedOut: Boolean
     get() = entries.all { it.accept(IsCommentedChecker) }
 
+/**
+ * Gets or constructs the cached [PsiBlock.Root] for this file.
+ *
+ * This function traverses the entire file AST on the first pass,
+ * so use it sparingly.
+ */
 fun PsiFile.getStitcherAst(): PsiBlock.Root {
     val file = InjectedLanguageManager.getInstance(project).getTopLevelFile(this) ?: this
     return CachedValuesManager.getCachedValue(file, PsiBlock.ROOT_BLOCK_KEY) {
@@ -99,6 +108,14 @@ fun PsiFile.getStitcherAst(): PsiBlock.Root {
     }
 }
 
+/**
+ * Returns the deepmost [PsiBlock] this element belongs to,
+ * constructing the AST if necessary.
+ *
+ * This function traverses the Stitcher block AST
+ * and may traverse the entire file AST on the first pass,
+ * so use it sparingly.
+ */
 fun PsiElement.findHostedBlock(): PsiBlock? =
     containingFile.getStitcherAst().accept(HostBlockLocator(this))
 

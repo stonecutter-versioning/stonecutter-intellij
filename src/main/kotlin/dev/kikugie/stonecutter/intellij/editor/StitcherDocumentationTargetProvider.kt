@@ -6,7 +6,7 @@ import com.intellij.platform.backend.documentation.DocumentationTargetProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parents
-import dev.kikugie.stonecutter.intellij.editor.documentation.ASTInspectionBuilder
+import dev.kikugie.stonecutter.intellij.debug.ASTInspectionBuilder
 import dev.kikugie.stonecutter.intellij.editor.documentation.ConstantDocBuilder
 import dev.kikugie.stonecutter.intellij.editor.documentation.DependencyDocBuilder
 import dev.kikugie.stonecutter.intellij.editor.documentation.ReplacementLocalDocBuild

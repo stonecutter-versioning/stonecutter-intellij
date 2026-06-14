@@ -53,8 +53,11 @@ val PsiComment.stitcherCode: SmartPsiElementPointer<PsiCode>?
         SmartPointerManager.getInstance(project).createSmartPsiElementPointer(def, file)
     }
 
+val PsiComment.innerText: String
+    inline get() = ElementManipulators.getValueText(this)
+
 val PsiComment.canHasStitcherCode: Boolean
-    get() = ElementManipulators.getValueText(this).getOrDefault(0) in CODE_PREFIXES
+    get() = innerText.getOrDefault(0) in CODE_PREFIXES
 
 fun PsiElement.unquote(): String = when (antlrType) {
     StitcherLexer.QUOTED -> text.removeSurrounding("'")
