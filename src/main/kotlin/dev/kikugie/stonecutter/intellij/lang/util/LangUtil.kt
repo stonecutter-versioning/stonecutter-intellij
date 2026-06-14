@@ -11,11 +11,7 @@ import dev.kikugie.commons.takeAsOrNull
 import dev.kikugie.commons.text.getOrDefault
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
-import dev.kikugie.stonecutter.intellij.lang.impl.CompositeIElementType
-import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
-import dev.kikugie.stonecutter.intellij.lang.layout.buildStitcherAst
-import dev.kikugie.stonecutter.intellij.lang.psi.PsiBlock
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiCode
 import org.antlr.intellij.adaptor.lexer.TokenIElementType
 import kotlin.properties.ReadOnlyProperty

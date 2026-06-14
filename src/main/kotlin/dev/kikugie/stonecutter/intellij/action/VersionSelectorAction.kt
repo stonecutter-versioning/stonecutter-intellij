@@ -16,13 +16,18 @@ import com.intellij.ui.popup.WizardPopup
 import com.intellij.ui.popup.list.ListPopupImpl
 import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.JBUI
+import dev.kikugie.stonecutter.intellij.StonecutterBundle.message
 import dev.kikugie.stonecutter.intellij.StonecutterIcons
 import dev.kikugie.stonecutter.intellij.service.model.SCProjectNode
 import dev.kikugie.stonecutter.intellij.service.model.SCProjectTree
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import dev.kikugie.stonecutter.intellij.util.GradleUtil
-import java.awt.*
-import java.awt.event.*
+import java.awt.BorderLayout
+import java.awt.Font
+import java.awt.GridLayout
+import java.awt.event.KeyEvent
+import java.awt.event.MouseEvent
+import java.awt.event.MouseMotionAdapter
 import java.nio.file.Path
 import javax.swing.*
 
@@ -35,7 +40,8 @@ class VersionSelectorAction : ComboBoxAction(), DumbAware {
     }
 
     override fun createActionPopup(context: DataContext, component: JComponent, callback: Runnable?): JBPopup {
-        val project = context.getData(CommonDataKeys.PROJECT) ?: throw UnsupportedOperationException("No project loaded")
+        val project = context.getData(CommonDataKeys.PROJECT)
+            ?: throw UnsupportedOperationException(message("stonecutter.action.version_selector.no_project"))
         val trees = project.stonecutterService.lookup.trees.values.filter { it.current != null }
         return createVersionTable(trees, context, callback)
     }
@@ -51,8 +57,9 @@ class VersionSelectorAction : ComboBoxAction(), DumbAware {
                 presentation.text = current
             }
         }
+
         else -> {
-            presentation.text = trees.asSequence().filter { it.current != null }.joinToString(" | ") {
+            presentation.text = trees.asSequence().filter { it.current != null }.joinToString(" | ", limit = 2) {
                 "${it.project.identityPath} > ${it.current}"
             }
             presentation.isEnabledAndVisible = presentation.text.isNotBlank()
@@ -60,8 +67,8 @@ class VersionSelectorAction : ComboBoxAction(), DumbAware {
     }
 
     private fun createVersionTable(trees: List<SCProjectTree>, context: DataContext, callback: Runnable?): JBPopup {
-        if (trees.isEmpty()) return JBPopupFactory.getInstance().createMessage("No available versions")
-        val step = TableStep(trees, context, callback, "Select Version")
+        if (trees.isEmpty()) return JBPopupFactory.getInstance().createMessage(message("stonecutter.action.version_selector.no_versions"))
+        val step = TableStep(trees, context, callback, message("stonecutter.action.version_selector.title"))
         return TableGroupPopup(context.getData(CommonDataKeys.PROJECT), step)
     }
 }
@@ -71,8 +78,12 @@ private class VersionSwitchAction(title: String, icon: Icon, val task: String, v
         node.metadata.project, node.icon(), "stonecutterSwitchTo${node.metadata.project}", node.tree.project.projectDir.toPath()
     )
 
-    override fun actionPerformed(event: AnActionEvent) = when(val project = event.project) {
-        null -> Messages.showMessageDialog("Couldn't access the project", "Error", null)
+    override fun actionPerformed(event: AnActionEvent) = when (val project = event.project) {
+        null -> Messages.showMessageDialog(
+            message("stonecutter.action.version_selector.error.access"),
+            message("stonecutter.action.version_selector.error.title"),
+            null
+        )
         else -> GradleUtil.runGradleTask(project, path) { taskNames = listOf(task) }
     }
 }
@@ -89,7 +100,9 @@ private class TableGroupPopup(private val project: Project?, table: TableStep) :
 
     override fun createContent(): JComponent = JPanel(GridLayout(1, table.trees.size)).apply {
         columns = mutableListOf()
+
         PopupUtil.applyNewUIBackground(this)
+        border = JBUI.Borders.emptyBottom(8)
 
         for (tree in table.trees) createColumn(tree).let {
             columns.add(it)
@@ -107,6 +120,7 @@ private class TableGroupPopup(private val project: Project?, table: TableStep) :
 
         return TableColumn(project, this, action).apply {
             beforeShow()
+            list.clearSelection()
             list.border = JBUI.Borders.empty()
             list.addMouseMotionListener(object : MouseMotionAdapter() {
                 override fun mouseMoved(e: MouseEvent) {
@@ -123,7 +137,7 @@ private class TableGroupPopup(private val project: Project?, table: TableStep) :
 
     private fun createColumnPanel(tree: SCProjectTree, column: TableColumn): JPanel = JPanel(BorderLayout()).apply {
         isOpaque = false
-        add(createHeader(tree), BorderLayout.NORTH)
+        if (table.trees.size > 1) add(createHeader(tree), BorderLayout.NORTH)
         add(column.list, BorderLayout.CENTER)
     }
 

@@ -13,16 +13,8 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.util.unquote
-import dev.kikugie.stonecutter.intellij.service.model.PerlReplacement
-import dev.kikugie.stonecutter.intellij.service.model.RegexReplacement
-import dev.kikugie.stonecutter.intellij.service.model.Replacement
-import dev.kikugie.stonecutter.intellij.service.model.SCProjectNode
-import dev.kikugie.stonecutter.intellij.service.model.StringReplacement
-import dev.kikugie.stonecutter.intellij.service.model.named
-import dev.kikugie.stonecutter.intellij.service.model.siblings
+import dev.kikugie.stonecutter.intellij.service.model.*
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
-import dev.kikugie.stonecutter.intellij.service.stonecutterService
-import kotlin.text.trimIndent
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as DefaultColors
 import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet as appendHighlighted
 
