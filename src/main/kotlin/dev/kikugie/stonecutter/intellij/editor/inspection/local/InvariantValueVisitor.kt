@@ -10,8 +10,10 @@ import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.editor.inspection.StitcherLocalInspectionTool
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiPredicate
-import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
+import dev.kikugie.stonecutter.intellij.service.model.SCProjectParameters
+import dev.kikugie.stonecutter.intellij.service.model.siblings
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
+import dev.kikugie.stonecutter.intellij.service.stonecutterParameters
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 
 /* TODO: Add a quick fix to safely remove the block.
@@ -27,7 +29,7 @@ In that case there are a couple steps to be done:
 class InvariantValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
     override fun visitConstant(constant: PsiExpression.Constant) {
         if (constant.variance { constants[it] } != 1) return
-        val value = constant.stonecutterNode!!.params.constants[constant.text].toString()
+        val value = constant.stonecutterParameters?.constants?.get(constant.text) ?: return
         holder.registerProblem(
             constant,
             StonecutterBundle.message("stonecutter.inspection.invariant_value.constant", value),
@@ -38,12 +40,10 @@ class InvariantValueVisitor(holder: ProblemsHolder, session: LocalInspectionTool
     override fun visitAssignment(assignment: PsiExpression.Assignment) {
         assignment.target?.let(::visitDependency)
 
-        val lookup = assignment.stonecutterService.lookup
-        val node = lookup.node(assignment) ?: return
-
         val dependency = assignment.target?.text.orEmpty()
-        val versions = node.siblings(lookup)
-            .mapNotNull { it.params.dependencies[dependency] }
+        val versions = assignment.stonecutterNode?.siblings
+            ?.mapNotNull { it.parameters.dependencies[dependency] }
+            ?: return
 
         val predicates = assignment.predicates.mapNotNull(PsiPredicate::parsed)
             .toList()
@@ -60,7 +60,7 @@ class InvariantValueVisitor(holder: ProblemsHolder, session: LocalInspectionTool
 
     private fun visitDependency(o: PsiElement) {
         if (o.variance { dependencies[it] } != 1) return
-        val value = o.stonecutterNode!!.params.dependencies[o.text].toString()
+        val value = o.stonecutterParameters?.dependencies?.get(o.text).toString()
         holder.registerProblem(
             o,
             StonecutterBundle.message("stonecutter.inspection.invariant_value.dependency", value),
@@ -68,14 +68,10 @@ class InvariantValueVisitor(holder: ProblemsHolder, session: LocalInspectionTool
         )
     }
 
-    private fun <T : PsiElement> T.variance(selector: SCProcessProperties.(String) -> Any?): Int {
-        val lookup = stonecutterService.lookup
-        val node = lookup.node(this) ?: return 0
+    private fun <T : PsiElement> T.variance(selector: SCProjectParameters.(String) -> Any?): Int {
         val text = text
-        return node.siblings(lookup)
-            .distinctBy { it.params.selector(text) }
-            .count()
+        return stonecutterNode?.siblings.orEmpty().distinctBy { it.parameters.selector(text) }.count()
     }
 
-    private fun Version.check(predicates: Iterable<VersionPredicate>) = predicates.all { it(this) }
+    private fun Version.check(predicates: Iterable<VersionPredicate>): Boolean = predicates.all { it(this) }
 }

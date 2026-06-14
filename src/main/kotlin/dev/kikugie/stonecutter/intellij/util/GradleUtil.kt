@@ -8,12 +8,10 @@ import com.intellij.openapi.externalSystem.util.ExternalSystemUtil
 import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import dev.kikugie.stonecutter.intellij.model.GradleProjectHierarchy
 import org.gradle.tooling.GradleConnectionException
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ResultHandler
 import org.gradle.tooling.model.GradleProject
-import org.jetbrains.plugins.gradle.service.project.GradleProjectResolverUtil
 import org.jetbrains.plugins.gradle.util.GradleConstants
 import java.io.File
 import java.nio.file.Path
@@ -25,10 +23,6 @@ object GradleUtil {
     fun PsiElement.findGradlePath(): Path? = ModuleUtil.findModuleForPsiElement(this)
         ?.let(ExternalSystemModulePropertyManager::getInstance)?.getLinkedProjectPath()
         ?.let(::Path)
-
-    fun PsiElement.findGradleHierarchy(): GradleProjectHierarchy? = ModuleUtil.findModuleForPsiElement(this)
-        ?.let(GradleProjectResolverUtil::getGradleIdentityPathOrNull)
-        ?.let(::GradleProjectHierarchy)
 
     inline fun runGradleTask(project: Project, dir: Path, configuration: ESTES.() -> Unit) =
         runGradleTask(project, dir, ESTES().apply(configuration))

@@ -19,9 +19,12 @@
                                        implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <lang.braceMatcher language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherBraceMatcher"/>
         <lang.quoteHandler language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherQuoteHandler"/>
+        <lang.surroundDescriptor language="JVM" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSurroundDescriptor"/>
         <editorHighlighterProvider filetype="Stitcher"
                                    implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <platform.backend.documentation.targetProvider implementation="dev.kikugie.stonecutter.intellij.editor.StitcherDocumentationTargetProvider"/>
+        <liveTemplateContext contextId="Stonecutter" implementation="dev.kikugie.stonecutter.intellij.editor.StitcherTemplateContext"/>
+        <defaultLiveTemplates file="/liveTemplates/Stonecutter.xml"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij"> <!-- Java -->

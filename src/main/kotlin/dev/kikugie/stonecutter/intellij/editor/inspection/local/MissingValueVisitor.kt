@@ -8,8 +8,9 @@ import dev.kikugie.stonecutter.intellij.editor.inspection.error
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
-import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
-import dev.kikugie.stonecutter.intellij.service.stonecutterService
+import dev.kikugie.stonecutter.intellij.service.model.SCProjectParameters
+import dev.kikugie.stonecutter.intellij.service.model.siblings
+import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 
 class MissingValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
     override fun visitConstant(constant: PsiExpression.Constant) {
@@ -29,12 +30,10 @@ class MissingValueVisitor(holder: ProblemsHolder, session: LocalInspectionToolSe
         assignment.target?.registerInconsistency("dependency") { it in dependencies }
     }
 
-    private fun PsiElement.registerInconsistency(type: String, selector: SCProcessProperties.(String) -> Boolean) = missingValues(selector = selector)
+    private fun PsiElement.registerInconsistency(type: String, selector: SCProjectParameters.(String) -> Boolean) = missingValues(selector = selector)
         .joinToString().let { if (it.isNotEmpty()) holder.error(this, "stonecutter.inspection.missing_value.$type", it) }
 
-    private inline fun PsiElement.missingValues(name: String = text, crossinline selector: SCProcessProperties.(String) -> Boolean): Sequence<String> {
-        val lookup = stonecutterService.lookup
-        val siblings = (lookup.node(this) ?: return emptySequence()).siblings(lookup)
-        return siblings.filterNot { it.params.selector(name) }.map { it.metadata.project }
+    private inline fun PsiElement.missingValues(name: String = text, crossinline selector: SCProjectParameters.(String) -> Boolean): Sequence<String> {
+        return stonecutterNode?.siblings.orEmpty().asSequence().filterNot { it.parameters.selector(name) }.map { it.metadata.project }
     }
 }

@@ -7,8 +7,8 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import dev.kikugie.stonecutter.intellij.StonecutterIcons
-import dev.kikugie.stonecutter.intellij.model.SCModelLookup
-import dev.kikugie.stonecutter.intellij.model.SCProjectTree
+import dev.kikugie.stonecutter.intellij.service.model.SCProjectTree
+import dev.kikugie.stonecutter.intellij.service.model.StonecutterModels
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import dev.kikugie.stonecutter.intellij.util.GradleUtil
 import java.awt.Dimension
@@ -25,7 +25,7 @@ class VersionSelectorAction : ComboBoxAction(), DumbAware {
         else event.presentation.isEnabledAndVisible = false
     }
 
-    private fun Presentation.configurePresentation(lookup: SCModelLookup): Unit = when (lookup.trees.size) {
+    private fun Presentation.configurePresentation(lookup: StonecutterModels): Unit = when (lookup.trees.size) {
         0 -> isEnabledAndVisible = false
         1 -> {
             val version = lookup.trees.values.first().current
@@ -48,21 +48,18 @@ class VersionSelectorAction : ComboBoxAction(), DumbAware {
         val available = lookup.trees.values.filter { it.current != null }
         return when(available.size) {
             0 -> JBPopupFactory.getInstance().createMessage("No available versions")
-            1 -> createVersionList(lookup, available.first(), context, callback)
+            1 -> createVersionList(available.first(), context, callback)
             else -> JBPopupFactory.getInstance().createMessage("Not yet implemented")
         }
     }
 
-    private fun createVersionList(lookup: SCModelLookup, tree: SCProjectTree, context: DataContext, callback: Runnable?): JBPopup {
-        val nodes = tree.branches.asSequence()
-            .mapNotNull { lookup.branches[it] }
-            .flatMap { it.nodes.mapNotNull(lookup.nodes::get) }
-            .distinctBy { it.metadata.project }
+    private fun createVersionList(tree: SCProjectTree, context: DataContext, callback: Runnable?): JBPopup {
+        val nodes = tree.nodes.distinctBy { it.metadata.project }
 
         val actions = nodes.map {
             val project = it.metadata.project
             val icon = if (project == tree.vcs) StonecutterIcons.VERSION_VCS else StonecutterIcons.VERSION_ENTRY
-            VersionSwitchAction(project, icon, "stonecutterSwitchTo$project", tree.location)
+            VersionSwitchAction(project, icon, "stonecutterSwitchTo$project", tree.project.projectDir.toPath())
         }
 
         val group = DefaultActionGroup().apply { addAll(actions.toList()) }

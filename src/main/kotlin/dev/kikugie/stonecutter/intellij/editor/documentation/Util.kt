@@ -5,7 +5,7 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.ui.JBColor
 import dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter.AttributeKeys
 import dev.kikugie.stonecutter.intellij.editor.documentation.html.*
-import dev.kikugie.stonecutter.intellij.model.SCProjectNode
+import dev.kikugie.stonecutter.intellij.service.model.SCProjectNode
 
 internal val RED = TextAttributes().apply {
     effectColor = JBColor.RED

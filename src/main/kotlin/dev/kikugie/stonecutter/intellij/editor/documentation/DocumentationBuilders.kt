@@ -13,11 +13,13 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.util.unquote
-import dev.kikugie.stonecutter.intellij.model.SCProjectNode
-import dev.kikugie.stonecutter.intellij.model.serialized.PerlReplacement
-import dev.kikugie.stonecutter.intellij.model.serialized.RegexReplacement
-import dev.kikugie.stonecutter.intellij.model.serialized.Replacement
-import dev.kikugie.stonecutter.intellij.model.serialized.StringReplacement
+import dev.kikugie.stonecutter.intellij.service.model.PerlReplacement
+import dev.kikugie.stonecutter.intellij.service.model.RegexReplacement
+import dev.kikugie.stonecutter.intellij.service.model.Replacement
+import dev.kikugie.stonecutter.intellij.service.model.SCProjectNode
+import dev.kikugie.stonecutter.intellij.service.model.StringReplacement
+import dev.kikugie.stonecutter.intellij.service.model.named
+import dev.kikugie.stonecutter.intellij.service.model.siblings
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import kotlin.text.trimIndent
@@ -32,8 +34,7 @@ object ConstantDocBuilder : DocumentationBuilder<PsiExpression.Constant> {
         signature("Constant", "condition-constants", name, AttributeKeys.CONSTANT, node)
 
         if (node == null) return@html
-        val variants = node.siblings(element.stonecutterService.lookup)
-            .groupBy { it.params.constants[name] }
+        val variants = node.siblings.groupBy { it.parameters.constants[name] }
         if (variants.isNotEmpty()) variants(node, variants) {
             cell {
                 if (it == null) text("UNDEFINED", RED)
@@ -50,8 +51,7 @@ object SwapIdDocBuilder : DocumentationBuilder<PsiSwap.Opener> {
         signature("Swap", "string-swaps", name, AttributeKeys.SWAP, node)
 
         if (node == null || name.isEmpty()) return@html
-        val variants = node.siblings(element.stonecutterService.lookup)
-            .groupBy { it.params.swaps[name] }
+        val variants = node.siblings.groupBy { it.parameters.swaps[name] }
         if (variants.isNotEmpty()) variants(node, variants) {
             cell {
                 if (it == null) text("UNDEFINED", RED)
@@ -82,8 +82,7 @@ object SwapLocalDocBuilder : DocumentationBuilder<PsiSwap.Local> {
         signature("Local swap", "local-swaps", null, AttributeKeys.DEPENDENCY, node)
 
         if (node == null) return@html
-        val variants = node.siblings(element.stonecutterService.lookup)
-            .groupBy { it.eval(element) }
+        val variants = node.siblings.groupBy { it.eval(element) }
         if (variants.isNotEmpty()) variants(node, variants) {
             cell {
                 if (it == null) text("UNDEFINED", RED)
@@ -107,8 +106,7 @@ object DependencyDocBuilder : DocumentationBuilder<PsiExpression.Assignment> {
         signature("Dependency", "condition-dependencies", name.ifEmpty { "minecraft" }, AttributeKeys.DEPENDENCY, node)
 
         if (node == null) return@html
-        val variants = node.siblings(element.stonecutterService.lookup)
-            .groupBy { it.params.dependencies[name] }
+        val variants = node.siblings.groupBy { it.parameters.dependencies[name] }
         if (variants.isNotEmpty()) variants(node, variants) {
             cell {
                 if (it == null) text("UNDEFINED", RED)
@@ -125,8 +123,8 @@ object ReplacementToggleDocBuilder : DocumentationBuilder<PsiReplacement.Toggle.
         signature("Replacement", "replacements", name, AttributeKeys.REPLACEMENT, node)
 
         if (node == null) return@html
-        val variants = node.siblings(element.stonecutterService.lookup)
-            .groupBy { it.params.replacements[name] }
+        // FIXME: Multiple replacements can share IDs, so deal with it
+        val variants = node.siblings.groupBy { it.parameters.replacements.named(name).firstOrNull() }
         if (variants.isNotEmpty()) variants(node, variants) {
             if (it == null) cell { text("UNDEFINED", RED) }
             else replacement(element.project, it)
@@ -140,9 +138,7 @@ object ReplacementToggleDocBuilder : DocumentationBuilder<PsiReplacement.Toggle.
     }
 
     private fun RowHtmlBuilder.stringReplacement(replacement: StringReplacement) {
-        val patterns = replacement.sources.toMutableList()
-        if (replacement.pattern != null) patterns += replacement.pattern
-
+        val patterns = replacement.patterns
         cell {
             for (it in patterns) {
                 text("•")
@@ -156,7 +152,7 @@ object ReplacementToggleDocBuilder : DocumentationBuilder<PsiReplacement.Toggle.
     }
 
     private fun RowHtmlBuilder.regexReplacement(project: Project, replacement: RegexReplacement) {
-        val pattern = replacement.regex?.pattern ?: replacement.pattern ?: "<unknown>"
+        val pattern = replacement.pattern
         cell {
             val language = Language.findLanguageByID("RegExp")
             if (language == null) text(pattern, DefaultColors.STRING)
@@ -181,8 +177,7 @@ object ReplacementLocalDocBuild : DocumentationBuilder<PsiReplacement.Local.Entr
         signature("Local replacement", "local-replacements", null, AttributeKeys.REPLACEMENT, node)
 
         if (node == null) return@html
-        val variants = node.siblings(element.stonecutterService.lookup)
-            .groupBy { it.eval(element) }
+        val variants = node.siblings.groupBy { it.eval(element) }
         if (variants.isNotEmpty()) variants(node, variants) {
             if (it == null) cell { text("UNDEFINED", RED) }
             else replacement(element.project, it)
@@ -195,8 +190,8 @@ object ReplacementLocalDocBuild : DocumentationBuilder<PsiReplacement.Local.Entr
         val source = element.source?.unquote().orEmpty()
         val target = element.target?.unquote().orEmpty()
 
-        return if (direction) StringReplacement(pattern = source, target = target)
-        else StringReplacement(pattern = target, target = source)
+        return if (direction) StringReplacement(patterns = setOf(source), target = target, identifier = null)
+        else StringReplacement(patterns = setOf(target), target = source, identifier = null)
     }
 }
 

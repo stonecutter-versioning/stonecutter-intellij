@@ -10,7 +10,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 
-@Deprecated("Not finished yet")
+@Suppress("DialogTitleCapitalization")
 class StitcherSurroundDescriptor : SurroundDescriptor {
     private val SURROUNDERS: Array<out Surrounder> = arrayOf(ConditionSurrounder)
 
@@ -20,7 +20,7 @@ class StitcherSurroundDescriptor : SurroundDescriptor {
         CodeInsightUtil.findStatementsInRange(file, startOffset, endOffset)
 
     private object ConditionSurrounder : Surrounder {
-        override fun getTemplateDescription(): @NlsActions.ActionText String? = "? if"
+        override fun getTemplateDescription(): String = "? if"
         override fun isApplicable(elements: Array<out PsiElement?>): Boolean = true
 
         override fun surroundElements(project: Project, editor: Editor, elements: Array<out PsiElement>): TextRange? {

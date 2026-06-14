@@ -13,7 +13,6 @@ import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiScope
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
-import dev.kikugie.stonecutter.intellij.model.SCModelLookup
 import dev.kikugie.stonecutter.intellij.service.stonecutterNode
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
 import org.jetbrains.annotations.PropertyKey
@@ -24,9 +23,8 @@ private val SC9A3: SemanticVersion = SemanticVersion(0, 9, preRelease = "alpha.3
 private val SC10A1: SemanticVersion = SemanticVersion(0, 10, preRelease = "alpha.1")
 
 class IncompatibleFeatureVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession) : StitcherLocalInspectionTool.Visitor(holder, session) {
-    private val lookup: SCModelLookup by lazy { session.file.stonecutterService.lookup }
     private val PsiElement.stonecutter: SemanticVersion?
-        get() = stonecutterNode?.tree(lookup)?.stonecutter
+        get() = stonecutterNode?.tree?.stonecutter
 
     override fun visitComment(comment: PsiComment) {
         comment.check(SC8A1, "stonecutter.inspection.feature.0.8.comments")

@@ -3,8 +3,9 @@
 package dev.kikugie.stonecutter.intellij.service.gradle
 
 import com.intellij.ide.impl.ProjectUtil
-import com.intellij.ide.util.PropertiesComponent
+import dev.kikugie.stonecutter.intellij.service.model.GradleIdentityPath.Companion.toIdentityPath
 import dev.kikugie.stonecutter.intellij.service.stonecutterService
+import org.jetbrains.plugins.gradle.model.DefaultExternalProject
 import org.jetbrains.plugins.gradle.model.ExternalProject
 import org.jetbrains.plugins.gradle.service.project.ProjectResolverContext
 import org.jetbrains.plugins.gradle.service.syncAction.GradleSyncListener
@@ -18,13 +19,50 @@ object GradleReloadListener : GradleSyncListener {
 
     private suspend fun updateStonecutterService(context: ProjectResolverContext) {
         val project = ProjectUtil.findProject(context.projectPath.let(::Path)) ?: return
-        val candidates = context.allBuilds.asSequence()
-            .flatMap { it.projects }
-            .mapNotNull { context.getProjectModel(it, ExternalProject::class.java) }
-            .filter { it.buildFile?.name?.startsWith("stonecutter.gradle") == true }
-            .associate { it.projectDir.invariantSeparatorsPath to it.identityPath }
-
-        project.stonecutterService.reset(candidates)
-        PropertiesComponent.getInstance(project).setList("dev.kikugie.stonecutter.projects", candidates.map { (k, v) -> "$k#$v" })
+        val candidates = context.buildProjectTree().filterWithStonecutter().toList()
+        project.stonecutterService.reset(candidates, true)
     }
+}
+
+private fun ProjectResolverContext.buildProjectTree(): List<DefaultExternalProject> = buildList {
+    val projects = allBuilds.asSequence()
+        .flatMap { it.projects }
+        .mapNotNull { getProjectModel(it, ExternalProject::class.java) }
+        .filterIsInstance<DefaultExternalProject>()
+        .sortedBy { it.toIdentityPath() }
+
+    for (project in projects) if (project.identityPath == ":") this += project.clone() else {
+        var parent = asSequence()
+            .filter { project.projectDir.startsWith(it.projectDir) }
+            .maxByOrNull { it.projectDir.absolutePath.length }
+            ?: continue
+        for (segment in project.toIdentityPath()) {
+            val next = parent.childProjects[segment]
+            if (next != null) parent = next else {
+                parent.childProjects[segment] = project.clone()
+                break
+            }
+        }
+    }
+}
+
+private fun Iterable<ExternalProject>.filterWithStonecutter(): Sequence<ExternalProject> = sequence {
+    for (project in this@filterWithStonecutter)
+        if (project.buildFile?.name.orEmpty().startsWith("stonecutter.gradle")) yield(project)
+        else yieldAll(project.childProjects.values.filterWithStonecutter())
+}
+
+private fun DefaultExternalProject.clone(): DefaultExternalProject = DefaultExternalProject().also {
+    it.id = id
+    it.path = path
+    it.identityPath = identityPath
+    it.name = name
+    it.qName = qName
+    it.description = description
+    it.group = group
+    it.version = version
+    it.projectDir = projectDir
+    it.buildDir = buildDir
+    it.buildFile = buildFile
+    it.externalSystemId = externalSystemId
 }

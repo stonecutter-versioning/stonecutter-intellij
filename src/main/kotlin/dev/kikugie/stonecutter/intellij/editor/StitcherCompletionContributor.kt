@@ -15,11 +15,11 @@ import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
-import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
-import dev.kikugie.stonecutter.intellij.service.stonecutterNode
+import dev.kikugie.stonecutter.intellij.service.model.SCProjectParameters
+import dev.kikugie.stonecutter.intellij.service.stonecutterParameters
 
-private val CompletionParameters.stonecutter: SCProcessProperties?
-    get() = originalPosition?.stonecutterNode?.params
+private val CompletionParameters.stonecutter: SCProjectParameters?
+    get() = originalPosition?.stonecutterParameters
 
 private fun psiAntlrToken(type: Int): PsiElementPattern.Capture<PsiElement> =
     psiElement(StitcherLang.tokenTypeOf(type))
@@ -27,10 +27,10 @@ private fun psiAntlrToken(type: Int): PsiElementPattern.Capture<PsiElement> =
 private inline fun <reified T : PsiElement> psiElement(): PsiElementPattern.Capture<T> =
     psiElement(T::class.java)
 
-private inline fun <reified T : PsiElement> PsiElementPattern.Capture<out PsiElement>.withParent() =
+private inline fun <reified T : PsiElement> PsiElementPattern.Capture<out PsiElement>.withParent(): PsiElementPattern.Capture<out PsiElement> =
     withParent(T::class.java)
 
-private inline fun <reified T : PsiElement> PsiElementPattern.Capture<out PsiElement>.inside() =
+private inline fun <reified T : PsiElement> PsiElementPattern.Capture<out PsiElement>.inside(): PsiElementPattern.Capture<out PsiElement> =
     inside(T::class.java)
 
 private fun formatSwap(value: String, length: Int): String {
@@ -48,23 +48,23 @@ private fun StitcherCompletionContributor.registerPatterns() {
 
     psiAntlrToken(StitcherLexer.IDENTIFIER).withParent<PsiSwap.Opener>().andNot(psiElement().afterSibling(psiElement())) register { params, result ->
         params.stonecutter?.swaps.orEmpty().map { (k, v) ->
-            create(k).withIcon(Reference.SWAP).withTailText(" " + formatSwap(k, 30))
+            create(k).withIcon(Reference.SWAP).withTailText(" ${formatSwap(k, 30)}")
         }.ifNotEmpty(result::addAllElements)
     }
 
     psiAntlrToken(StitcherLexer.IDENTIFIER).withParent<PsiExpression.Assignment>() register { params, result ->
         params.stonecutter?.dependencies.orEmpty().map { (k, v) ->
-            create(k).withIcon(Reference.DEPENDENCY).withTailText(" " + v.value)
+            create(k).withIcon(Reference.DEPENDENCY).withTailText(" $v")
         }.ifNotEmpty(result::addAllElements)
     }
 
     psiAntlrToken(StitcherLexer.IDENTIFIER).withParent<PsiExpression.Constant>() register { params, result ->
         with(params.stonecutter ?: return@register) {
             constants.map { (k, v) ->
-                create(k).withIcon(Reference.CONSTANT).withTailText(" " + v)
+                create(k).withIcon(Reference.CONSTANT).withTailText(" $v")
             }.ifNotEmpty(result::addAllElements)
             dependencies.map { (k, v) ->
-                create("$k:").withIcon(Reference.DEPENDENCY).withTailText(" " + v.value)
+                create("$k:").withIcon(Reference.DEPENDENCY).withTailText(" $v")
             }.ifNotEmpty(result::addAllElements)
         }
     }

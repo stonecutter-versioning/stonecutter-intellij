@@ -16,6 +16,7 @@ import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
 import dev.kikugie.stonecutter.intellij.settings.variants.FoldingMode.AGGRESSIVE
 import org.jetbrains.plugins.gradle.service.syncAction.GradleSyncListener
 import java.awt.event.FocusEvent
+import kotlin.io.path.relativeTo
 
 object StonecutterCallbacks {
     internal fun invokeAppLoad(settings: StonecutterSettings) {
@@ -66,13 +67,14 @@ object StonecutterCallbacks {
         }
 
         private fun updateFile(service: StonecutterService, source: FileEditorManager, file: VirtualFile) {
-            val path = file.toNioPathOrNull() ?: return
-            val root = service.lookup.all
-                .find { path.startsWith(it.location.resolve("build")) }
-                ?: return
-            val isGenerated = path.startsWith(root.location.resolve("build/generated/stonecutter"))
-            val isCache = path.startsWith(root.location.resolve("build/stonecutter-cache"))
-            if (isGenerated || isCache) file.findDocument()?.setReadOnly(true)
+            val filePath = file.toNioPathOrNull() ?: return
+            val nodeRelative = service.lookup.nodes.values.firstNotNullOfOrNull {
+                val buildPath = it.project.buildDir.toPath()
+                if (!filePath.startsWith(buildPath)) return@firstNotNullOfOrNull null
+                filePath.relativeTo(buildPath)
+            } ?: return
+            if (nodeRelative.startsWith("generated/stonecutter") || nodeRelative.startsWith("stonecutter-cache"))
+                file.findDocument()?.setReadOnly(true)
         }
     }
 

@@ -2,7 +2,7 @@ package dev.kikugie.stonecutter.intellij.lang.impl
 
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
-import dev.kikugie.stonecutter.intellij.model.SCProjectNode
+import dev.kikugie.stonecutter.intellij.service.model.SCProjectNode
 
 class ExpressionEvaluationVisitor(val node: SCProjectNode) : PsiExpression.Visitor<Boolean> {
     override fun visitGroup(group: PsiExpression.Group): Boolean = group.body.eval()
@@ -16,11 +16,11 @@ class ExpressionEvaluationVisitor(val node: SCProjectNode) : PsiExpression.Visit
     }
 
     override fun visitConstant(constant: PsiExpression.Constant): Boolean {
-        return node.params.constants[constant.text] ?: false
+        return node.parameters.constants[constant.text] ?: false
     }
 
     override fun visitAssignment(assignment: PsiExpression.Assignment): Boolean {
-        val version = node.params.dependencies[assignment.target?.text.orEmpty()] ?: return false
+        val version = node.parameters.dependencies[assignment.target?.text.orEmpty()] ?: return false
         return assignment.predicates.all { it.parsed?.invoke(version) ?: false }
     }
 

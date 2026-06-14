@@ -72,6 +72,7 @@ kotlin {
         languageVersion = KotlinVersion.KOTLIN_2_4
 
         freeCompilerArgs.add("-Xcontext-parameters")
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
         freeCompilerArgs.add("-XXLanguage:+UnnamedLocalVariables")
     }
 }

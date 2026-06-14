@@ -14,8 +14,8 @@ import dev.kikugie.commons.takeAsOrNull
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiCondition
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.util.stitcherCode
-import dev.kikugie.stonecutter.intellij.model.SCProcessProperties
-import dev.kikugie.stonecutter.intellij.service.stonecutterService
+import dev.kikugie.stonecutter.intellij.service.model.SCProjectParameters
+import dev.kikugie.stonecutter.intellij.service.stonecutterParameters
 
 private class StitcherHintsCollector : SharedBypassCollector {
     override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
@@ -61,8 +61,8 @@ private class StitcherHintsCollector : SharedBypassCollector {
         else -> true
     }
 
-    private inline fun PsiElement.value(provider: SCProcessProperties.(String) -> Any?): String? =
-        stonecutterService.lookup.node(this)?.params?.provider(text)?.toString()
+    private inline fun PsiElement.value(provider: SCProjectParameters.(String) -> Any?): String? =
+        stonecutterParameters?.provider(text)?.toString()
 }
 
 class StitcherHintsProvider : InlayHintsProvider {
