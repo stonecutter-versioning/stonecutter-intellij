@@ -1,7 +1,6 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
@@ -11,7 +10,7 @@ plugins {
     alias(common.plugins.kotlin.serialization)
 }
 
-version = "0.10.1+${property("intellij.suffix")}"
+version = "0.11.0+${property("intellij.suffix")}"
 
 buildscript {
     repositories {
