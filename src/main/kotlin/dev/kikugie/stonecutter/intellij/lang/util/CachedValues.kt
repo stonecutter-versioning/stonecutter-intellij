@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package dev.kikugie.stonecutter.intellij.lang.navigation
+package dev.kikugie.stonecutter.intellij.lang.util
 
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.UserDataHolder

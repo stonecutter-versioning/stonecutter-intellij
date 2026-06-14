@@ -1,6 +1,9 @@
 package dev.kikugie.stonecutter.intellij.lang.impl
 
+import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.IElementType
+import com.intellij.psi.util.elementType
+import dev.kikugie.commons.takeAsOrNull
 import dev.kikugie.stonecutter.intellij.lang.StitcherLang
 
 enum class StitcherCompositeType {
@@ -29,3 +32,10 @@ enum class StitcherCompositeType {
  * because the parser relies on the named rule branches, which don't have unique IDs.
  */
 class CompositeIElementType internal constructor(val value: StitcherCompositeType) : IElementType(value.name, StitcherLang)
+
+val PsiElement?.compositeType: StitcherCompositeType?
+    inline get() = elementType?.compositeType
+
+val IElementType?.compositeType: StitcherCompositeType?
+    get() = this?.takeAsOrNull<CompositeIElementType>()?.value
+

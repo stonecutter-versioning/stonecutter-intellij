@@ -23,15 +23,11 @@ import kotlin.reflect.KProperty
 
 private val CODE_PREFIXES = charArrayOf('?', '$', '~')
 private val SCOPE_DEF: Key<SmartPsiElementPointer<PsiCode>> = Key.create("STITCHER_DEFINITION")
-private val AST_KEY: Key<CachedValue<PsiBlock.Root>> = Key.create("STITCHER_AST")
 
 val LITERALS = intArrayOf(StitcherLexer.IDENTIFIER, StitcherLexer.QUOTED)
 
 val PsiElement?.antlrType: AntlrTokenType
     inline get() = elementType?.antlrType ?: -1
-
-val PsiElement?.compositeType: StitcherCompositeType?
-    inline get() = elementType?.compositeType
 
 val IElementType?.antlrType: AntlrTokenType
     get() = this
@@ -39,9 +35,6 @@ val IElementType?.antlrType: AntlrTokenType
         ?.takeIf { it.language == StitcherLang }
         ?.antlrTokenType
         ?: -1
-
-val IElementType?.compositeType: StitcherCompositeType?
-    get() = this?.takeAsOrNull<CompositeIElementType>()?.value
 
 val PsiFile.isInjected: Boolean
     get() = InjectedLanguageManager.getInstance(project).isInjectedFragment(this)
@@ -54,14 +47,6 @@ val PsiComment.stitcherFile: StitcherFile?
 /**The host [PsiComment] for the injected file.*/
 val StitcherFile.containingComment: PsiComment
     get() = FileContextUtil.getFileContext(this) as PsiComment
-
-val PsiFile.stitcherAst: PsiBlock.Root
-    get() {
-        val topLevel = InjectedLanguageManager.getInstance(project).getTopLevelFile(this) ?: this
-        return CachedValuesManager.getCachedValue(topLevel, AST_KEY) {
-            CachedValueProvider.Result.create(topLevel.buildStitcherAst(), topLevel)
-        }
-    }
 
 /**Cached injected [ScopeDefinition] for this comment.*/
 val PsiComment.stitcherCode: SmartPsiElementPointer<PsiCode>?

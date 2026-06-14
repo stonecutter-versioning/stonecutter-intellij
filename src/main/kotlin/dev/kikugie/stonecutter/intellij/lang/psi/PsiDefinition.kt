@@ -8,6 +8,7 @@ import dev.kikugie.commons.collections.findIsInstance
 import dev.kikugie.stonecutter.intellij.lang.impl.PsiStitcherNodeImpl
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType.*
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
+import dev.kikugie.stonecutter.intellij.lang.impl.compositeType
 import dev.kikugie.stonecutter.intellij.lang.util.*
 
 sealed interface PsiDefinition : PsiStitcherNode {

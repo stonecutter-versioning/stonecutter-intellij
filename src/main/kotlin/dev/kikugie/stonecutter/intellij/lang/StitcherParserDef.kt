@@ -17,9 +17,9 @@ import com.intellij.psi.tree.TokenSet
 import dev.kikugie.commons.takeAs
 import dev.kikugie.stonecutter.intellij.lang.impl.*
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType.*
-import dev.kikugie.stonecutter.intellij.lang.layout.BlockIElementType
-import dev.kikugie.stonecutter.intellij.lang.layout.StitcherBlockType
-import dev.kikugie.stonecutter.intellij.lang.layout.StitcherBlockType.*
+import dev.kikugie.stonecutter.intellij.lang.impl.BlockIElementType
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherBlockType
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherBlockType.*
 import dev.kikugie.stonecutter.intellij.lang.psi.*
 import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory

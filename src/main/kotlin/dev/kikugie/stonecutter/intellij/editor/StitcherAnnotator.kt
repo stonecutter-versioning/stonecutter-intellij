@@ -11,12 +11,12 @@ import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType.SEM_VER
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherCompositeType.STR_VER
 import dev.kikugie.stonecutter.intellij.lang.impl.StitcherLexer
+import dev.kikugie.stonecutter.intellij.lang.impl.compositeType
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiExpression
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiReplacement
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiScope
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiSwap
 import dev.kikugie.stonecutter.intellij.lang.util.antlrType
-import dev.kikugie.stonecutter.intellij.lang.util.compositeType
 
 private fun AnnotationHolder.applyAttributes(element: PsiElement, key: TextAttributesKey) = newSilentAnnotation(HighlightSeverity.TEXT_ATTRIBUTES)
     .textAttributes(key).range(element).create()

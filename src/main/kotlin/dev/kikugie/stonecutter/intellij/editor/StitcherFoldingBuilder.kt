@@ -16,8 +16,8 @@ import dev.kikugie.commons.takeAsOrNull
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiBlock
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiCondition
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition
+import dev.kikugie.stonecutter.intellij.lang.psi.getStitcherAst
 import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
-import dev.kikugie.stonecutter.intellij.lang.util.stitcherAst
 import dev.kikugie.stonecutter.intellij.lang.util.stitcherCode
 import dev.kikugie.stonecutter.intellij.settings.StonecutterSettings
 import dev.kikugie.stonecutter.intellij.settings.variants.FoldingMode
@@ -31,7 +31,7 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     override fun buildFoldRegions(root: PsiElement, document: Document, quick: Boolean): Array<out FoldingDescriptor> {
         if (StonecutterSettings.STATE.foldDisabledBlocks == FoldingMode.DISABLED) return emptyArray()
 
-        val visitor = FoldingVisitor().apply { root.containingFile.stitcherAst.accept(this) }
+        val visitor = FoldingVisitor().apply { root.containingFile.getStitcherAst().accept(this) }
         return visitor.descriptors.toTypedArray()
     }
 

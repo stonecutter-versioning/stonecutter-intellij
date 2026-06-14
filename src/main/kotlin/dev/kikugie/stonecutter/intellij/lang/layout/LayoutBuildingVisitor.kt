@@ -1,15 +1,14 @@
 package dev.kikugie.stonecutter.intellij.lang.layout
 
 import com.intellij.openapi.progress.ProgressIndicatorProvider
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.CompositeElement
 import com.intellij.psi.impl.source.tree.LeafElement
 import com.intellij.psi.impl.source.tree.TreeElement
-import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.endOffset
 import com.intellij.psi.util.startOffset
 import dev.kikugie.commons.takeAs
+import dev.kikugie.stonecutter.intellij.lang.impl.StitcherBlockType
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiBlock
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition.Kind
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiScope

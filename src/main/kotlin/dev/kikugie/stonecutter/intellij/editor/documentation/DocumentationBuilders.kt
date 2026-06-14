@@ -110,7 +110,7 @@ object DependencyDocBuilder : DocumentationBuilder<PsiExpression.Assignment> {
         if (variants.isNotEmpty()) variants(node, variants) {
             cell {
                 if (it == null) text("UNDEFINED", RED)
-                else text(it.value, AttributeKeys.VERSION)
+                else text(it.toString(), AttributeKeys.VERSION)
             }
         }
     }
