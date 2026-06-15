@@ -1,5 +1,7 @@
 package dev.kikugie.stonecutter.intellij.lang.util
 
+import com.intellij.lang.Commenter
+import com.intellij.lang.LanguageCommenters
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.nullableLazyValueUnsafe
@@ -31,6 +33,9 @@ val IElementType?.antlrType: AntlrTokenType
         ?.takeIf { it.language == StitcherLang }
         ?.antlrTokenType
         ?: -1
+
+val PsiFile.commenter: Commenter?
+    get() = LanguageCommenters.INSTANCE.forLanguage(language)
 
 val PsiFile.isInjected: Boolean
     get() = InjectedLanguageManager.getInstance(project).isInjectedFragment(this)

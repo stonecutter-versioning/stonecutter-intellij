@@ -100,12 +100,20 @@
     <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
         <!--@sync-contributor@-->
     </extensions>
-    <actions>
+    <actions resource-bundle="messages.StonecutterBundle">
         <action id="dev.kikugie.stonecutter.intellij.select_version"
-                text="Switch Active Version"
                 icon="/assets/icons/versions.svg"
                 class="dev.kikugie.stonecutter.intellij.action.VersionSelectorAction">
             <add-to-group group-id="MainToolbarLeft" anchor="last"/>
+        </action>
+        <group id="dev.kikugie.stonecutter.intellij.editor_actions"
+               icon="/assets/icons/stonecutter.svg"
+               popup="true">
+            <add-to-group group-id="Floating.CodeToolbar" anchor="last"/>
+        </group>
+        <action id="dev.kikugie.stonecutter.intellij.wrap_in_condition"
+                class="dev.kikugie.stonecutter.intellij.action.NewConditionAction">
+            <add-to-group group-id="dev.kikugie.stonecutter.intellij.editor_actions" anchor="last"/>
         </action>
     </actions>
 </idea-plugin>

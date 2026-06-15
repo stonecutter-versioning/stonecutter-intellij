@@ -5,6 +5,7 @@ package dev.kikugie.stonecutter.intellij.lang.util
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.tree.IElementType
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
 
 typealias AntlrTokenType = Int
@@ -26,6 +27,18 @@ internal val PsiElement.reverseChildrenSequence: Sequence<PsiElement>
             child = child.prevSibling
         }
     }
+
+internal val PsiElement.prevLeaf: PsiElement?
+    inline get() = PsiTreeUtil.prevLeaf(this)
+
+internal val PsiElement.nextLeaf: PsiElement?
+    inline get() = PsiTreeUtil.nextLeaf(this)
+
+internal val PsiElement.prevNotEmptyLeaf: PsiElement?
+    inline get() = PsiTreeUtil.prevLeaf(this, true)
+
+internal val PsiElement.nextNotEmptyLeaf: PsiElement?
+    inline get() = PsiTreeUtil.nextLeaf(this, true)
 
 internal val PsiElement.prevSiblings: Sequence<PsiElement>
     get() = generateSequence({ prevSibling }, { it.prevSibling })
