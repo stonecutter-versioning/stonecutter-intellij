@@ -1,4 +1,4 @@
-package dev.kikugie.stonecutter.intellij.action
+package dev.kikugie.stonecutter.intellij.editor.action
 
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction

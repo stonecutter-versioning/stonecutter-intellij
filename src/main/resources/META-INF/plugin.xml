@@ -19,12 +19,9 @@
                                        implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <lang.braceMatcher language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherBraceMatcher"/>
         <lang.quoteHandler language="Stitcher" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherQuoteHandler"/>
-        <lang.surroundDescriptor language="JVM" implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSurroundDescriptor"/>
         <editorHighlighterProvider filetype="Stitcher"
                                    implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <platform.backend.documentation.targetProvider implementation="dev.kikugie.stonecutter.intellij.editor.StitcherDocumentationTargetProvider"/>
-        <liveTemplateContext contextId="Stonecutter" implementation="dev.kikugie.stonecutter.intellij.editor.StitcherTemplateContext"/>
-        <defaultLiveTemplates file="/liveTemplates/Stonecutter.xml"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij"> <!-- Java -->
@@ -103,7 +100,7 @@
     <actions resource-bundle="messages.StonecutterBundle">
         <action id="dev.kikugie.stonecutter.intellij.select_version"
                 icon="/assets/icons/versions.svg"
-                class="dev.kikugie.stonecutter.intellij.action.VersionSelectorAction">
+                class="dev.kikugie.stonecutter.intellij.editor.action.VersionSelectorAction">
             <add-to-group group-id="MainToolbarLeft" anchor="last"/>
         </action>
         <group id="dev.kikugie.stonecutter.intellij.editor_actions"
@@ -112,11 +109,11 @@
             <add-to-group group-id="Floating.CodeToolbar" anchor="last"/>
         </group>
         <action id="dev.kikugie.stonecutter.intellij.wrap_in_condition"
-                class="dev.kikugie.stonecutter.intellij.action.NewConditionAction">
+                class="dev.kikugie.stonecutter.intellij.editor.action.NewConditionAction">
             <add-to-group group-id="dev.kikugie.stonecutter.intellij.editor_actions" anchor="last"/>
         </action>
         <action id="dev.kikugie.stonecutter.intellij.wrap_in_extension"
-                class="dev.kikugie.stonecutter.intellij.action.ExtendConditionAction">
+                class="dev.kikugie.stonecutter.intellij.editor.action.ExtendConditionAction">
             <add-to-group group-id="dev.kikugie.stonecutter.intellij.editor_actions" anchor="last"/>
         </action>
     </actions>

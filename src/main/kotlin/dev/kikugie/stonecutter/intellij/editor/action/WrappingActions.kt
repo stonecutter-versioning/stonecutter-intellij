@@ -1,4 +1,4 @@
-package dev.kikugie.stonecutter.intellij.action
+package dev.kikugie.stonecutter.intellij.editor.action
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.lang.Commenter
@@ -22,15 +22,16 @@ import com.intellij.psi.util.startOffset
 import dev.kikugie.commons.collections.lastNotNullOfOrNull
 import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.StonecutterBundle.BUNDLE
-import dev.kikugie.stonecutter.intellij.action.StitcherWrapAction.ActionResult
-import dev.kikugie.stonecutter.intellij.action.StitcherWrapAction.ActionResult.Err
-import dev.kikugie.stonecutter.intellij.action.StitcherWrapAction.ActionResult.Ok
+import dev.kikugie.stonecutter.intellij.editor.action.StitcherWrapAction.ActionResult
+import dev.kikugie.stonecutter.intellij.editor.action.StitcherWrapAction.ActionResult.Err
+import dev.kikugie.stonecutter.intellij.editor.action.StitcherWrapAction.ActionResult.Ok
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.psi.*
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition.Kind
 import dev.kikugie.stonecutter.intellij.lang.util.*
 import org.intellij.lang.annotations.Language
 import org.jetbrains.annotations.PropertyKey
+import kotlin.text.iterator
 
 abstract class StitcherWrapAction(protected val name: @Command String) : AnAction(), DumbAware {
     abstract fun isApplicableIn(editor: Editor, file: PsiFile): Boolean
@@ -62,7 +63,7 @@ abstract class StitcherWrapAction(protected val name: @Command String) : AnActio
     }
 
     sealed interface ActionResult {
-        object Ok: ActionResult
+        object Ok : ActionResult
         class Err(val msg: @PropertyKey(resourceBundle = BUNDLE) String) : ActionResult
     }
 }
@@ -109,7 +110,8 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
         return when {
             definition.kind == Kind.CLOSER -> extendClosedScope(code, commenter)
             definition.opener == null -> extendLineScope(code, commenter)
-            else -> Ok
+            // TODO: It's supposed to be able to split the condition, but idk how yet
+            else -> Err("stonecutter.action.wrap.err_nothing_to_extend")
         }
     }
 
@@ -160,9 +162,6 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
             // Lookup conditions can't be split or extended
             if (definition.opener is PsiScope.Lookup) return false
 
-            // This condition can be extended by splitting it in the middle
-            if (start >= code.startOffset && end <= code.endOffset) return true
-
             val sibling = code.nextSibling as? PsiBlock.Content ?: return false
             return start >= sibling.startOffset
                 && start < sibling.endOffset
@@ -179,7 +178,7 @@ private class SelectionContext(val editor: Editor, val first: PsiElement, val la
     val endLineIndex by lazy { document.getLineNumber(last.endOffset) }
 
     val isInline: Boolean
-        get() = first.prevNotEmptyLeaf !is PsiWhiteSpace || last.nextNotEmptyLeaf !is PsiWhiteSpace
+        get() = last.nextNotEmptyLeaf !is PsiWhiteSpace
 
     val isMultiLine: Boolean
         get() = startLineIndex != endLineIndex
