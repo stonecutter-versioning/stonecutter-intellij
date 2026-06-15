@@ -13,6 +13,7 @@ import com.intellij.psi.SmartPsiElementPointer
 import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.psi.util.endOffset
 import com.intellij.psi.util.nextLeafs
 import com.intellij.psi.util.startOffset
@@ -20,6 +21,7 @@ import com.intellij.util.takeWhileInclusive
 import dev.kikugie.stonecutter.intellij.lang.layout.buildStitcherAst
 import dev.kikugie.stonecutter.intellij.lang.util.UserDataHolderAccessor
 import dev.kikugie.stonecutter.intellij.lang.util.childrenSequence
+import dev.kikugie.stonecutter.intellij.lang.util.stitcherCode
 
 /**
  * Represents a block element in the Stitcher PSI structure.
@@ -95,6 +97,9 @@ sealed interface PsiBlock : PsiElement, UserDataHolderAccessor {
 val PsiBlock.Code.isCommentedOut: Boolean
     get() = entries.all { it.accept(IsCommentedChecker) }
 
+val PsiBlock.Code.definition: PsiDefinition?
+    get() = hostComment?.element?.stitcherCode?.element?.definition
+
 /**
  * Gets or constructs the cached [PsiBlock.Root] for this file.
  *
@@ -104,7 +109,7 @@ val PsiBlock.Code.isCommentedOut: Boolean
 fun PsiFile.getStitcherAst(): PsiBlock.Root {
     val file = InjectedLanguageManager.getInstance(project).getTopLevelFile(this) ?: this
     return CachedValuesManager.getCachedValue(file, PsiBlock.ROOT_BLOCK_KEY) {
-        CachedValueProvider.Result.create(file.buildStitcherAst(), file)
+        CachedValueProvider.Result.create(file.buildStitcherAst(), file, PsiModificationTracker.MODIFICATION_COUNT)
     }
 }
 

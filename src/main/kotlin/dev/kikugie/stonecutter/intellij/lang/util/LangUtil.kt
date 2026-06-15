@@ -4,6 +4,7 @@ import com.intellij.lang.Commenter
 import com.intellij.lang.LanguageCommenters
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.nullableLazyValueUnsafe
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.resolve.FileContextUtil
@@ -60,6 +61,9 @@ val PsiComment.stitcherCode: SmartPsiElementPointer<PsiCode>?
 
 val PsiComment.innerText: String
     inline get() = ElementManipulators.getValueText(this)
+
+val PsiComment.innerRange: TextRange
+    inline get() = ElementManipulators.getValueTextRange(this)
 
 val PsiComment.canHasStitcherCode: Boolean
     get() = innerText.getOrDefault(0) in CODE_PREFIXES

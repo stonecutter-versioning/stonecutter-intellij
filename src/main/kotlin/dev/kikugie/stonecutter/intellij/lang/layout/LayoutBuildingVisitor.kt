@@ -257,7 +257,7 @@ private class CodeBuilder(val host: PsiComment, override val entries: MutableLis
             satisfied = true
             val absoluteSplit = block.elements.first().startOffset + split
             val first = block.elements.takeWhile { it.startOffset < absoluteSplit }
-            val second = block.elements.dropWhile { it.endOffset < absoluteSplit }
+            val second = block.elements.dropWhile { it.endOffset <= absoluteSplit }
             if (first.isNotEmpty()) entries += ContentBuilder(first, end = absoluteSplit)
             if (second.isNotEmpty()) BlockAcceptResult.ConsumedPartial(ContentBuilder(second, start = absoluteSplit))
             else BlockAcceptResult.Rejected
