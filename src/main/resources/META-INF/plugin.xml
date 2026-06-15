@@ -115,5 +115,9 @@
                 class="dev.kikugie.stonecutter.intellij.action.NewConditionAction">
             <add-to-group group-id="dev.kikugie.stonecutter.intellij.editor_actions" anchor="last"/>
         </action>
+        <action id="dev.kikugie.stonecutter.intellij.wrap_in_extension"
+                class="dev.kikugie.stonecutter.intellij.action.ExtendConditionAction">
+            <add-to-group group-id="dev.kikugie.stonecutter.intellij.editor_actions" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>

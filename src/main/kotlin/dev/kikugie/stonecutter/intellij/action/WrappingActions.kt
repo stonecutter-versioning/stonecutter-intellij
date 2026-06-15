@@ -13,19 +13,22 @@ import com.intellij.openapi.editor.SelectionModel
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.util.NlsContexts.Command
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.endOffset
 import com.intellij.psi.util.startOffset
+import dev.kikugie.commons.collections.lastNotNullOfOrNull
 import dev.kikugie.stonecutter.intellij.StonecutterBundle
 import dev.kikugie.stonecutter.intellij.StonecutterBundle.BUNDLE
+import dev.kikugie.stonecutter.intellij.action.StitcherWrapAction.ActionResult
 import dev.kikugie.stonecutter.intellij.action.StitcherWrapAction.ActionResult.Err
 import dev.kikugie.stonecutter.intellij.action.StitcherWrapAction.ActionResult.Ok
 import dev.kikugie.stonecutter.intellij.lang.StitcherFile
-import dev.kikugie.stonecutter.intellij.lang.util.commenter
-import dev.kikugie.stonecutter.intellij.lang.util.nextNotEmptyLeaf
-import dev.kikugie.stonecutter.intellij.lang.util.prevNotEmptyLeaf
+import dev.kikugie.stonecutter.intellij.lang.psi.*
+import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition.Kind
+import dev.kikugie.stonecutter.intellij.lang.util.*
 import org.intellij.lang.annotations.Language
 import org.jetbrains.annotations.PropertyKey
 
@@ -65,11 +68,8 @@ abstract class StitcherWrapAction(protected val name: @Command String) : AnActio
 }
 
 class NewConditionAction : StitcherWrapAction("Wrap in Condition") {
-    override fun isApplicableIn(editor: Editor, file: PsiFile): Boolean {
-        if (file is StitcherFile || file.commenter == null) return false
-
-        return true
-    }
+    override fun isApplicableIn(editor: Editor, file: PsiFile): Boolean =
+        file !is StitcherFile && file.commenter != null
 
     override fun performWriteAction(editor: Editor, file: PsiFile): ActionResult {
         val commenter = file.commenter
@@ -78,50 +78,96 @@ class NewConditionAction : StitcherWrapAction("Wrap in Condition") {
             ?: return Err("stonecutter.action.wrap.err_no_psi")
 
         return when {
-            ctx.first.prevNotEmptyLeaf !is PsiWhiteSpace
-                || ctx.last.nextNotEmptyLeaf !is PsiWhiteSpace -> ctx.wrapInline(commenter)
-            ctx.startLineIndex == ctx.endLineIndex -> ctx.wrapSingleLine(commenter)
-            else -> ctx.wrapMultiLine(commenter)
+            ctx.isInline -> ctx.wrapInLine(commenter, "? if  {", "?}", openerCaret = 5)
+            ctx.isMultiLine -> ctx.wrapAroundLine(commenter, "? if  {", "?}", openerCaret = 5)
+            else -> ctx.wrapAroundLine(commenter, opener = "? if ", openerCaret = 5)
+        }
+    }
+}
+
+class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
+    override fun isApplicableIn(editor: Editor, file: PsiFile): Boolean =
+        file !is StitcherFile && file.commenter != null
+
+    override fun performWriteAction(editor: Editor, file: PsiFile): ActionResult {
+        val commenter = file.commenter
+            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+        val ctx = SelectionContext(editor, file)
+            ?: return Err("stonecutter.action.wrap.err_no_psi")
+
+        val candidate = file.getStitcherAst()
+            .accept(ExtensionTargetLocator(ctx.first.startOffset, ctx.last.endOffset))
+            ?: return Err("stonecutter.action.wrap.err_nothing_to_extend")
+
+        return ctx.extendCodeBlock(candidate, commenter)
+    }
+
+    private fun SelectionContext.extendCodeBlock(code: PsiBlock.Code, commenter: Commenter): ActionResult {
+        val definition = code.definition
+            ?: return Err("stonecutter.action.wrap.err_nothing_to_extend")
+
+        return when {
+            definition.kind == Kind.CLOSER -> extendClosedScope(code, commenter)
+            definition.opener == null -> extendLineScope(code, commenter)
+            else -> Ok
         }
     }
 
-    private fun SelectionContext.wrapMultiLine(commenter: Commenter): ActionResult {
-        val opener = commenter.wrapLine(SCOPED_OPENER)
-        val closer = commenter.wrapLine(SCOPED_CLOSER)
-        if (opener == null || closer == null)
-            return Err("stonecutter.action.wrap.err_no_commenter")
+    private fun SelectionContext.extendLineScope(code: PsiBlock.Code, commenter: Commenter): ActionResult {
+        val result = when {
+            isInline -> wrapInLine(commenter, "?} else {", "?}", openerCaret = 7)
+            isMultiLine -> wrapAroundLine(commenter, "?} else {", "?}", openerCaret = 7)
+            else -> wrapAroundLine(commenter, opener = "?} else", openerCaret = 7)
+        }
+        if (result is Err) return result
 
-        val lineStartOffset = document.getLineStartOffset(startLineIndex)
-        val indent = document[lineStartOffset, first.startOffset]
-        val caret = first.startOffset + opener.indexOf('{') - 1
-        return insertAround("$opener\n$indent", "\n$indent$closer", caret)
+        document.insertString(code.hostComment?.element!!.findPrefixOffset(), " {")
+        return Ok
     }
 
-    private fun SelectionContext.wrapSingleLine(commenter: Commenter): ActionResult {
-        val opener = commenter.wrapLine(LINE_OPENER)
-            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+    private fun SelectionContext.extendClosedScope(code: PsiBlock.Code, commenter: Commenter): ActionResult {
+        val result = when {
+            isInline -> wrapInLine(commenter, closer = "?}")
+            else -> wrapAroundLine(commenter, closer = "?}")
+        }
+        if (result is Err) return result
 
-        val lineStartOffset = document.getLineStartOffset(startLineIndex)
-        val indent = document[lineStartOffset, first.startOffset]
-        val caret = first.startOffset + opener.length
-        return insertAround("$opener\n$indent", null, caret)
+        val offset = code.hostComment?.element!!.findPrefixOffset()
+        document.insertString(offset, " else {")
+        editor.caretModel.moveToOffset(offset + 5)
+        return Ok
     }
 
-    private fun SelectionContext.wrapInline(commenter: Commenter): ActionResult {
-        val prefix = commenter.blockCommentPrefix
-        val suffix = commenter.blockCommentSuffix
-        if (prefix == null || suffix == null)
-            return Err("stonecutter.action.wrap.err_no_inline_commenter")
-
-        val caret = first.startOffset + prefix.length + SCOPED_OPENER.indexOf('{') - 1
-        return insertAround("$prefix$SCOPED_OPENER$suffix", "$prefix$SCOPED_CLOSER$suffix", caret)
+    private fun SelectionContext.extendSplitScope(code: PsiBlock.Code, commenter: Commenter): ActionResult {
+        TODO()
     }
 
-    private companion object {
-        @Language("Stitcher") const val SCOPED_OPENER: String = "? if  {"
-        @Language("Stitcher") const val SCOPED_CLOSER: String = "?}"
+    private class ExtensionTargetLocator(val start: Int, val end: Int) : PsiBlock.Visitor<PsiBlock.Code?> {
+        override fun visitContent(content: PsiBlock.Content): PsiBlock.Code? = null
+        override fun visitComment(comment: PsiBlock.Comment): PsiBlock.Code? = null
 
-        @Language("Stitcher") const val LINE_OPENER: String = "? if "
+        override fun visitRoot(root: PsiBlock.Root): PsiBlock.Code? =
+            root.entries.lastNotNullOfOrNull { it.accept(this) }
+
+        override fun visitCode(code: PsiBlock.Code): PsiBlock.Code? =
+            code.entries.lastNotNullOfOrNull { it.accept(this) }
+                ?: code.takeIf(::canBeExtended)
+
+        private fun canBeExtended(code: PsiBlock.Code): Boolean {
+            // Only conditions may be extended
+            val definition = code.definition as? PsiCondition ?: return false
+
+            // Lookup conditions can't be split or extended
+            if (definition.opener is PsiScope.Lookup) return false
+
+            // This condition can be extended by splitting it in the middle
+            if (start >= code.startOffset && end <= code.endOffset) return true
+
+            val sibling = code.nextSibling as? PsiBlock.Content ?: return false
+            return start >= sibling.startOffset
+                && start < sibling.endOffset
+                && sibling.text.take(start - sibling.startOffset).isBlank()
+        }
     }
 }
 
@@ -132,7 +178,13 @@ private class SelectionContext(val editor: Editor, val first: PsiElement, val la
     val startLineIndex by lazy { document.getLineNumber(first.startOffset) }
     val endLineIndex by lazy { document.getLineNumber(last.endOffset) }
 
-    fun insertAround(prefix: String?, suffix: String?, caret: Int): StitcherWrapAction.ActionResult {
+    val isInline: Boolean
+        get() = first.prevNotEmptyLeaf !is PsiWhiteSpace || last.nextNotEmptyLeaf !is PsiWhiteSpace
+
+    val isMultiLine: Boolean
+        get() = startLineIndex != endLineIndex
+
+    fun insertAround(prefix: String?, suffix: String?, caret: Int): ActionResult {
         if (suffix != null) document.insertString(last.endOffset, suffix)
         if (prefix != null) document.insertString(first.startOffset, prefix)
         if (caret >= 0) editor.caretModel.moveToOffset(caret)
@@ -162,10 +214,58 @@ private class SelectionContext(val editor: Editor, val first: PsiElement, val la
     }
 }
 
-private fun Commenter.wrapLine(text: String): String? = when {
-    lineCommentPrefix != null -> "$lineCommentPrefix$text"
-    blockCommentPrefix != null && blockCommentSuffix != null -> "$blockCommentPrefix$text$blockCommentSuffix"
-    else -> null
+private fun SelectionContext.wrapAroundLine(
+    commenter: Commenter,
+    @Language("Stitcher") opener: String? = null, @Language("Stitcher") closer: String? = null,
+    openerCaret: Int = -1, closerCaret: Int = -1
+): ActionResult {
+    val (prefix, suffix) = commenter.getLineSurrounders()
+        ?: return Err("stonecutter.action.wrap.err_no_commenter")
+    val indent = document[document.getLineStartOffset(startLineIndex), first.startOffset]
+    val opener = opener?.let { "$prefix$it$suffix\n$indent" }
+    val closer = closer?.let { "\n$indent$prefix$it$suffix" }
+    if (opener == null && closer == null) return Ok
+
+    val caret = when {
+        openerCaret >= 0 -> first.startOffset + prefix.length + openerCaret
+        closerCaret >= 0 -> first.endOffset + indent.length + 1 + prefix.length + closerCaret
+        else -> -1
+    }
+    return insertAround(opener, closer, caret)
+}
+
+private fun SelectionContext.wrapInLine(
+    commenter: Commenter,
+    @Language("Stitcher") opener: String? = null, @Language("Stitcher") closer: String? = null,
+    openerCaret: Int = -1, closerCaret: Int = -1
+): ActionResult {
+    val (prefix, suffix) = commenter.getLineSurrounders()
+        ?: return Err("stonecutter.action.wrap.err_no_commenter")
+    val opener = opener?.let { "$prefix$it$suffix" }
+    val closer = closer?.let { "$prefix$it$suffix" }
+    if (opener == null && closer == null) return Ok
+
+    val caret = when {
+        openerCaret >= 0 -> first.startOffset + prefix.length + openerCaret
+        closerCaret >= 0 -> first.endOffset + prefix.length + closerCaret
+        else -> -1
+    }
+    return insertAround(opener, closer, caret)
+}
+
+private fun Commenter.getLineSurrounders(): Pair<String, String>? {
+    lineCommentPrefix?.let { return it to "" }
+    blockCommentPrefix?.let { pr -> blockCommentSuffix?.let { return pr to it } }
+    return null
+}
+
+private fun PsiComment.findPrefixOffset(): Int {
+    var position = innerRange.endOffset
+    for (char in innerText.reversed()) when (char) {
+        ' ', '\t' -> position -= 1
+        else -> break
+    }
+    return startOffset + position
 }
 
 @Suppress("NOTHING_TO_INLINE")
