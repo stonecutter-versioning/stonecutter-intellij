@@ -21,11 +21,9 @@ private val LINE_BREAKS: CharArray = charArrayOf('\r', '\n')
 private val WORD_BREAKS: CharArray = charArrayOf(' ', '\t')
 private val WHITESPACES: CharArray = WORD_BREAKS + LINE_BREAKS
 
-fun PsiFile.buildStitcherAst(): PsiBlock.Root {
-    val visitor = LayoutBuildingVisitor()
-    accept(visitor)
-    return visitor.root
-}
+internal fun PsiFile.buildStitcherAst(): Result<PsiBlock.Root> = LayoutBuildingVisitor()
+    .runCatching { accept(this); this.root }
+    .onFailure { if (it !== InjectionNotReady) throw it }
 
 private class LayoutBuildingVisitor : PsiRecursiveElementVisitor() {
     private val stack: Deque<PsiBlockBuilder.Scoped> = ArrayDeque()
@@ -84,6 +82,8 @@ private class LayoutBuildingVisitor : PsiRecursiveElementVisitor() {
     private fun handleComment(comment: PsiComment) {
         if (!comment.canHasStitcherCode)
             return acceptBlock(CommentBuilder(comment))
+        if (comment.stitcherCode?.element == null)
+            throw InjectionNotReady
 
         val code = CodeBuilder(comment)
         if (code.kind == Kind.INDEPENDENT) acceptBlock(code)
@@ -327,4 +327,10 @@ private fun PsiBlockBuilder.isNotBlank(): Boolean = when (this) {
     is ContentBuilder -> text.isNotBlank()
     is CodeBuilder -> false
     is RootBuilder -> entries.all(PsiBlockBuilder::isNotBlank)
+}
+
+// This exception is intentionally a singleton as it is reserved as a quick exit card
+@Suppress("ObjectInheritsException")
+private object InjectionNotReady : Throwable(null, null, true, false) {
+    private fun readResolve(): Any = InjectionNotReady
 }

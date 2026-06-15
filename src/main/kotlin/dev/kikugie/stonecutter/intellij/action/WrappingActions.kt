@@ -96,7 +96,7 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
             ?: return Err("stonecutter.action.wrap.err_no_psi")
 
         val candidate = file.getStitcherAst()
-            .accept(ExtensionTargetLocator(ctx.first.startOffset, ctx.last.endOffset))
+            ?.accept(ExtensionTargetLocator(ctx.first.startOffset, ctx.last.endOffset))
             ?: return Err("stonecutter.action.wrap.err_nothing_to_extend")
 
         return ctx.extendCodeBlock(candidate, commenter)

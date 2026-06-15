@@ -153,9 +153,10 @@ class PsiBlockNavigatorPanel(private val project: Project, toolWindow: ToolWindo
         }
         ApplicationManager.getApplication().runReadAction {
             val psiFile = PsiManager.getInstance(project).findFile(vFile)
+            val collector = psiFile?.getStitcherAst()?.accept(TreeNodeCollector)
             val newModel =
-                if (psiFile == null) DefaultTreeModel(DefaultMutableTreeNode("No PSI file"))
-                else DefaultTreeModel(psiFile.getStitcherAst().accept(TreeNodeCollector))
+                if (collector != null) DefaultTreeModel(collector)
+                else DefaultTreeModel(DefaultMutableTreeNode("No PSI file"))
             SwingUtilities.invokeLater {
                 tree.model = newModel
                 expandAll()

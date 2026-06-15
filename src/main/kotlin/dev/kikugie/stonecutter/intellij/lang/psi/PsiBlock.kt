@@ -87,7 +87,7 @@ sealed interface PsiBlock : PsiElement, UserDataHolderAccessor {
 
         val COMMENT_HOST_KEY: Key<SmartPsiElementPointer<PsiComment>> = Key.create("STITCHER_COMMENT_HOST")
 
-        val ROOT_BLOCK_KEY: Key<CachedValue<Root>> = Key.create("STITCHER_ROOT_BLOCK")
+        val ROOT_BLOCK_KEY: Key<CachedValue<Result<Root>>> = Key.create("STITCHER_ROOT_BLOCK")
     }
 }
 
@@ -106,11 +106,11 @@ val PsiBlock.Code.definition: PsiDefinition?
  * This function traverses the entire file AST on the first pass,
  * so use it sparingly.
  */
-fun PsiFile.getStitcherAst(): PsiBlock.Root {
+fun PsiFile.getStitcherAst(): PsiBlock.Root? {
     val file = InjectedLanguageManager.getInstance(project).getTopLevelFile(this) ?: this
     return CachedValuesManager.getCachedValue(file, PsiBlock.ROOT_BLOCK_KEY) {
         CachedValueProvider.Result.create(file.buildStitcherAst(), file, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+    }.getOrNull()
 }
 
 /**
@@ -122,7 +122,7 @@ fun PsiFile.getStitcherAst(): PsiBlock.Root {
  * so use it sparingly.
  */
 fun PsiElement.findHostedBlock(): PsiBlock? =
-    containingFile.getStitcherAst().accept(HostBlockLocator(this))
+    containingFile.getStitcherAst()?.accept(HostBlockLocator(this))
 
 private class HostBlockLocator(val host: PsiElement) : PsiBlock.Visitor<PsiBlock?> {
     override fun visitContent(content: PsiBlock.Content): PsiBlock? = when {

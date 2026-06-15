@@ -31,7 +31,8 @@ class StitcherFoldingBuilder : FoldingBuilderEx(), DumbAware {
     override fun buildFoldRegions(root: PsiElement, document: Document, quick: Boolean): Array<out FoldingDescriptor> {
         if (StonecutterSettings.STATE.foldDisabledBlocks == FoldingMode.DISABLED) return emptyArray()
 
-        val visitor = FoldingVisitor().apply { root.containingFile.getStitcherAst().accept(this) }
+        val ast = root.containingFile.getStitcherAst() ?: return emptyArray()
+        val visitor = FoldingVisitor().apply { ast.accept(this) }
         return visitor.descriptors.toTypedArray()
     }
 
