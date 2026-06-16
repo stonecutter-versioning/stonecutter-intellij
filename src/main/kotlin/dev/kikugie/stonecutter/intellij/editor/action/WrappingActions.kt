@@ -96,7 +96,7 @@ class NewConditionAction : StitcherWrapAction("Wrap in Condition") {
         document.insertString(endOffset, "$pr$COND_CLOSER$sf")
         document.insertString(startOffset, "$pr$COND_OPENER$sf")
         selection.removeSelection()
-        return template.insertAt(startOffset + pr.length + 2, "if ")
+        return template.insertAt(startOffset + pr.length + 5, "")
     }
 
     private fun SelectionContext.wrapMultiLine(template: TemplateBuilder, commenter: Commenter): ActionResult {
@@ -107,7 +107,7 @@ class NewConditionAction : StitcherWrapAction("Wrap in Condition") {
         document.insertString(endOffset, "\n$indent$pr$COND_CLOSER$sf")
         document.insertString(startOffset, "$pr$COND_OPENER$sf\n$indent")
         selection.removeSelection()
-        return template.insertAt(startOffset + pr.length + 2, "if ")
+        return template.insertAt(startOffset + pr.length + 5, "")
     }
 
     private fun SelectionContext.wrapSingleLine(template: TemplateBuilder, commenter: Commenter): ActionResult {
@@ -117,13 +117,13 @@ class NewConditionAction : StitcherWrapAction("Wrap in Condition") {
         val indent = document.findIndentAt(startLineIndex)
         document.insertString(startOffset, "$pr$COND_LINE$sf\n$indent")
         selection.removeSelection()
-        return template.insertAt(startOffset + pr.length + 2, "if ")
+        return template.insertAt(startOffset + pr.length + 5, "")
     }
 
     private companion object {
-        @Language("Stitcher") const val COND_OPENER = "?  {"
+        @Language("Stitcher") const val COND_OPENER = "? if  {"
         @Language("Stitcher") const val COND_CLOSER = "?}"
-        @Language("Stitcher") const val COND_LINE = "? "
+        @Language("Stitcher") const val COND_LINE = "? if "
     }
 }
 
@@ -261,6 +261,67 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
         @Language("Stitcher") const val COND_EXTENSION = "?}  {"
         @Language("Stitcher") const val COND_LINE = "?} "
         @Language("Stitcher") const val COND_CLOSER = "?}"
+    }
+}
+
+class NewLocalReplacementAction : StitcherWrapAction("Wrap in Replacement") {
+    override fun performWriteAction(editor: Editor, file: PsiFile): ActionResult {
+        val commenter = file.commenter
+            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+        val ctx = SelectionContext(editor, file)
+
+        val builder = TemplateBuilderFactory.getInstance()
+            .createTemplateBuilder(file)
+        return when {
+            ctx.isInline -> ctx.wrapInline(builder, commenter)
+            ctx.isMultiLine -> ctx.wrapMultiLine(builder, commenter)
+            else -> ctx.wrapSingleLine(builder, commenter)
+        }
+    }
+
+    private fun SelectionContext.wrapInline(template: TemplateBuilder, commenter: Commenter): ActionResult {
+        val pr = commenter.blockCommentPrefix
+        val sf = commenter.blockCommentSuffix
+        if (pr == null || sf == null)
+            return Err("stonecutter.action.wrap.err_no_inline_commenter")
+
+        document.insertString(endOffset, "$pr$REPL_CLOSER$sf")
+        document.insertString(startOffset, "$pr$REPL_OPENER$sf")
+        selection.removeSelection()
+        template.insertAt(startOffset + pr.length + 5, "", false)
+        template.insertAt(startOffset + pr.length + 7, "", false)
+        return template.insertAt(startOffset + pr.length + 13, "")
+    }
+
+    private fun SelectionContext.wrapMultiLine(template: TemplateBuilder, commenter: Commenter): ActionResult {
+        val (pr, sf) = commenter.getLineSurrounders()
+            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+
+        val indent = document.findIndentAt(startLineIndex)
+        document.insertString(endOffset, "\n$indent$pr$REPL_CLOSER$sf")
+        document.insertString(startOffset, "$pr$REPL_OPENER$sf\n$indent")
+        selection.removeSelection()
+        template.insertAt(startOffset + pr.length + 5, "", false)
+        template.insertAt(startOffset + pr.length + 7, "", false)
+        return template.insertAt(startOffset + pr.length + 13, "")
+    }
+
+    private fun SelectionContext.wrapSingleLine(template: TemplateBuilder, commenter: Commenter): ActionResult {
+        val (pr, sf) = commenter.getLineSurrounders()
+            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+
+        val indent = document.findIndentAt(startLineIndex)
+        document.insertString(startOffset, "$pr$REPL_LINE$sf\n$indent")
+        selection.removeSelection()
+        template.insertAt(startOffset + pr.length + 5, "", false)
+        template.insertAt(startOffset + pr.length + 7, "", false)
+        return template.insertAt(startOffset + pr.length + 13, "")
+    }
+
+    private companion object {
+        @Language("Stitcher") const val REPL_OPENER = "~ if  '' -> '' {"
+        @Language("Stitcher") const val REPL_CLOSER = "~}"
+        @Language("Stitcher") const val REPL_LINE = "~ if  '' -> ''"
     }
 }
 

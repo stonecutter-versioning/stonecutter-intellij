@@ -116,5 +116,9 @@
                 class="dev.kikugie.stonecutter.intellij.editor.action.ExtendConditionAction">
             <add-to-group group-id="dev.kikugie.stonecutter.intellij.editor_actions" anchor="last"/>
         </action>
+        <action id="dev.kikugie.stonecutter.intellij.wrap_in_replacement"
+                class="dev.kikugie.stonecutter.intellij.editor.action.NewLocalReplacementAction">
+            <add-to-group group-id="dev.kikugie.stonecutter.intellij.editor_actions" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>
