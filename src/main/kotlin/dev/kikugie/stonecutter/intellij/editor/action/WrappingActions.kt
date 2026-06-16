@@ -76,7 +76,6 @@ class NewConditionAction : StitcherWrapAction("Wrap in Condition") {
         val commenter = file.commenter
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
         val ctx = SelectionContext(editor, file)
-            ?: return Err("stonecutter.action.wrap.err_no_psi")
 
         return when {
             ctx.isInline -> ctx.wrapInLine(commenter, "? if  {", "?}", openerCaret = 5)
@@ -94,10 +93,9 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
         val commenter = file.commenter
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
         val ctx = SelectionContext(editor, file)
-            ?: return Err("stonecutter.action.wrap.err_no_psi")
 
         val candidate = file.getStitcherAst()
-            ?.accept(ExtensionTargetLocator(ctx.first.startOffset, ctx.last.endOffset))
+            ?.accept(ExtensionTargetLocator(ctx.startOffset, ctx.endOffset))
             ?: return Err("stonecutter.action.wrap.err_nothing_to_extend")
 
         return ctx.extendCodeBlock(candidate, commenter)
@@ -170,33 +168,36 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
     }
 }
 
-private class SelectionContext(val editor: Editor, val first: PsiElement, val last: PsiElement) {
+private class SelectionContext(val editor: Editor, val first: PsiElement? = null, val last: PsiElement? = null) {
     val selection: SelectionModel inline get() = editor.selectionModel
     val document: Document inline get() = editor.document
 
-    val startLineIndex by lazy { document.getLineNumber(first.startOffset) }
-    val endLineIndex by lazy { document.getLineNumber(last.endOffset) }
+    val startOffset: Int = first?.startOffset ?: selection.selectionStart
+    val endOffset: Int = first?.startOffset ?: selection.findSelectionEnd()
+
+    val startLineIndex by lazy { document.getLineNumber(startOffset) }
+    val endLineIndex by lazy { document.getLineNumber(endOffset) }
 
     val isInline: Boolean
-        get() = last.nextNotEmptyLeaf !is PsiWhiteSpace
+        get() = last != null && last.nextNotEmptyLeaf !is PsiWhiteSpace
 
     val isMultiLine: Boolean
         get() = startLineIndex != endLineIndex
 
     fun insertAround(prefix: String?, suffix: String?, caret: Int): ActionResult {
-        if (suffix != null) document.insertString(last.endOffset, suffix)
-        if (prefix != null) document.insertString(first.startOffset, prefix)
+        if (suffix != null) document.insertString(endOffset, suffix)
+        if (prefix != null) document.insertString(startOffset, prefix)
         if (caret >= 0) editor.caretModel.moveToOffset(caret)
         editor.selectionModel.removeSelection()
         return Ok
     }
 
     companion object {
-        operator fun invoke(editor: Editor, file: PsiFile): SelectionContext? {
+        operator fun invoke(editor: Editor, file: PsiFile): SelectionContext {
             val sel = editor.selectionModel
             val first = file.findNext(sel.selectionStart, file.findElementAt(sel.selectionStart))
             val last = file.findPrev(sel.selectionEnd, file.findElementAt(sel.findSelectionEnd()))
-            return SelectionContext(editor, first ?: return null, last ?: return null)
+            return SelectionContext(editor, first, last)
         }
 
         private tailrec fun PsiFile.findNext(start: Int, element: PsiElement?): PsiElement? = when (element) {
@@ -220,14 +221,14 @@ private fun SelectionContext.wrapAroundLine(
 ): ActionResult {
     val (prefix, suffix) = commenter.getLineSurrounders()
         ?: return Err("stonecutter.action.wrap.err_no_commenter")
-    val indent = document[document.getLineStartOffset(startLineIndex), first.startOffset]
+    val indent = document[document.getLineStartOffset(startLineIndex), startOffset]
     val opener = opener?.let { "$prefix$it$suffix\n$indent" }
     val closer = closer?.let { "\n$indent$prefix$it$suffix" }
     if (opener == null && closer == null) return Ok
 
     val caret = when {
-        openerCaret >= 0 -> first.startOffset + prefix.length + openerCaret
-        closerCaret >= 0 -> first.endOffset + indent.length + 1 + prefix.length + closerCaret
+        openerCaret >= 0 -> startOffset + prefix.length + openerCaret
+        closerCaret >= 0 -> endOffset + indent.length + 1 + prefix.length + closerCaret
         else -> -1
     }
     return insertAround(opener, closer, caret)
@@ -245,8 +246,8 @@ private fun SelectionContext.wrapInLine(
     if (opener == null && closer == null) return Ok
 
     val caret = when {
-        openerCaret >= 0 -> first.startOffset + prefix.length + openerCaret
-        closerCaret >= 0 -> first.endOffset + prefix.length + closerCaret
+        openerCaret >= 0 -> startOffset + prefix.length + openerCaret
+        closerCaret >= 0 -> endOffset + prefix.length + closerCaret
         else -> -1
     }
     return insertAround(opener, closer, caret)
