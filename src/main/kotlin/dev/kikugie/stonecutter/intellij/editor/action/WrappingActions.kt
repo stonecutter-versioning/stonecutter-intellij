@@ -1,6 +1,8 @@
 package dev.kikugie.stonecutter.intellij.editor.action
 
 import com.intellij.codeInsight.hint.HintManager
+import com.intellij.codeInsight.template.TemplateBuilder
+import com.intellij.codeInsight.template.TemplateBuilderFactory
 import com.intellij.lang.Commenter
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
@@ -34,7 +36,9 @@ import org.jetbrains.annotations.PropertyKey
 import kotlin.text.iterator
 
 abstract class StitcherWrapAction(protected val name: @Command String) : AnAction(), DumbAware {
-    abstract fun isApplicableIn(editor: Editor, file: PsiFile): Boolean
+    open fun isApplicableIn(editor: Editor, file: PsiFile): Boolean =
+        file !is StitcherFile && file.commenter != null
+
     abstract fun performWriteAction(editor: Editor, file: PsiFile): ActionResult
 
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
@@ -69,26 +73,61 @@ abstract class StitcherWrapAction(protected val name: @Command String) : AnActio
 }
 
 class NewConditionAction : StitcherWrapAction("Wrap in Condition") {
-    override fun isApplicableIn(editor: Editor, file: PsiFile): Boolean =
-        file !is StitcherFile && file.commenter != null
-
     override fun performWriteAction(editor: Editor, file: PsiFile): ActionResult {
         val commenter = file.commenter
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
         val ctx = SelectionContext(editor, file)
 
+        val builder = TemplateBuilderFactory.getInstance()
+            .createTemplateBuilder(file)
         return when {
-            ctx.isInline -> ctx.wrapInLine(commenter, "? if  {", "?}", openerCaret = 5)
-            ctx.isMultiLine -> ctx.wrapAroundLine(commenter, "? if  {", "?}", openerCaret = 5)
-            else -> ctx.wrapAroundLine(commenter, opener = "? if ", openerCaret = 5)
+            ctx.isInline -> ctx.wrapInline(builder, commenter)
+            ctx.isMultiLine -> ctx.wrapMultiLine(builder, commenter)
+            else -> ctx.wrapSingleLine(builder, commenter)
         }
+    }
+
+    private fun SelectionContext.wrapInline(template: TemplateBuilder, commenter: Commenter): ActionResult {
+        val pr = commenter.blockCommentPrefix
+        val sf = commenter.blockCommentSuffix
+        if (pr == null || sf == null)
+            return Err("stonecutter.action.wrap.err_no_inline_commenter")
+
+        document.insertString(endOffset, "$pr$COND_CLOSER$sf")
+        document.insertString(startOffset, "$pr$COND_OPENER$sf")
+        selection.removeSelection()
+        return template.insertAt(startOffset + pr.length + 2, "if ")
+    }
+
+    private fun SelectionContext.wrapMultiLine(template: TemplateBuilder, commenter: Commenter): ActionResult {
+        val (pr, sf) = commenter.getLineSurrounders()
+            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+
+        val indent = document.findIndentAt(startLineIndex)
+        document.insertString(endOffset, "\n$indent$pr$COND_CLOSER$sf")
+        document.insertString(startOffset, "$pr$COND_OPENER$sf\n$indent")
+        selection.removeSelection()
+        return template.insertAt(startOffset + pr.length + 2, "if ")
+    }
+
+    private fun SelectionContext.wrapSingleLine(template: TemplateBuilder, commenter: Commenter): ActionResult {
+        val (pr, sf) = commenter.getLineSurrounders()
+            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+
+        val indent = document.findIndentAt(startLineIndex)
+        document.insertString(startOffset, "$pr$COND_LINE$sf\n$indent")
+        selection.removeSelection()
+        return template.insertAt(startOffset + pr.length + 2, "if ")
+    }
+
+    private companion object {
+        @Language("Stitcher") const val COND_OPENER = "?  {"
+        @Language("Stitcher") const val COND_CLOSER = "?}"
+        @Language("Stitcher") const val COND_LINE = "? "
     }
 }
 
 class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
-    override fun isApplicableIn(editor: Editor, file: PsiFile): Boolean =
-        file !is StitcherFile && file.commenter != null
-
     override fun performWriteAction(editor: Editor, file: PsiFile): ActionResult {
         val commenter = file.commenter
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
@@ -98,26 +137,28 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
             ?.accept(ExtensionTargetLocator(ctx.startOffset, ctx.endOffset))
             ?: return Err("stonecutter.action.wrap.err_nothing_to_extend")
 
-        return ctx.extendCodeBlock(candidate, commenter)
+        val builder = TemplateBuilderFactory.getInstance()
+            .createTemplateBuilder(file)
+        return ctx.extendCodeBlock(candidate, builder, commenter)
     }
 
-    private fun SelectionContext.extendCodeBlock(code: PsiBlock.Code, commenter: Commenter): ActionResult {
+    private fun SelectionContext.extendCodeBlock(code: PsiBlock.Code, template: TemplateBuilder, commenter: Commenter): ActionResult {
         val definition = code.definition
             ?: return Err("stonecutter.action.wrap.err_nothing_to_extend")
 
         return when {
-            definition.kind == Kind.CLOSER -> extendClosedScope(code, commenter)
-            definition.opener == null -> extendLineScope(code, commenter)
+            definition.kind == Kind.CLOSER -> extendClosedScope(code, template, commenter)
+            definition.opener == null -> extendLineScope(code, template, commenter)
             // TODO: It's supposed to be able to split the condition, but idk how yet
             else -> Err("stonecutter.action.wrap.err_nothing_to_extend")
         }
     }
 
-    private fun SelectionContext.extendLineScope(code: PsiBlock.Code, commenter: Commenter): ActionResult {
+    private fun SelectionContext.extendLineScope(code: PsiBlock.Code, template: TemplateBuilder, commenter: Commenter): ActionResult {
         val result = when {
-            isInline -> wrapInLine(commenter, "?} else {", "?}", openerCaret = 7)
-            isMultiLine -> wrapAroundLine(commenter, "?} else {", "?}", openerCaret = 7)
-            else -> wrapAroundLine(commenter, opener = "?} else", openerCaret = 7)
+            isInline -> wrapInlineExtension(template, commenter)
+            isMultiLine -> wrapMultiLineExtension(template, commenter)
+            else -> wrapSingleLineExtension(template, commenter)
         }
         if (result is Err) return result
 
@@ -125,21 +166,70 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
         return Ok
     }
 
-    private fun SelectionContext.extendClosedScope(code: PsiBlock.Code, commenter: Commenter): ActionResult {
+    private fun SelectionContext.extendClosedScope(code: PsiBlock.Code, template: TemplateBuilder, commenter: Commenter): ActionResult {
         val result = when {
-            isInline -> wrapInLine(commenter, closer = "?}")
-            else -> wrapAroundLine(commenter, closer = "?}")
+            isInline -> wrapInlineCloser(commenter)
+            else -> wrapMultiLineCloser(commenter)
         }
         if (result is Err) return result
 
         val offset = code.hostComment?.element!!.findPrefixOffset()
-        document.insertString(offset, " else {")
-        editor.caretModel.moveToOffset(offset + 5)
+        document.insertString(offset, "  {")
+        return template.insertAt(offset + 1, "else")
+    }
+
+    private fun SelectionContext.wrapInlineExtension(template: TemplateBuilder, commenter: Commenter): ActionResult {
+        val pr = commenter.blockCommentPrefix
+        val sf = commenter.blockCommentSuffix
+        if (pr == null || sf == null)
+            return Err("stonecutter.action.wrap.err_no_inline_commenter")
+
+        document.insertString(endOffset, "$pr$COND_CLOSER$sf")
+        document.insertString(startOffset, "$pr$COND_EXTENSION$sf")
+        selection.removeSelection()
+        return template.insertAt(startOffset + pr.length + 3, "else")
+    }
+
+    private fun SelectionContext.wrapMultiLineExtension(template: TemplateBuilder, commenter: Commenter): ActionResult {
+        val (pr, sf) = commenter.getLineSurrounders()
+            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+
+        val indent = document.findIndentAt(startLineIndex)
+        document.insertString(endOffset, "\n$indent$pr$COND_CLOSER$sf")
+        document.insertString(startOffset, "$pr$COND_EXTENSION$sf\n$indent")
+        selection.removeSelection()
+        return template.insertAt(startOffset + pr.length + 3, "else")
+    }
+
+    private fun SelectionContext.wrapSingleLineExtension(template: TemplateBuilder, commenter: Commenter): ActionResult {
+        val (pr, sf) = commenter.getLineSurrounders()
+            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+
+        val indent = document.findIndentAt(startLineIndex)
+        document.insertString(startOffset, "$pr$COND_LINE$sf\n$indent")
+        selection.removeSelection()
+        return template.insertAt(startOffset + pr.length + 3, "else")
+    }
+
+    private fun SelectionContext.wrapInlineCloser(commenter: Commenter): ActionResult {
+        val pr = commenter.blockCommentPrefix
+        val sf = commenter.blockCommentSuffix
+        if (pr == null || sf == null)
+            return Err("stonecutter.action.wrap.err_no_inline_commenter")
+
+        document.insertString(endOffset, "$pr$COND_CLOSER$sf")
+        selection.removeSelection()
         return Ok
     }
 
-    private fun SelectionContext.extendSplitScope(code: PsiBlock.Code, commenter: Commenter): ActionResult {
-        TODO()
+    private fun SelectionContext.wrapMultiLineCloser(commenter: Commenter): ActionResult {
+        val (pr, sf) = commenter.getLineSurrounders()
+            ?: return Err("stonecutter.action.wrap.err_no_commenter")
+
+        val indent = document.findIndentAt(startLineIndex)
+        document.insertString(endOffset, "\n$indent$pr$COND_CLOSER$sf")
+        selection.removeSelection()
+        return Ok
     }
 
     private class ExtensionTargetLocator(val start: Int, val end: Int) : PsiBlock.Visitor<PsiBlock.Code?> {
@@ -166,18 +256,25 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
                 && sibling.text.take(start - sibling.startOffset).isBlank()
         }
     }
+
+    private companion object {
+        @Language("Stitcher") const val COND_EXTENSION = "?}  {"
+        @Language("Stitcher") const val COND_LINE = "?} "
+        @Language("Stitcher") const val COND_CLOSER = "?}"
+    }
 }
 
-private class SelectionContext(val editor: Editor, val first: PsiElement? = null, val last: PsiElement? = null) {
+private class SelectionContext(val editor: Editor, val first: PsiElement?, val last: PsiElement?) {
     val selection: SelectionModel inline get() = editor.selectionModel
     val document: Document inline get() = editor.document
 
     val startOffset: Int = first?.startOffset ?: selection.selectionStart
-    val endOffset: Int = first?.startOffset ?: selection.findSelectionEnd()
+    val endOffset: Int = last?.endOffset ?: selection.findSelectionEnd()
 
     val startLineIndex by lazy { document.getLineNumber(startOffset) }
     val endLineIndex by lazy { document.getLineNumber(endOffset) }
 
+    // Fixme check if it's a line break
     val isInline: Boolean
         get() = last != null && last.nextNotEmptyLeaf !is PsiWhiteSpace
 
@@ -214,49 +311,27 @@ private class SelectionContext(val editor: Editor, val first: PsiElement? = null
     }
 }
 
-private fun SelectionContext.wrapAroundLine(
-    commenter: Commenter,
-    @Language("Stitcher") opener: String? = null, @Language("Stitcher") closer: String? = null,
-    openerCaret: Int = -1, closerCaret: Int = -1
-): ActionResult {
-    val (prefix, suffix) = commenter.getLineSurrounders()
-        ?: return Err("stonecutter.action.wrap.err_no_commenter")
-    val indent = document[document.getLineStartOffset(startLineIndex), startOffset]
-    val opener = opener?.let { "$prefix$it$suffix\n$indent" }
-    val closer = closer?.let { "\n$indent$prefix$it$suffix" }
-    if (opener == null && closer == null) return Ok
-
-    val caret = when {
-        openerCaret >= 0 -> startOffset + prefix.length + openerCaret
-        closerCaret >= 0 -> endOffset + indent.length + 1 + prefix.length + closerCaret
-        else -> -1
-    }
-    return insertAround(opener, closer, caret)
-}
-
-private fun SelectionContext.wrapInLine(
-    commenter: Commenter,
-    @Language("Stitcher") opener: String? = null, @Language("Stitcher") closer: String? = null,
-    openerCaret: Int = -1, closerCaret: Int = -1
-): ActionResult {
-    val (prefix, suffix) = commenter.getLineSurrounders()
-        ?: return Err("stonecutter.action.wrap.err_no_commenter")
-    val opener = opener?.let { "$prefix$it$suffix" }
-    val closer = closer?.let { "$prefix$it$suffix" }
-    if (opener == null && closer == null) return Ok
-
-    val caret = when {
-        openerCaret >= 0 -> startOffset + prefix.length + openerCaret
-        closerCaret >= 0 -> endOffset + prefix.length + closerCaret
-        else -> -1
-    }
-    return insertAround(opener, closer, caret)
+context(ctx: SelectionContext)
+private fun TemplateBuilder.insertAt(index: Int, str: String, run: Boolean = true): ActionResult {
+    replaceRange(TextRange(index, index), str)
+    if (run) run(ctx.editor, true)
+    return Ok
 }
 
 private fun Commenter.getLineSurrounders(): Pair<String, String>? {
     lineCommentPrefix?.let { return it to "" }
     blockCommentPrefix?.let { pr -> blockCommentSuffix?.let { return pr to it } }
     return null
+}
+
+private fun Document.findIndentAt(line: Int): String {
+    val start = getLineStartOffset(line)
+    val end = getLineEndOffset(line)
+    for (i in start..<end) when (charsSequence[i]) {
+        ' ', '\t' -> continue
+        else -> return charsSequence.substring(start, i)
+    }
+    return charsSequence.substring(start, end)
 }
 
 private fun PsiComment.findPrefixOffset(): Int {
@@ -267,7 +342,3 @@ private fun PsiComment.findPrefixOffset(): Int {
     }
     return startOffset + position
 }
-
-@Suppress("NOTHING_TO_INLINE")
-private inline operator fun Document.get(start: Int, end: Int): String =
-    getText(TextRange(start, end))
