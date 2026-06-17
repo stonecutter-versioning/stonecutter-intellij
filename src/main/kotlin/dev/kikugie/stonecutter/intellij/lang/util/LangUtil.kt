@@ -65,6 +65,9 @@ val PsiComment.innerText: String
 val PsiComment.innerRange: TextRange
     inline get() = ElementManipulators.getValueTextRange(this)
 
+val PsiComment.contentRange: TextRange
+    get() = innerRange.shiftRight(startOffset)
+
 val PsiComment.canHasStitcherCode: Boolean
     get() = innerText.getOrDefault(0) in CODE_PREFIXES
 

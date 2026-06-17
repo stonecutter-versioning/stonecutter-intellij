@@ -22,6 +22,20 @@
         <editorHighlighterProvider filetype="Stitcher"
                                    implementationClass="dev.kikugie.stonecutter.intellij.editor.StitcherSyntaxHighlighter$Provider"/>
         <platform.backend.documentation.targetProvider implementation="dev.kikugie.stonecutter.intellij.editor.StitcherDocumentationTargetProvider"/>
+        <liveTemplateContext contextId="Stonecutter" implementation="dev.kikugie.stonecutter.intellij.editor.template.StitcherTemplateContext"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.LineConditionTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.ScopedConditionTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.LookupConditionTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.LineExtensionTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.ScopedExtensionTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.LookupExtensionTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.LineSwapTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.ScopedSwapTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.LookupSwapTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.LineReplacementTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.ScopedReplacementTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.LookupReplacementTemplate"/>
+        <customLiveTemplate implementation="dev.kikugie.stonecutter.intellij.editor.template.NamedReplacementTemplate"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij"> <!-- Java -->

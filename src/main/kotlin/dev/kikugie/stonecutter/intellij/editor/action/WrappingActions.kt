@@ -31,6 +31,7 @@ import dev.kikugie.stonecutter.intellij.lang.StitcherFile
 import dev.kikugie.stonecutter.intellij.lang.psi.*
 import dev.kikugie.stonecutter.intellij.lang.psi.PsiDefinition.Kind
 import dev.kikugie.stonecutter.intellij.lang.util.*
+import dev.kikugie.stonecutter.intellij.util.findIndentAtLine
 import org.intellij.lang.annotations.Language
 import org.jetbrains.annotations.PropertyKey
 import kotlin.text.iterator
@@ -103,7 +104,7 @@ class NewConditionAction : StitcherWrapAction("Wrap in Condition") {
         val (pr, sf) = commenter.getLineSurrounders()
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
 
-        val indent = document.findIndentAt(startLineIndex)
+        val indent = document.findIndentAtLine(startLineIndex)
         document.insertString(endOffset, "\n$indent$pr$COND_CLOSER$sf")
         document.insertString(startOffset, "$pr$COND_OPENER$sf\n$indent")
         selection.removeSelection()
@@ -114,7 +115,7 @@ class NewConditionAction : StitcherWrapAction("Wrap in Condition") {
         val (pr, sf) = commenter.getLineSurrounders()
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
 
-        val indent = document.findIndentAt(startLineIndex)
+        val indent = document.findIndentAtLine(startLineIndex)
         document.insertString(startOffset, "$pr$COND_LINE$sf\n$indent")
         selection.removeSelection()
         return template.insertAt(startOffset + pr.length + 5, "")
@@ -194,7 +195,7 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
         val (pr, sf) = commenter.getLineSurrounders()
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
 
-        val indent = document.findIndentAt(startLineIndex)
+        val indent = document.findIndentAtLine(startLineIndex)
         document.insertString(endOffset, "\n$indent$pr$COND_CLOSER$sf")
         document.insertString(startOffset, "$pr$COND_EXTENSION$sf\n$indent")
         selection.removeSelection()
@@ -205,7 +206,7 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
         val (pr, sf) = commenter.getLineSurrounders()
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
 
-        val indent = document.findIndentAt(startLineIndex)
+        val indent = document.findIndentAtLine(startLineIndex)
         document.insertString(startOffset, "$pr$COND_LINE$sf\n$indent")
         selection.removeSelection()
         return template.insertAt(startOffset + pr.length + 3, "else")
@@ -226,7 +227,7 @@ class ExtendConditionAction : StitcherWrapAction("Wrap in Extension") {
         val (pr, sf) = commenter.getLineSurrounders()
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
 
-        val indent = document.findIndentAt(startLineIndex)
+        val indent = document.findIndentAtLine(startLineIndex)
         document.insertString(endOffset, "\n$indent$pr$COND_CLOSER$sf")
         selection.removeSelection()
         return Ok
@@ -297,7 +298,7 @@ class NewLocalReplacementAction : StitcherWrapAction("Wrap in Replacement") {
         val (pr, sf) = commenter.getLineSurrounders()
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
 
-        val indent = document.findIndentAt(startLineIndex)
+        val indent = document.findIndentAtLine(startLineIndex)
         document.insertString(endOffset, "\n$indent$pr$REPL_CLOSER$sf")
         document.insertString(startOffset, "$pr$REPL_OPENER$sf\n$indent")
         selection.removeSelection()
@@ -310,7 +311,7 @@ class NewLocalReplacementAction : StitcherWrapAction("Wrap in Replacement") {
         val (pr, sf) = commenter.getLineSurrounders()
             ?: return Err("stonecutter.action.wrap.err_no_commenter")
 
-        val indent = document.findIndentAt(startLineIndex)
+        val indent = document.findIndentAtLine(startLineIndex)
         document.insertString(startOffset, "$pr$REPL_LINE$sf\n$indent")
         selection.removeSelection()
         template.insertAt(startOffset + pr.length + 5, "", false)
@@ -383,16 +384,6 @@ private fun Commenter.getLineSurrounders(): Pair<String, String>? {
     lineCommentPrefix?.let { return it to "" }
     blockCommentPrefix?.let { pr -> blockCommentSuffix?.let { return pr to it } }
     return null
-}
-
-private fun Document.findIndentAt(line: Int): String {
-    val start = getLineStartOffset(line)
-    val end = getLineEndOffset(line)
-    for (i in start..<end) when (charsSequence[i]) {
-        ' ', '\t' -> continue
-        else -> return charsSequence.substring(start, i)
-    }
-    return charsSequence.substring(start, end)
 }
 
 private fun PsiComment.findPrefixOffset(): Int {
