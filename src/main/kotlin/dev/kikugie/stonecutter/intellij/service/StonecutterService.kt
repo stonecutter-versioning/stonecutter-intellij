@@ -9,6 +9,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.externalSystem.autoimport.ExternalSystemProjectTracker
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -77,17 +78,23 @@ class StonecutterService(val project: Project, val scope: CoroutineScope) : Disp
             .setIcon(StonecutterIcons.STONECUTTER)
         with(notification) {
             configureDoNotAskOption("sc-model-err", title)
+            @Suppress("DialogTitleCapitalization")
+            addAction(NotificationAction.createSimple(StonecutterBundle.message("stonecutter.notifications.reload.sync")) {
+                val tracker = ExternalSystemProjectTracker.getInstance(project)
+                tracker.markDirtyAllProjects()
+                tracker.scheduleProjectRefresh()
+            })
+            addAction(NotificationAction.createSimple(StonecutterBundle.message("stonecutter.notifications.reload.logs")) {
+                val vf = LocalFileSystem.getInstance().findFileByNioFile(output)?.takeIf(VirtualFile::exists)
+                    ?: return@createSimple
+                FileEditorManager.getInstance(project).openFile(vf, true, true)
+            })
             addAction(NotificationAction.createSimple(StonecutterBundle.message("stonecutter.notifications.reload.hide")) {
                 PropertiesComponent.getInstance(project).apply {
                     setValue("Notification.DoNotAsk-sc-model-err", true)
                     setValue("Notification.DisplayName-DoNotAsk-sc-model-err", title)
                 }
                 expire()
-            })
-            addAction(NotificationAction.createSimple(StonecutterBundle.message("stonecutter.notifications.reload.logs")) {
-                val vf = LocalFileSystem.getInstance().findFileByNioFile(output)?.takeIf(VirtualFile::exists)
-                    ?: return@createSimple
-                FileEditorManager.getInstance(project).openFile(vf, true, true)
             })
             notify(project)
         }
